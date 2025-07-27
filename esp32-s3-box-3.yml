@@ -89,7 +89,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.07.25"
+    version: "2025.07.27"
 
 esp32:
   board: esp32s3box
@@ -1557,8 +1557,8 @@ script:
           condition:
             and:
               - switch.is_on: alarmclock
-              - lambda: 'return { (id(ha_time).now().hour == id(alarmclock_hour).get_selected_index()) };'
-              - lambda: 'return { (id(ha_time).now().minute == (id(alarmclock_minutes).get_selected_index() * 5)) };'
+              - lambda: 'return { (id(ha_time).now().hour == id(alarmclock_time).hour) };'
+              - lambda: 'return { (id(ha_time).now().minute == id(alarmclock_time).minute) };'
           then:
             - lambda: id(alarmclock_ringing) = true;
             - lvgl.widget.show: but_snooze
@@ -1743,7 +1743,7 @@ script:
       - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
       - switch.turn_on: timer_ringing
     mode: restart
-                      
+
 switch:
   - platform: gpio
     name: Speaker Enable
@@ -2237,6 +2237,31 @@ select:
     entity_category: config    
     internal: true
     restore_value: true
+
+datetime:
+  - id: alarmclock_time
+    platform: template
+    type: time
+    optimistic: true
+    restore_value: true
+    initial_value:
+      hour: 00
+      minute: 00
+      second: 00
+    name: "Alarm Clock Time"
+    icon: 'mdi:alarm'
+    on_value:
+      then:
+        - if:
+            condition:
+              - lambda: return ((id(alarmclock_hour).get_selected_index() != (id(alarmclock_time).hour / 1)) || (id(alarmclock_minutes).get_selected_index() != (id(alarmclock_time).minute / 5)));
+            then:
+              - select.set_index:
+                  id: sel_alarmclock_hour
+                  index: !lambda return (id(alarmclock_time).hour / 1);
+              - select.set_index:
+                  id: sel_alarmclock_minutes
+                  index: !lambda return (id(alarmclock_time).minute / 5);  
 
 number:
   - id: s_saver_delay
@@ -6492,6 +6517,15 @@ lvgl:
                                  - 21
                                  - 22
                                  - 23
+                               on_change:
+                                 - datetime.time.set:
+                                     id: alarmclock_time
+                                     time: !lambda |-
+                                       int myminutes = id(alarmclock_minutes).get_selected_index() * 5;
+                                       uint8_t newminutes = static_cast<uint8_t>(myminutes);
+                                       int myhours = x;
+                                       uint8_t newhours = static_cast<uint8_t>(myhours);
+                                       return {.second = 00, .minute = newminutes, .hour = newhours};
                            - roller:
                                align: CENTER
                                id: alarmclock_minutes
@@ -6508,6 +6542,15 @@ lvgl:
                                  - 45
                                  - 50
                                  - 55
+                               on_change:
+                                 - datetime.time.set:
+                                     id: alarmclock_time
+                                     time: !lambda |-
+                                       int myminutes = x * 5;
+                                       uint8_t newminutes = static_cast<uint8_t>(myminutes);
+                                       int myhours = id(alarmclock_hour).get_selected_index();
+                                       uint8_t newhours = static_cast<uint8_t>(myhours);
+                                       return {.second = 00, .minute = newminutes, .hour = newhours};
 
   top_layer:
     widgets:
