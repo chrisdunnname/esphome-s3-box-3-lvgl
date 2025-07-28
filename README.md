@@ -10,6 +10,7 @@ Each provides a different theme and voice assistant interface.
 - Default provides the original theme and a more standard Home Assistant experience. 
 - HAL provides a darker theme and an animated Space Odyssey inspired 2001 HAL voice assistant.
 - Home provides a more subtle theme and an animated Google inspired voice assistant.
+
 A no animation YAML configuration is provided that provides the UI Mode but without the animated voice assistants for much smaller firmware.
 
 The wakeword is not tied to the UI Mode providing flexibility for your preferred experience.
