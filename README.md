@@ -10,6 +10,7 @@ Each provides a different theme and voice assistant interface.
 - Default provides the original theme and a more standard Home Assistant experience. 
 - HAL provides a darker theme and an animated Space Odyssey inspired 2001 HAL voice assistant.
 - Home provides a more subtle theme and an animated Google inspired voice assistant.
+A no animation YAML configuration is provided that provides the UI Mode but without the animated voice assistants for much smaller firmware.
 
 The wakeword is not tied to the UI Mode providing flexibility for your preferred experience.
 
@@ -37,7 +38,7 @@ Sensor dock & battery are optional to use radar/presence, battery level and temp
 
 The minimum supported ESPHome version is 2025.6.0.
 
-Last tested on Home Assistant 2025.7.3 and ESPHome Version 2025.7.3.
+Last tested on Home Assistant 2025.7.4 and ESPHome Version 2025.7.4.
 
 # Loading
 ![loading](https://github.com/user-attachments/assets/55e0a1b8-8873-42a3-864f-297fa6826b6e)
