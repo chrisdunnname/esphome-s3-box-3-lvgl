@@ -82,7 +82,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.07.29"
+    version: "2025.07.31"
 
 esp32:
   board: esp32s3box
@@ -494,6 +494,36 @@ text:
               id(previous_notification_text) = id(notification_text).state;
               id(show_notification).execute();
             }
+
+  - platform: template
+    id: onlineimagefile
+    name: "Image URL"
+    icon: mdi:link
+    mode: text
+    optimistic: true
+    entity_category: "config"
+    on_value:
+      then:
+        - if:
+            condition:
+              not:
+                - lambda: return (x.empty() || x == "invalid" || x == "unknown");
+            then:
+              - if:
+                  condition:
+                    lambda: |-
+                      std::string ftype = x.substr(x.length() - 4, 4);
+                      std::transform(ftype.begin(), ftype.end(), ftype.begin(),::tolower);
+                      return ftype == ".png";
+                  then:
+                    - online_image.set_url:
+                        id: online_png_image
+                        url: !lambda return x;
+                    - component.update: online_png_image
+                  else:
+                    - text.set:
+                        id: onlineimagefile
+                        value: ""                    
 
 i2c:
   - id: bus_a
@@ -2421,7 +2451,36 @@ globals:
   - id: alarmclock_ringing
     type: bool
     restore_value: false
-    
+
+http_request:
+  timeout: 30s
+  watchdog_timeout: 60s
+
+online_image:
+  - url: ${loading_illustration_file}
+    format: png
+    resize: 318x238
+    type: RGB565
+    transparency: alpha_channel
+    id: online_png_image
+    on_download_finished:
+      - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+      - script.execute: saver_enabled
+      - lvgl.page.show: image_page
+      - lvgl.image.update:
+          id: onlineimage
+          src: online_png_image
+      - delay: 60s
+      - lvgl.page.show: idle_page
+      - online_image.release: online_png_image
+      - text.set:
+          id: onlineimagefile
+          value: ""
+    on_error:
+      - text.set:
+          id: onlineimagefile
+          value: ""
+
 image:
 ## Default Images
   - file: ${error_illustration_file}
@@ -2536,7 +2595,7 @@ image:
     resize: 318x238
     type: RGB565
     transparency: alpha_channel  
-    
+
 font:
   - file: ${font_file}
     id: my_font
@@ -5374,6 +5433,27 @@ lvgl:
                   bg_color: 0x000000
                   border_color: 0x000000
                   text_color: 0xFFFFFF              
+
+    - id: image_page
+      skip: true
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - image:
+                  id: onlineimage
+                  align: CENTER
+                  src: online_png_image
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer 
+                  widgets:
+                    - label:
+                        text: " "
+                        y: 4
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
 
     - id: ota_page
       skip: true
