@@ -1,9 +1,11 @@
 # ESP32-S3-Box-3 LVGL Firmware 
-ESP Home Configuration for the S3-Box-3 with an LVGL UI.
+ESPHome Configuration for the S3-Box-3 with an LVGL UI.
 
 All credit and inspiration for the original UI and device configuration goes to https://github.com/BigBobbas/ESP32-S3-Box3-Custom-ESPHome/
 
 This firmware provides the S3 box 3 with a voice assistant, timers, screen saver with analog/digital clock and sleep, 12/24 hour time, media controls, radar/presence sensing, temperature (in Celsius or Fahrenheit) and humidity sensing, battery levels and indicator, alarmo integration, alarm clock, internal and external audio, notifications with sound, and multiple pages for lights, thermostats, switches, media, scenes, locks other devices from your Home Assistant.
+
+A large number of entities are exposed to Home Assistant including a notification text entity that provides the ability to push notifications to the device which will display on screen for 10 seconds (with an optional notification sound) and an Image URL entity that provides the ability to push the URL for an image to the device which will display on screen for 60 seconds (with no notification sound) and can be used in automation to show an image (like a camera snapshot). At this time only PNG images are supported by online images in LVGL.
 
 A UI Mode feature provides the ability to switch the user experience with 3 modes: Default, HAL, Home.
 Each provides a different theme and voice assistant interface.
