@@ -82,7 +82,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.07.31"
+    version: "2025.08.01"
 
 esp32:
   board: esp32s3box
@@ -1767,6 +1767,22 @@ script:
       - switch.turn_on: timer_ringing
     mode: restart
 
+  - id: showonlineimage
+    then:
+      - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+      - script.execute: saver_enabled
+      - lvgl.page.show: image_page
+      - lvgl.image.update:
+          id: onlineimage
+          src: online_png_image
+      - delay: 30s
+      - lvgl.page.show: idle_page
+      - online_image.release: online_png_image
+      - text.set:
+          id: onlineimagefile
+          value: ""
+    mode: restart
+
 switch:
   - platform: gpio
     name: Speaker Enable
@@ -2464,18 +2480,7 @@ online_image:
     transparency: alpha_channel
     id: online_png_image
     on_download_finished:
-      - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
-      - script.execute: saver_enabled
-      - lvgl.page.show: image_page
-      - lvgl.image.update:
-          id: onlineimage
-          src: online_png_image
-      - delay: 60s
-      - lvgl.page.show: idle_page
-      - online_image.release: online_png_image
-      - text.set:
-          id: onlineimagefile
-          value: ""
+      - script.execute: showonlineimage
     on_error:
       - text.set:
           id: onlineimagefile
