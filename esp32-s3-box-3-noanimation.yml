@@ -82,7 +82,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.08.01"
+    version: "2025.08.03"
 
 esp32:
   board: esp32s3box
@@ -734,6 +734,8 @@ media_player:
                           id: i2s_audio_speaker
             - script.execute: start_wake_word
             - script.execute: set_idle_or_mute_phase
+    on_pause:
+      - media_player.stop
 
 micro_wake_word:
   id: mww
