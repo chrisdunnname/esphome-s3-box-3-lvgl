@@ -2602,7 +2602,7 @@ image:
 #    resize: 318x238
 #    type: RGB565
 #    transparency: alpha_channel  
-    
+
 font:
   - file: ${font_file}
     id: my_font
@@ -4227,10 +4227,15 @@ lvgl:
                               text: "\U000F05FA"
                         ## Control 1 toggle switch
                         # on_release:
-                        # - homeassistant.action:
-                            # action: switch.toggle
-                            # data:
-                              # entity_id: switch.kettle_start
+                        #   then:
+                        #     if:
+                        #       condition:
+                        #         - lambda: return (id(alarm_status).state == "disarmed");
+                        #       then:
+                        #         - homeassistant.action:
+                        #             action: switch.toggle
+                        #             data:
+                        #               entity_id: switch.kettle_start
                     - label:
                         text: "Vacuum" ## Control 2 Name
                         align: CENTER
@@ -4263,7 +4268,9 @@ lvgl:
                         # on_release:
                           # - if:
                               # condition:
-                                # lambda: 'return id(control2_item).state == "docked";'
+                               # - and:
+                               #     - lambda: 'return id(control2_item).state == "docked";'
+                               #     - lambda: return (id(alarm_status).state == "disarmed");
                               # then:
                                 # - homeassistant.service:
                                     # service: vacuum.start
@@ -4303,10 +4310,15 @@ lvgl:
                               text: "\U000F12D3"
                         ## Control 3 switch toggle
                         # on_release:
-                        # - homeassistant.action:
-                            # action: switch.toggle
-                            # data:
-                              # entity_id: switch.garage ## replace this with entity to open/close garage
+                        #   then:
+                        #     if:
+                        #       condition:
+                        #         - lambda: return (id(alarm_status).state == "disarmed");
+                        #       then:
+                        #         - homeassistant.action:
+                        #             action: switch.toggle
+                        #             data:
+                        #               entity_id: switch.garage ## replace this with entity to open/close garage
                     - label:
                         text: "Dishwasher" ## Control 4 Name
                         align: CENTER
@@ -4339,7 +4351,9 @@ lvgl:
                         # on_release:
                           # - if:
                               # condition:
-                                # lambda: 'return id(control5_item).state == "Ready" && id(control5_item2).state == "off";'
+                              #   - and:
+                              #       - lambda: return (id(alarm_status).state == "disarmed");
+                              #       - lambda: 'return id(control5_item).state == "Ready" && id(control5_item2).state == "off";'
                               # then:
                                 # - homeassistant.action:
                                     # action: select.select_option
@@ -4799,7 +4813,9 @@ lvgl:
                           # then:
                             # if:
                               # condition:
-                                # lambda: return (id(security1_item).state == "locked");
+                              #   - and:
+                              #       - lambda: return (id(security1_item).state == "locked");
+                              #       - lambda: return (id(alarm_status).state == "disarmed");
                               # then:
                                 # - homeassistant.action:
                                     # action: lock.unlock
