@@ -61,7 +61,7 @@ esphome:
       - at581x.settings:
           id: "Radar"
           sensing_distance: 1000
-          stage_gain: 12
+          stage_gain: 4
       - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
       - lambda: id(time_remaining_0).publish_state ("0:00:00");
       - script.execute: draw_display
