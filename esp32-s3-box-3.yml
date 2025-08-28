@@ -5384,9 +5384,9 @@ lvgl:
                         grid_cell_y_align: STRETCH
                         on_release:
                           then:
+                            - lambda: id(alarmclock_ringing) = false;
                             - lvgl.widget.hide: but_snooze
                             - switch.turn_off: timer_ringing
-                            - lambda: id(alarmclock_ringing) = false;
                             - lvgl.page.show: idle_page
                     - label:
                         text: "Tap screen to dismiss"
@@ -5400,9 +5400,9 @@ lvgl:
                         grid_cell_y_align: STRETCH
                         on_release:
                           then:
+                            - lambda: id(alarmclock_ringing) = false;
                             - lvgl.widget.hide: but_snooze
                             - switch.turn_off: timer_ringing
-                            - lambda: id(alarmclock_ringing) = false;
                             - lvgl.page.show: idle_page
                     - button:
                         id: but_snooze
