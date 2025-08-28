@@ -82,7 +82,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.08.03"
+    version: "2025.08.28"
 
 esp32:
   board: esp32s3box
@@ -262,8 +262,9 @@ sensor:
     variant: AHT20
     temperature:
       name: "S3 Temperature"
-      #filters:
-      #  offset: -3
+      filters:
+        - lambda: |-
+            return x + id(temp_offset);
       id: s3temp
       on_value:
         - lvgl.widget.show: temp_label
@@ -2409,6 +2410,21 @@ number:
     entity_category: config
     mode: box
 
+  - platform: template
+    name: "Temp Offset"
+    id: temp_offset_number
+    entity_category: config
+    initial_value: 0
+    min_value: -10
+    max_value: 10
+    step: 0.1
+    restore_value: true
+    optimistic: true
+    unit_of_measurement: 'C'
+    on_value:
+      - lambda: |-
+            id(temp_offset) = x;
+
 globals:
   - id: init_in_progress
     type: bool
@@ -2469,6 +2485,10 @@ globals:
   - id: alarmclock_ringing
     type: bool
     restore_value: false
+  - id: temp_offset
+    type: float
+    restore_value: true
+    initial_value: '0.0'
 
 http_request:
   timeout: 30s
