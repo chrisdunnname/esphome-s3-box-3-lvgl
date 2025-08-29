@@ -82,7 +82,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.08.03"
+    version: "2025.08.28"
 
 esp32:
   board: esp32s3box
