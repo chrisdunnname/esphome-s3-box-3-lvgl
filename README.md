@@ -210,3 +210,5 @@ Example entity configuration is included to match the screens above providing st
 The configuration provides a Wifi QR Code so that guests can scan your screen to be connected to the specified network. 
 This is configured using a secret called "wifi_qr" that needs to be configured in your ESPHome installation.
 This secret uses a format similar to "WIFI:S:your_wifi_ssid;T:WPA;P:your_wifi_password;H:false;;". This is the standard format for Wifi QR codes and more details can be found in the WPA3 specification.
+
+Two additional secrets are used for wifi credentials for connecting your device to yur wifi and these are wifi_ssid and wifi_password.
