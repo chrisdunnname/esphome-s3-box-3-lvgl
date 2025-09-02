@@ -206,3 +206,7 @@ This means the UI updates interactively so that as actions are performed which s
 For each new or modified widget you need to update the LVGL to specify the action to take when a UI interaction occurs and in parallel you need to update the entity to update the UI on state changes.
 
 Example entity configuration is included to match the screens above providing starting configuration for how different types of devices can be configured.
+
+The configuration provides a Wifi QR Code so that guests can scan your screen to be connected to the specified network. 
+This is configured using a secret called "wifi_qr" that needs to be configured in your ESPHome installation.
+This secret uses a format similar to "WIFI:S:your_wifi_ssid;T:WPA;P:your_wifi_password;H:false;;". This is the standard format for Wifi QR codes and more details can be found in the WPA3 specification.
