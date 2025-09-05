@@ -176,10 +176,11 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 
 **Device Settings**
 
-![device_settings](https://github.com/user-attachments/assets/933b137e-753f-48ca-be44-0ab56fc527e8)
+![device_settings](https://github.com/user-attachments/assets/b24b582c-0db6-4d58-98a6-bfa76cfa2d22)
 - External Audio outputs audio to the external audio player configured in the substitions section.
 - Notify sound triggers a sound when a text notification is sent to the device. This is different to the wake sound.
 - Stop Ring on Presence will stop any ringing timer or alarm clock when motion is detected. If used with Presence snooze then after snooze complete on next ring motion will stop alarm clock.
+- Temperature Offset provides a configurable offset for the temperature sensor that is always set in Celsius.
 - Brightness slider controls screen brightness
 
 **UI Settings**
