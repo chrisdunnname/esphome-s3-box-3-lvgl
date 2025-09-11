@@ -41,7 +41,7 @@ Sensor dock & battery are optional to use radar/presence, battery level and temp
 
 The minimum supported ESPHome version is 2025.8.3.
 
-Last tested on Home Assistant 2025.8.3 and ESPHome Version 2025.8.3.
+Last tested on Home Assistant 2025.9.1 and ESPHome Version 2025.8.4.
 
 # Loading
 ![loading](https://github.com/user-attachments/assets/55e0a1b8-8873-42a3-864f-297fa6826b6e)
