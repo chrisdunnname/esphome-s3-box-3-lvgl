@@ -51,7 +51,7 @@ substitutions:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2025.8.3
+  min_version: 2025.9.0
   name_add_mac_suffix: false
   on_boot:
     priority: 600
@@ -82,7 +82,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.09.05"
+    version: "2025.09.17"
 
 esp32:
   board: esp32s3box
@@ -3903,7 +3903,7 @@ lvgl:
                         width: 50
                         range_from: 16
                         range_to: 31
-                        step: 1
+                        selected_digit: 1
                         rollover: false
                         digits: 3
                         decimal_places: 1
@@ -5945,7 +5945,7 @@ lvgl:
                                width: 50
                                range_from: 10
                                range_to: 999999
-                               step: 5
+                               selected_digit: 0
                                rollover: false
                                digits: 4
                                decimal_places: 0
@@ -6017,7 +6017,7 @@ lvgl:
                                width: 50
                                range_from: 10
                                range_to: 999999
-                               step: 5
+                               selected_digit: 0
                                rollover: false
                                digits: 4
                                decimal_places: 0
@@ -6273,7 +6273,7 @@ lvgl:
                                max_height: 42px
                                range_from: -10.0
                                range_to: 10.0
-                               step: 1
+                               selected_digit: 1
                                rollover: false
                                digits: 2
                                decimal_places: 1
