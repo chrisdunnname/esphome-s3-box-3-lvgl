@@ -2417,6 +2417,7 @@ number:
     entity_category: config
     restore_value: true
     unit_of_measurement: 'C'
+    mode: box
 
 globals:
   - id: init_in_progress
@@ -6273,7 +6274,7 @@ lvgl:
                                max_height: 42px
                                range_from: -10.0
                                range_to: 10.0
-                               selected_digit: 1
+                               selected_digit: 0
                                rollover: false
                                digits: 2
                                decimal_places: 1
