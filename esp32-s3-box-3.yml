@@ -1300,6 +1300,7 @@ script:
   - id: set_idle_or_mute_phase
     then:
       - lambda: ESP_LOGD("script", "set_idle_or_mute_phase");
+      - script.execute: saver_enabled      
       - if:
           condition:
             switch.is_off: mute_switch
