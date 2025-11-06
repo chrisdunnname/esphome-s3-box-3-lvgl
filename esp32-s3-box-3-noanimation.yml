@@ -565,6 +565,11 @@ touchscreen:
               - light.turn_on: led
               - lvgl.resume:
               - lvgl.widget.redraw:
+        - if:
+            condition:
+              - lvgl.page.is_showing: saver_page
+            then:
+              - lvgl.page.show: idle_page
 
 i2s_audio:
   - id: i2s_audio_bus
@@ -2501,118 +2506,57 @@ online_image:
 
 image:
 ## Default Images
-  - file: ${error_illustration_file}
-    id: error_img
-    resize: 318x238
+  defaults:
     type: RGB565
-    transparency: alpha_channel
-#  - file: ${idle_illustration_file}
-#    id: idle_img
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-  - file: ${listening_illustration_file}
-    id: listening_img
     resize: 318x238
-    type: RGB565
     transparency: alpha_channel
-  - file: ${thinking_illustration_file}
-    id: thinking_img
-    resize: 318x238
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${replying_illustration_file}
-    id: replying_img
-    resize: 318x238
-    type: RGB565
-    transparency: alpha_channel
-  - file: ${loading_illustration_file}
-    id: loading_img
-    resize: 318x238
-    type: RGB565
-    transparency: alpha_channel
-#  - file: ${timer_finished_illustration_file}
-#    id: timer_finished_img
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${logo_illustration_file}
-#    id: logo_img
-#    resize: 80x75
-#    type: RGB565
-#    transparency: alpha_channel
-## HAL Animated Voice Assistant images
-#  - file: ${anim_listening1}
-#    id: anim_listening1
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim_listening2}
-#    id: anim_listening2
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim_thinking1}
-#    id: anim_thinking1
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim_thinking2}
-#    id: anim_thinking2
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim_replying1}
-#    id: anim_replying1
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim_replying2}
-#    id: anim_replying2
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim_error1}
-#    id: anim_error1
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-## HOME Animated Voice Assistant images
-#  - file: ${anim2_listening}
-#    id: anim2_listening
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim2_thinking}
-#    id: anim2_thinking
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim2_replying1}
-#    id: anim2_replying1
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim2_replying2}
-#    id: anim2_replying2
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim2_replying3}
-#    id: anim2_replying3
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim2_replying4}
-#    id: anim2_replying4
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel
-#  - file: ${anim2_error}
-#    id: anim2_error
-#    resize: 318x238
-#    type: RGB565
-#    transparency: alpha_channel  
+  images:
+    - file: ${error_illustration_file}
+      id: error_img
+  #  - file: ${idle_illustration_file}
+  #    id: idle_img
+    - file: ${listening_illustration_file}
+      id: listening_img
+    - file: ${thinking_illustration_file}
+      id: thinking_img
+    - file: ${replying_illustration_file}
+      id: replying_img
+    - file: ${loading_illustration_file}
+      id: loading_img
+  #  - file: ${timer_finished_illustration_file}
+  #    id: timer_finished_img
+  #  - file: ${logo_illustration_file}
+  #    id: logo_img
+  ## HAL Animated Voice Assistant images
+  #  - file: ${anim_listening1}
+  #    id: anim_listening1
+  #  - file: ${anim_listening2}
+  #    id: anim_listening2
+  #  - file: ${anim_thinking1}
+  #    id: anim_thinking1
+  #  - file: ${anim_thinking2}
+  #    id: anim_thinking2
+  #  - file: ${anim_replying1}
+  #    id: anim_replying1
+  #  - file: ${anim_replying2}
+  #    id: anim_replying2
+  #  - file: ${anim_error1}
+  #    id: anim_error1
+  ## HOME Animated Voice Assistant images
+  #  - file: ${anim2_listening}
+  #    id: anim2_listening
+  #  - file: ${anim2_thinking}
+  #    id: anim2_thinking
+  #  - file: ${anim2_replying1}
+  #    id: anim2_replying1
+  #  - file: ${anim2_replying2}
+  #    id: anim2_replying2
+  #  - file: ${anim2_replying3}
+  #    id: anim2_replying3
+  #  - file: ${anim2_replying4}
+  #    id: anim2_replying4
+  #  - file: ${anim2_error}
+  #    id: anim2_error 
 
 font:
   - file: ${font_file}
