@@ -2911,7 +2911,7 @@ text_sensor:
                         # selected_index: 3
               # - if:
                   # condition:
-                    # lambda: return (id(climate1_item).state == "cool");
+                    # lambda: return (id(climate1_item).state == "dry");
                   # then:
                     # - lvgl.dropdown.update:
                         # id: dropdown_studioacmode
