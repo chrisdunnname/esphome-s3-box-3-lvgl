@@ -51,7 +51,7 @@ substitutions:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2025.9.0
+  min_version: 2025.11.0
   name_add_mac_suffix: false
   on_boot:
     priority: 600
@@ -82,7 +82,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.09.17"
+    version: "2025.11.20"
 
 esp32:
   board: esp32s3box
@@ -194,7 +194,7 @@ interval:
     then:
       - lambda: |-
           float celsius = id(s3temp).state;
-          if (id(temp_unit).state == "Fahrenheit") {
+          if (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0) {
             id(display_temp) = celsius * 9.0 / 5.0 + 32.0;
           } else {
             id(display_temp) = celsius;
@@ -203,7 +203,7 @@ interval:
           id: temp_label
           text: !lambda |-
             char buf[10];
-            sprintf(buf, "%.1f%s", id(display_temp), (id(temp_unit).state == "Fahrenheit" ? "°F" : "°C"));
+            sprintf(buf, "%.1f%s", id(display_temp), (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
             return buf;
       - lvgl.label.update:
           id: humidity_label
@@ -387,13 +387,13 @@ sensor:
             # id: temp_climate_1   
             # text: !lambda |-
               # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (id(temp_unit).state == "Fahrenheit" ? "°F" : "°C"));
+              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
               # return buf;
         # - lvgl.label.update:
             # id: studioac_currenttemp   
             # text: !lambda |-
               # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (id(temp_unit).state == "Fahrenheit" ? "°F" : "°C"));
+              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
               # return buf; 
 
   # - platform: homeassistant
@@ -407,7 +407,7 @@ sensor:
             # id: studioac_targettemp   
             # text: !lambda |-
               # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (id(temp_unit).state == "Fahrenheit" ? "°F" : "°C"));
+              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
               # return buf; 
         # - lambda: |-
             # float val = roundf(x * 2.0f) / 2.0f;  // Round to nearest 0.5
@@ -425,7 +425,7 @@ sensor:
             # id: temp_climate_2   
             # text: !lambda |-
               # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (id(temp_unit).state == "Fahrenheit" ? "°F" : "°C"));
+              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
               # return buf;
 
   # - platform: homeassistant
@@ -438,7 +438,7 @@ sensor:
             # id: temp_climate_3   
             # text: !lambda |-
               # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (id(temp_unit).state == "Fahrenheit" ? "°F" : "°C"));
+              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
               # return buf;
 
   # - platform: homeassistant
@@ -451,7 +451,7 @@ sensor:
             # id: temp_climate_4   
             # text: !lambda |-
               # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (id(temp_unit).state == "Fahrenheit" ? "°F" : "°C"));
+              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
               # return buf;
 
   # - platform: homeassistant
@@ -464,7 +464,7 @@ sensor:
             # id: temp_climate_5   
             # text: !lambda |-
               # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (id(temp_unit).state == "Fahrenheit" ? "°F" : "°C"));
+              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
               # return buf;
 
   # - platform: homeassistant
@@ -477,7 +477,7 @@ sensor:
             # id: temp_climate_6   
             # text: !lambda |-
               # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (id(temp_unit).state == "Fahrenheit" ? "°F" : "°C"));
+              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
               # return buf;
 ##########
 
@@ -697,7 +697,7 @@ media_player:
             - script.execute: stop_wake_word
             - if:
                 condition:
-                  - lambda: return id(wake_word_engine_location).state == "In Home Assistant";
+                  - lambda: return strcmp(id(wake_word_engine_location).current_option(), "In Home Assistant") == 0;
                 then:
                   - wait_until:
                       - not:
@@ -711,7 +711,7 @@ media_player:
             - script.execute: stop_wake_word
             - if:
                 condition:
-                  - lambda: return id(wake_word_engine_location).state == "In Home Assistant";
+                  - lambda: return strcmp(id(wake_word_engine_location).current_option(), "In Home Assistant") == 0;
                 then:
                   - wait_until:
                       - not:
@@ -910,7 +910,7 @@ voice_assistant:
     - lambda: ESP_LOGD("voice_assistant", "on_end starting wake word again"); 
     - if:
         condition:
-          - lambda: return id(wake_word_engine_location).state == "On device";
+          - lambda: return strcmp(id(wake_word_engine_location).current_option(), "On device") == 0;
         then:
           - lambda: id(va).set_use_wake_word(false);
           - micro_wake_word.start:
@@ -1274,7 +1274,7 @@ script:
             and:
               - not:
                   - voice_assistant.is_running:
-              - lambda: return id(wake_word_engine_location).state == "On device";
+              - lambda: return strcmp(id(wake_word_engine_location).current_option(), "On device") == 0;
           then:
             - lambda: id(va).set_use_wake_word(false);
             - micro_wake_word.start:
@@ -1283,7 +1283,7 @@ script:
             and:
               - not:
                   - voice_assistant.is_running:
-              - lambda: return id(wake_word_engine_location).state == "In Home Assistant";
+              - lambda: return strcmp(id(wake_word_engine_location).current_option(), "In Home Assistant") == 0;
           then:
             - lambda: id(va).set_use_wake_word(true);
             - voice_assistant.start_continuous:
@@ -1293,13 +1293,13 @@ script:
       - lambda: ESP_LOGD("script", "stop_wake_word");
       - if:
           condition:
-            lambda: return id(wake_word_engine_location).state == "In Home Assistant";
+            lambda: return strcmp(id(wake_word_engine_location).current_option(), "In Home Assistant") == 0;
           then:
             - lambda: id(va).set_use_wake_word(false);
             - voice_assistant.stop:
       - if:
           condition:
-            lambda: return id(wake_word_engine_location).state == "On device";
+            lambda: return strcmp(id(wake_word_engine_location).current_option(), "On device") == 0;
           then:
             - micro_wake_word.stop:
 
@@ -1553,7 +1553,7 @@ script:
             time: !lambda return id(ha_time).now();
       - if:
           condition:
-            - lambda: 'return { (id(time_format).state == "24 Hr") };'
+            - lambda: 'return { (strcmp(id(time_format).current_option(), "24 Hr") == 0) };'
           then:
             - lvgl.label.update:
                 id: lbl_time
@@ -1578,7 +1578,7 @@ script:
                   time: !lambda return id(ha_time).now();
       - if:
           condition:
-            - lambda: 'return { (id(ss_clockstyle).state == "Digital") };'
+            - lambda: 'return { (strcmp(id(ss_clockstyle).current_option(), "Digital") == 0) };'
           then:
             - lvgl.widget.hide: analog
             - lvgl.widget.show: digital
@@ -1601,11 +1601,11 @@ script:
     then:
       - if:
           condition: 
-            - lambda: return (id(current_uimode) != id(uimode).state);
+            - lambda: return (strcmp(id(uimode).current_option(), id(current_uimode)) != 0);
           then:
             - if:
                 condition: 
-                  lambda: return (id(uimode).state == "Default" || id(uimode).state.empty());
+                  lambda: return (strcmp(id(uimode).current_option(), "Default") == 0 || strcmp(id(uimode).current_option(), "") == 0);
                 then:
                   - lvgl.style.update:
                       id: header_footer
@@ -1643,7 +1643,7 @@ script:
 #                  - lvgl.widget.hide: error
             - if:
                 condition: 
-                  lambda: return (id(uimode).state == "HAL");
+                  lambda: return (strcmp(id(uimode).current_option(), "HAL") == 0);
                 then:
                   - lvgl.style.update:
                       id: header_footer
@@ -1681,7 +1681,7 @@ script:
 #                  - lvgl.widget.hide: error_anim
             - if:
                 condition: 
-                  lambda: return (id(uimode).state == "Home");
+                  lambda: return (strcmp(id(uimode).current_option(), "Home") == 0);
                 then:
                   - lvgl.style.update:
                       id: header_footer
@@ -1717,13 +1717,13 @@ script:
 #                  - lvgl.widget.hide: thinking_anim2
 #                  - lvgl.widget.hide: replying_anim2
 #                  - lvgl.widget.hide: error_anim2
-            - lambda: id(current_uimode) = id(uimode).state;
+            - lambda: strcpy(id(current_uimode), id(uimode).current_option());
             - lvgl.widget.redraw:
           else:
             - if:
                 condition:
                   lambda: |-
-                        return (id(voice_assistant_phase) == ${voice_assist_listening_phase_id} && id(uimode).state == "HAL");
+                        return (id(voice_assistant_phase) == ${voice_assist_listening_phase_id} && strcmp(id(uimode).current_option(), "HAL") == 0);
                 then:
 #                  - lvgl.animimg.start:
 #                      id: listening_anim
@@ -1733,7 +1733,7 @@ script:
             - if:
                 condition:
                   lambda: |-
-                        return (id(voice_assistant_phase) == ${voice_assist_thinking_phase_id} && id(uimode).state == "HAL");
+                        return (id(voice_assistant_phase) == ${voice_assist_thinking_phase_id} && strcmp(id(uimode).current_option(), "HAL") == 0);
                 then:
 #                  - lvgl.animimg.start:
 #                      id: thinking_anim
@@ -1743,7 +1743,7 @@ script:
             - if:
                 condition:
                   lambda: |-
-                        return (id(voice_assistant_phase) == ${voice_assist_replying_phase_id} && id(uimode).state == "HAL");
+                        return (id(voice_assistant_phase) == ${voice_assist_replying_phase_id} && strcmp(id(uimode).current_option(), "HAL") == 0);
                 then:
 #                  - lvgl.animimg.start:
 #                      id: replying_anim
@@ -1753,7 +1753,7 @@ script:
             - if:
                 condition:
                   lambda: |-
-                        return (id(voice_assistant_phase) == ${voice_assist_replying_phase_id} && id(uimode).state == "Home");
+                        return (id(voice_assistant_phase) == ${voice_assist_replying_phase_id} && strcmp(id(uimode).current_option(), "Home") == 0);
                 then:
 #                  - lvgl.animimg.start:
 #                      id: replying_anim2
@@ -2260,7 +2260,7 @@ select:
     on_value:
       - if:
           condition:
-            lambda: return id(temp_unit).state == "Celsius";
+            lambda: return strcmp(id(temp_unit).current_option(), "Celsius") == 0;
           then:
             - lvgl.dropdown.update:
                 id: dropdown_tempunit
@@ -2480,7 +2480,7 @@ globals:
     restore_value: no
     initial_value: '0.0'
   - id: current_uimode
-    type: std::string
+    type: char[50]
     initial_value: ""
   - id: alarmclock_ringing
     type: bool
@@ -6946,14 +6946,38 @@ lvgl:
       border_color: 0x000000
       border_width: 1
       text_color: 0xFFFFFF
+      ############## ADD SHADOW
+      shadow_color: 0xFFFFFF
+      shadow_width: 20
+      shadow_ofs_x: 0
+      shadow_ofs_y: 0
+      shadow_opa: 50%
+      radius: 15
+      bg_dither_mode: ORDERED
     - id: button_pressed_style
       bg_color: 0x666666 #grey
       bg_grad_color: 0x00334d #dark blue
+      ############## ADD SHADOW
+      shadow_color: 0xFFFFFF
+      shadow_width: 20
+      shadow_ofs_x: 0
+      shadow_ofs_y: 0
+      shadow_opa: 50%
+      radius: 15
+      bg_dither_mode: ORDERED
     - id: button_checked_style
       bg_color: 0x000000 #black
       bg_grad_color: 0x002233 #darker blue
       bg_grad_dir: VER
       text_color: yellow
+      ############## ADD SHADOW
+      shadow_color: 0xFFFFFF
+      shadow_width: 20
+      shadow_ofs_x: 0
+      shadow_ofs_y: 0
+      shadow_opa: 50%
+      radius: 15
+      bg_dither_mode: ORDERED
     - id: button_standard_style
       bg_color: 0x2F8CD8
       bg_grad_color: 0x005782
