@@ -95,6 +95,7 @@ substitutions:
   security1_entity: lock.door #lock
   keypad_page_title: "Code"
   ssaver_page_title: " "
+  screensaver_weather_entity: weather.home #weather
   notification_page_title: "Notification"
 
 ###### Fonts & Icons ######
@@ -537,6 +538,23 @@ sensor:
               char buf[10];
               sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
               return buf;
+
+##### SCREENSAVER FORECAST TEMPERATURE #####
+  - platform: homeassistant
+    id: external_temp
+    entity_id: ${screensaver_weather_entity}
+    attribute: temperature
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: temp_ext_label
+        - lvgl.label.update:
+            id: temp_ext_label  
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf;
+
 ##########
 
 text:
@@ -2758,7 +2776,22 @@ font:
       - "\U000F033E"#lock
       - "\U000F033F"#lock-open
       - "\U000F00DF"#brightness 
-
+      - "\U000F0594"# clear-night
+      - "\U000F0590"# cloudy
+      - "\U000F0F2F"# exceptional
+      - "\U000F0592"# hail
+      - "\U000F0593"# lightning
+      - "\U000F067E"# lightning-rainy
+      - "\U000F0595"# partlycloudy
+      - "\U000F0596"# pouring
+      - "\U000F0597"# rainy
+      - "\U000F0598"# snowy
+      - "\U000F067F"# snowy-rainy
+      - "\U000F0599"# sunny
+      - "\U000F059D"# windy
+      - "\U000F059E"# windy-variant
+      - "\U000F14E4"# sunny-off
+      
   - file: ${icon_font_file}
     id: icon_font_20
     size: 20
@@ -2974,6 +3007,57 @@ text_sensor:
                     - lvgl.dropdown.update:
                         id: dropdown_studioacmode
                         selected_index: 4
+
+##### SCREENSAVER FORECAST CONDITION #####
+  - platform: homeassistant
+    id: external_temp_condition
+    entity_id: ${screensaver_weather_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: temp_condition_label
+        - lvgl.label.update:
+            id: temp_condition_label  
+            text: !lambda |-
+              static char buf[20];
+              std::string icon;
+              if (id(external_temp_condition).state == "clear-night") {
+                  icon = "\U000F0594";
+              } else if (id(external_temp_condition).state == "cloudy") {
+                  icon = "\U000F0590";
+              } else if (id(external_temp_condition).state == "exceptional") {
+                  icon = "\U000F0F2F";
+              } else if (id(external_temp_condition).state == "fog") {
+                  icon = "\U000F0591";
+              } else if (id(external_temp_condition).state == "hail") {
+                  icon = "\U000F0592";
+              } else if (id(external_temp_condition).state == "lightning") {
+                  icon = "\U000F0593";
+              } else if (id(external_temp_condition).state == "lightning-rainy") {
+                  icon = "\U000F067E";
+              } else if (id(external_temp_condition).state == "partlycloudy") {
+                  icon = "\U000F0595";
+              } else if (id(external_temp_condition).state == "pouring") {
+                  icon = "\U000F0596";
+              } else if (id(external_temp_condition).state == "rainy") {
+                  icon = "\U000F0597";
+              } else if (id(external_temp_condition).state == "snowy") {
+                  icon = "\U000F0598";
+              } else if (id(external_temp_condition).state == "snowy-rainy") {
+                  icon = "\U000F067F";
+              } else if (id(external_temp_condition).state == "sunny") {
+                  icon = "\U000F0599";
+              } else if (id(external_temp_condition).state == "windy") {
+                  icon = "\U000F059D";
+              } else if (id(external_temp_condition).state == "windy-variant") {
+                  icon = "\U000F059E";
+              } else if (id(external_temp_condition).state == "sunny-off") {
+                  icon = "\U000F14E4"; 
+              } else {
+                  icon = "\U000F14E4";
+              }
+              snprintf(buf, sizeof(buf), "%s", icon.c_str());
+              return buf;
 
 ##### CONTROL PAGE TEXT SENSORS #####
   - platform: homeassistant
@@ -5118,6 +5202,7 @@ lvgl:
             id: temp_label
             hidden: true
             align: TOP_LEFT
+            text: " "
             text_align: LEFT
             styles: clock_style
             text_color: lightblue
@@ -5127,14 +5212,34 @@ lvgl:
         - label:
             id: humidity_label
             hidden: true
+            align: TOP_LEFT
+            text_align: LEFT
+            styles: clock_style
+            text_color: lightblue
+            text_font: my_font12
+            x: 15
+            y: 60
+        - label:
+            id: temp_ext_label
+            hidden: true
             align: TOP_RIGHT
+            text: " "
             text_align: RIGHT
             styles: clock_style
             text_color: lightblue
             text_font: my_font18
             x: -15
             y: 40
-
+        - label:
+            id: temp_condition_label
+            hidden: true
+            align: TOP_RIGHT
+            text_align: RIGHT
+            styles: clock_style
+            text_color: lightblue
+            text_font: icon_font_20
+            x: -15
+            y: 60
     - id: listening_page
       skip: true
       widgets:
