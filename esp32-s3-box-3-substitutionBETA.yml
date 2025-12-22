@@ -42,55 +42,60 @@ substitutions:
   home_assistant_host: http://homeassistant.local:8123 ##change to the full url or IP of your HA server including port
   api_key: QhTgdqqJ3XY9DbDuN8NS1+zXUr8NaY83pab4dqgy8Yk= ##### Device specific API KEY
   wifi_fallback_pwd: s3box123
+  home_page_title: "Home"
   climate_page_title: "Climate"
   climate1_name: "Room 1 AC"
-  climate1_entity: "climate.air_conditioner" #climate
+  climate1_entity: climate.air_conditioner #climate
   climate2_name: "Room 2"
-  climate2_entity: "sensor.temperature2" #sensor
+  climate2_entity: sensor.temperature2 #sensor
   climate3_name: "Room 3"
-  climate3_entity: "sensor.temperature3" #sensor
+  climate3_entity: sensor.temperature3 #sensor
   climate4_name: "Room 4"
-  climate4_entity: "sensor.temperature4" #sensor
+  climate4_entity: sensor.temperature4 #sensor
   climate5_name: "Room 5"
-  climate5_entity: "sensor.temperature5" #sensor
+  climate5_entity: sensor.temperature5 #sensor
   climate6_name: "Room 6"
-  climate6_entity: "sensor.temperature6" #sensor
+  climate6_entity: sensor.temperature6 #sensor
   lights_page_title: "Lights"
   lights1_name: "Light 1"
-  lights1_entity: "switch.light1" #switch
+  lights1_entity: switch.light1 #switch or light
   lights2_name: "Light 2"
-  lights2_entity: "switch.light2" #switch
+  lights2_entity: switch.light2 #switch or light
   lights3_name: "Light 3"
-  lights3_entity: "light.light3" #light
+  lights3_entity: light.light3 #switch or light
   lights4_name: "Light 4"
-  lights4_entity: "switch.light4" #switch
+  lights4_entity: switch.light4 #switch or light
   lights5_name: "Light 5"
-  lights5_entity: "switch.light5" #switch
+  lights5_entity: switch.light5 #switch or light
   lights6_name: "Light 6"
-  lights6_entity: "light.light6" #light
+  lights6_entity: light.light6 #switch or light
   controls_page_title: "Controls"
   controls1_name: "Kettle"
-  controls1_entity: "switch.kettle_start" #switch
+  controls1_entity: switch.kettle_start #switch
   controls2_name: "Vacuum"
-  controls2_entity: "vacuum.vacuum_cleaner" #vacuum
+  controls2_entity: vacuum.vacuum_cleaner #vacuum
   controls4_name: "Garage"
-  controls4_entity: "switch.garagedoorbutton" #switch
-  controls4_state: "binary_sensor.garagedoorstate" #binary_sensor
+  controls4_entity: switch.garagedoorbutton #switch
+  controls4_state: binary_sensor.garagedoorstate #binary_sensor
   controls5_name: "Dishwasher" #HomeConnect Dishwasher
-  controls5_programs: "select.device_programs" #select
-  controls5_start: "button.device_start_pause" #button
-  controls5_stop: "button.device_stop" #button
-  controls5_state: "sensor.device_bsh_common_status_operationstate" #sensor
-  controls5_doorstate: "binary_sensor.device_bsh_common_status_doorstate" #binary_sensor
+  controls5_programs: select.device_programs #select
+  controls5_start: button.device_start_pause #button
+  controls5_stop: button.device_stop #button
+  controls5_state: sensor.device_bsh_common_status_operationstate #sensor
+  controls5_doorstate: binary_sensor.device_bsh_common_status_doorstate #binary_sensor
+  media_page_title: "Media"
   scenes_page_title: "Screens"
   scenes1_name: "TV 1"
-  scenes1_entity: "media_player.tv1" #media_player
+  scenes1_entity: media_player.tv1 #media_player
   scenes2_name: "TV 2"
-  scenes2_entity: "media_player.tv2" #media_player
-  alarmo_entity: "alarm_control_panel.alarmo" #alarmo
+  scenes2_entity: media_player.tv2 #media_player
+  alarmo_entity: alarm_control_panel.alarmo #alarmo
   security_page_title: "Security"
   security1_name: "Door"
-  security1_entity: "lock.door" #lock
+  security1_entity: lock.door #lock
+  keypad_page_title: "Code"
+  ssaver_page_title: " "
+  notification_page_title: "Notification"
 
 ###### Fonts & Icons ######
   font_glyphs: '&@!"''%()+=,-_.:°/$€£¥?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюя'
@@ -431,7 +436,7 @@ sensor:
 ##### CLIMATE PAGE SENSORS #####
   - platform: homeassistant
     id: climate1_temp
-    entity_id: '${climate1_entity}'
+    entity_id: ${climate1_entity}
     attribute: current_temperature
     internal: true
     on_value:
@@ -451,7 +456,7 @@ sensor:
 
   - platform: homeassistant
     id: climate1_temp2
-    entity_id: '${climate1_entity}'
+    entity_id: ${climate1_entity}
     attribute: temperature
     internal: true
     on_value:
@@ -470,7 +475,7 @@ sensor:
 
   - platform: homeassistant
     id: climate2_temp
-    entity_id: '${climate2_entity}'
+    entity_id: ${climate2_entity}
     internal: true
     on_value:
       then:
@@ -483,7 +488,7 @@ sensor:
 
   - platform: homeassistant
     id: climate3_temp
-    entity_id: '${climate3_entity}'
+    entity_id: ${climate3_entity}
     internal: true
     on_value:
       then:
@@ -496,7 +501,7 @@ sensor:
 
   - platform: homeassistant
     id: climate4_temp
-    entity_id: '${climate4_entity}'
+    entity_id: ${climate4_entity}
     internal: true
     on_value:
       then:
@@ -509,7 +514,7 @@ sensor:
 
   - platform: homeassistant
     id: climate5_temp
-    entity_id: '${climate5_entity}'
+    entity_id: ${climate5_entity}
     internal: true
     on_value:
       then:
@@ -522,7 +527,7 @@ sensor:
 
   - platform: homeassistant
     id: climate6_temp
-    entity_id: '${climate6_entity}'
+    entity_id: ${climate6_entity}
     internal: true
     on_value:
       then:
@@ -2904,7 +2909,7 @@ text_sensor:
 
   - platform: homeassistant
     name: "Alarm Status"
-    entity_id: '${alarmo_entity}'
+    entity_id: ${alarmo_entity}
     id: alarm_status
     on_value:
       then:
@@ -2913,7 +2918,7 @@ text_sensor:
 ##### CLIMATE PAGE TEXT SENSORS #####
   - platform: homeassistant
     id: climate1_item
-    entity_id: '${climate1_entity}'
+    entity_id: ${climate1_entity}
     internal: true
     on_value:
       then:
@@ -2973,7 +2978,7 @@ text_sensor:
 ##### CONTROL PAGE TEXT SENSORS #####
   - platform: homeassistant
     id: control1_item
-    entity_id: '${controls1_entity}'
+    entity_id: ${controls1_entity}
     internal: true
     on_value:
       then:
@@ -2993,7 +2998,7 @@ text_sensor:
 
   - platform: homeassistant
     id: control2_item
-    entity_id: '${controls2_entity}'
+    entity_id: ${controls2_entity}
     internal: true
     on_value:
       then:
@@ -3027,7 +3032,7 @@ text_sensor:
 
   - platform: homeassistant
     id: control4_item
-    entity_id: '${controls4_state}'
+    entity_id: ${controls4_state}
     internal: true
     on_value:
       then:
@@ -3053,7 +3058,7 @@ text_sensor:
 
   - platform: homeassistant
     id: control5_item
-    entity_id: '${controls5_state}'
+    entity_id: ${controls5_state}
     internal: true
     on_value:
       then:
@@ -3090,7 +3095,7 @@ text_sensor:
 
   - platform: homeassistant
     id: control5_item2
-    entity_id: '${controls5_doorstate}'
+    entity_id: ${controls5_doorstate}
     internal: true
     on_value:
       then:
@@ -3119,7 +3124,7 @@ text_sensor:
   ##### SCENES PAGE TEXT SENSORS #####
   - platform: homeassistant
     id: scenes1_item
-    entity_id: '${scenes1_entity}'
+    entity_id: ${scenes1_entity}
     internal: true
     on_value:
       then:
@@ -3145,7 +3150,7 @@ text_sensor:
 
   - platform: homeassistant
     id: scenes2_item
-    entity_id: '${scenes2_entity}'
+    entity_id: ${scenes2_entity}
     internal: true
     on_value:
       then:
@@ -3172,7 +3177,7 @@ text_sensor:
 ##### SECURITY PAGE TEXT SENSORS #####
   - platform: homeassistant
     id: security1_item
-    entity_id: '${security1_entity}'
+    entity_id: ${security1_entity}
     internal: true
     on_value:
       then:
@@ -3267,7 +3272,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_disarm
                   data:
-                    entity_id: '${alarmo_entity}'
+                    entity_id: ${alarmo_entity}
                     code: !lambda return x.c_str();
       - if:
           condition:
@@ -3276,7 +3281,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_arm_home
                   data:
-                    entity_id: '${alarmo_entity}'
+                    entity_id: ${alarmo_entity}
                     code: !lambda return x.c_str();
       - if:
           condition:
@@ -3285,7 +3290,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_arm_away
                   data:
-                    entity_id: '${alarmo_entity}'
+                    entity_id: ${alarmo_entity}
                     code: !lambda return x.c_str();
       - if:
           condition:
@@ -3294,7 +3299,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_arm_night
                   data:
-                    entity_id: '${alarmo_entity}'
+                    entity_id: ${alarmo_entity}
                     code: !lambda return x.c_str();
       - lambda: id(alarm_action) = "";
       - script.execute: set_alarm_status
@@ -3330,7 +3335,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Home" ## Home page title
+                        text: '${home_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -3768,7 +3773,7 @@ lvgl:
                             - homeassistant.service:
                                 service: climate.toggle
                                 data:
-                                  entity_id: '${climate1_entity}'
+                                  entity_id: ${climate1_entity}
                     - label:
                         text: "Current Temp"
                         align: CENTER
@@ -3843,7 +3848,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: climate.set_hvac_mode
                                     data:
-                                      entity_id: '${climate1_entity}'
+                                      entity_id: ${climate1_entity}
                                       hvac_mode: "off"
                           - if:
                               condition:
@@ -3852,7 +3857,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: climate.set_hvac_mode
                                     data:
-                                      entity_id: '${climate1_entity}'
+                                      entity_id: ${climate1_entity}
                                       hvac_mode: heat_cool
                           - if:
                               condition:
@@ -3861,7 +3866,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: climate.set_hvac_mode
                                     data:
-                                      entity_id: '${climate1_entity}'
+                                      entity_id: ${climate1_entity}
                                       hvac_mode: heat
                           - if:
                               condition:
@@ -3870,7 +3875,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: climate.set_hvac_mode
                                     data:
-                                      entity_id: '${climate1_entity}'
+                                      entity_id: ${climate1_entity}
                                       hvac_mode: Cool
                           - if:
                               condition:
@@ -3879,7 +3884,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: climate.set_hvac_mode
                                     data:
-                                      entity_id: '${climate1_entity}'
+                                      entity_id: ${climate1_entity}
                                       hvac_mode: dry
                     - button:
                         id: studioac_spin_down
@@ -3909,7 +3914,7 @@ lvgl:
                             - homeassistant.service:
                                 service: climate.set_temperature
                                 data:
-                                  entity_id: '${climate1_entity}'
+                                  entity_id: ${climate1_entity}
                                 data_template:
                                   temperature: '{{ my_variable }}'
                                 variables:
@@ -3992,9 +3997,11 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: switch.toggle
+                            action: !lambda |
+                              std::string s = "${lights1_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
                             data:
-                              entity_id: '${lights1_entity}'
+                              entity_id: ${lights1_entity}
                     - label:
                         text: '${lights2_name}'
                         align: CENTER
@@ -4024,9 +4031,11 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: switch.toggle
+                            action: !lambda |
+                              std::string s = "${lights2_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
                             data:
-                              entity_id: '${lights2_entity}'
+                              entity_id: ${lights2_entity}
                     - label:
                         text: '${lights3_name}'
                         align: CENTER
@@ -4056,9 +4065,11 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: light.toggle
+                            action: !lambda |
+                              std::string s = "${lights3_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
                             data:
-                              entity_id: '${lights3_entity}'
+                              entity_id: ${lights3_entity}
                     - label:
                         text: '${lights4_name}'
                         align: CENTER
@@ -4088,9 +4099,11 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: switch.toggle
+                            action: !lambda |
+                              std::string s = "${lights4_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
                             data:
-                              entity_id: '${lights4_entity}'
+                              entity_id: ${lights4_entity}
                     - label:
                         text: '${lights5_name}'
                         align: CENTER
@@ -4120,9 +4133,11 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: switch.toggle
+                            action: !lambda |
+                              std::string s = "${lights5_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
                             data:
-                              entity_id: '${lights5_entity}'
+                              entity_id: ${lights5_entity}
                     - label:
                         text: '${lights6_name}'
                         align: CENTER
@@ -4152,9 +4167,11 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: light.toggle
+                            action: !lambda |
+                              std::string s = "${lights6_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
                             data:
-                              entity_id: '${lights6_entity}'
+                              entity_id: ${lights6_entity}
 
     - id: controls_page
       on_swipe_left:
@@ -4227,7 +4244,7 @@ lvgl:
                                 - homeassistant.action:
                                     action: switch.toggle
                                     data:
-                                      entity_id: '${controls1_entity}'
+                                      entity_id: ${controls1_entity}
                     - label:
                         text: '${controls2_name}'
                         align: CENTER
@@ -4265,12 +4282,12 @@ lvgl:
                                 - homeassistant.service:
                                     service: vacuum.start
                                     data:
-                                      entity_id: '${controls2_entity}'
+                                      entity_id: ${controls2_entity}
                               else: 
                                 - homeassistant.service:
                                     service: vacuum.return_to_base
                                     data:
-                                      entity_id: '${controls2_entity}'
+                                      entity_id: ${controls2_entity}
                     - label:
                         text: '${controls4_name}'
                         align: CENTER
@@ -4307,7 +4324,7 @@ lvgl:
                                 - homeassistant.action:
                                     action: switch.toggle
                                     data:
-                                      entity_id: '${controls4_entity}'
+                                      entity_id: ${controls4_entity}
                     - label:
                         text: '${controls5_name}'
                         align: CENTER
@@ -4345,18 +4362,18 @@ lvgl:
                                 - homeassistant.action:
                                     action: select.select_option
                                     data:
-                                      entity_id: '${controls5_programs}'
+                                      entity_id: ${controls5_programs}
                                       option: "Quick 1h"
                                 - delay: 4s
                                 - homeassistant.service:
                                     service: button.press
                                     data:
-                                      entity_id: '${controls5_start}'
+                                      entity_id: ${controls5_start}
                               else:
                                 - homeassistant.service:
                                     service: button.press
                                     data:
-                                      entity_id: '${controls5_stop}'
+                                      entity_id: ${controls5_stop}
 
     - id: media_page
       on_swipe_left:
@@ -4374,7 +4391,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Media" ## Media page title
+                        text: '${media_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -4681,12 +4698,12 @@ lvgl:
                                   - homeassistant.service:
                                       service: media_player.turn_on
                                       data:
-                                        entity_id: '${scenes1_entity}'
+                                        entity_id: ${scenes1_entity}
                                 else: 
                                   - homeassistant.service:
                                       service: media_player.turn_off
                                       data:
-                                        entity_id: '${scenes1_entity}'
+                                        entity_id: ${scenes1_entity}
                     - label:
                         text: '${scenes2_name}'
                         align: CENTER
@@ -4723,12 +4740,12 @@ lvgl:
                                   - homeassistant.service:
                                       service: media_player.turn_on
                                       data:
-                                        entity_id: '${scenes2_entity}'
+                                        entity_id: ${scenes2_entity}
                                 else: 
                                   - homeassistant.service:
                                       service: media_player.turn_off
                                       data:
-                                        entity_id: '${scenes2_entity}'
+                                        entity_id: ${scenes2_entity}
 
     - id: security_page
       on_swipe_left:
@@ -4804,12 +4821,12 @@ lvgl:
                                 - homeassistant.action:
                                     action: lock.unlock
                                     data:
-                                      entity_id: '${security1_entity}'
+                                      entity_id: ${security1_entity}
                               else:
                                 - homeassistant.action:
                                     action: lock.lock
                                     data:
-                                      entity_id: '${security1_entity}'
+                                      entity_id: ${security1_entity}
               - buttonmatrix:
                   align: CENTER
                   width: 100%
@@ -4861,7 +4878,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: alarm_control_panel.alarm_arm_home
                                     data:
-                                      entity_id: '${alarmo_entity}'
+                                      entity_id: ${alarmo_entity}
                                 - script.execute: set_alarm_status
                               else:
                                 - lambda: |-
@@ -4880,7 +4897,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: alarm_control_panel.alarm_arm_away
                                     data:
-                                      entity_id: '${alarmo_entity}'
+                                      entity_id: ${alarmo_entity}
                                 - script.execute: set_alarm_status
                               else:
                                 - lambda: |-
@@ -4899,7 +4916,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: alarm_control_panel.alarm_arm_night
                                     data:
-                                      entity_id: '${alarmo_entity}'
+                                      entity_id: ${alarmo_entity}
                                 - script.execute: set_alarm_status
                               else:
                                 - lambda: |-
@@ -4926,7 +4943,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Code"
+                        text: '${keypad_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -4996,7 +5013,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: " "
+                        text: '${ssaver_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -5424,7 +5441,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Notification"
+                        text: '${notification_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -7139,7 +7156,7 @@ binary_sensor:
 ##### LIGHT PAGE BINARY SENSORS #####
   - platform: homeassistant
     id: light1_item
-    entity_id: '${lights1_entity}'
+    entity_id: ${lights1_entity}
     trigger_on_initial_state: true
     internal: true
     on_state:
@@ -7162,7 +7179,7 @@ binary_sensor:
 
   - platform: homeassistant
     id: light2_item
-    entity_id: '${lights2_entity}'
+    entity_id: ${lights2_entity}
     trigger_on_initial_state: true
     internal: true
     on_state:
@@ -7185,7 +7202,7 @@ binary_sensor:
 
   - platform: homeassistant
     id: light3_item
-    entity_id: '${lights3_entity}'
+    entity_id: ${lights3_entity}
     trigger_on_initial_state: true
     internal: true
     on_state:
@@ -7208,7 +7225,7 @@ binary_sensor:
 
   - platform: homeassistant
     id: light4_item
-    entity_id: '${lights4_entity}'
+    entity_id: ${lights4_entity}
     trigger_on_initial_state: true
     internal: true
     on_state:
@@ -7231,7 +7248,7 @@ binary_sensor:
 
   - platform: homeassistant
     id: light5_item
-    entity_id: '${lights5_entity}'
+    entity_id: ${lights5_entity}
     trigger_on_initial_state: true
     internal: true
     on_state:
@@ -7254,7 +7271,7 @@ binary_sensor:
 
   - platform: homeassistant
     id: light6_item
-    entity_id: '${lights6_entity}'
+    entity_id: ${lights6_entity}
     trigger_on_initial_state: true
     internal: true
     on_state:
