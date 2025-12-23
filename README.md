@@ -21,8 +21,7 @@ The On Device Wake Word includes the standard ESPHome wakeword models (4) but al
 Additional experimental wake words for okay computer and hey home assistant and included in the config but disabled by default. 
 
 The UI and Voice Assistant experience is implemented out of the box.
-Configuration is required to integrate button actions into your Home Assistant.
-This configuration is suitable for anyone with an understanding of ESPHOME, the S3-Box-3, Home Assistant and Wake Word Voice Assistants.
+Only basic configuration is required to integrate the standard features with your Home Assistant.
 
 Key Components:
 - Radar: https://esphome.netlify.app/components/at581x
@@ -39,12 +38,8 @@ Requires [S3-Box-3](https://www.espressif.com/en/dev-board/esp32-s3-box-3-en).
 
 Sensor dock & battery are optional to use radar/presence, battery level and temperature/humidity functionality.
 
-The minimum supported ESPHome version is 2025.11.0.
+The minimum supported ESPHome version is 2025.12.0.
 Last tested on Home Assistant 2025.12 and ESPHome Version 2025.12.
-
-# BETA
-The BETA yaml is a preview of a proposed update to be the next release simplifying the configuration using extensive substitution for entities and adding an external weather source.
-This supports Home Assistant 2025.12 and ESPHome Version 2025.12.
 
 # Loading
 ![loading](https://github.com/user-attachments/assets/55e0a1b8-8873-42a3-864f-297fa6826b6e)
@@ -144,7 +139,8 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 # Screensaver
 ![analog](https://github.com/user-attachments/assets/dfb647fe-6d61-4561-b051-6af23b851f27)
 ![digital](https://github.com/user-attachments/assets/ccfa0c24-9ae2-4b64-84ea-2c60173ea339)
-- Temperature and Humidity will not be shown if a sensor dock is not connected.
+- The left side of the screen shows device Temperature and Humidity and will not be shown if a sensor dock is not connected.
+- The right side of the screen shows your specified weather entity temperature and condition and will not be shown if a valid entity is not specified.
 
 # Settings
 ![settings](https://github.com/user-attachments/assets/9f51c38d-4a3f-450a-9771-42b6d3ad4c6e)
@@ -171,7 +167,6 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 - Delay Secs is the time until the screensaver starts
 - Screen Off Delay is the time until the screen turns off.
 - The brightness slider allows setting the screensaver brightness.
-
 
 **Info**
 
@@ -200,19 +195,20 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 # OTA Updates
 ![ota](https://github.com/user-attachments/assets/b72041fb-3402-4387-a839-bb7c78d40b21)
 
-# Configuration Guidance
-To use the wake, notify and timer sounds with external audio you will need to load the sounds folder to the www folder in your home assistant. This can be done through an add on like Filebrowser or SambaShare.
-
-LVGL functions differently to the standard ESPHOME UI. Instead of using lambda to construct pages and format them separate to the touch screen configuration, LVGL uses a hierarchical page structure combining the touchscreen and UI elements.
-This means the LVGL section of the YAML contains all the UI elements including the pages and widgets. These widgets are interactive and have different actions associated to their type. 
-Setting the status of these widgets is not done in the LVGL configuration. Instead each component forces appropriate updates to the UI. So when a switch is turned on or off it needs to update the lvgl switch widget to be checked or not checked.
-This means the UI updates interactively so that as actions are performed which send service calls to home assistant or trigger local actions, the corresponding state changes in sensors can update the UI in response.
-For each new or modified widget you need to update the LVGL to specify the action to take when a UI interaction occurs and in parallel you need to update the entity to update the UI on state changes.
-
-Example entity configuration is included to match the screens above providing starting configuration for how different types of devices can be configured.
+# Getting Started
+The 2025.12.21 release now enables much easier configuration for new users. 
+All standard user functions included in the configuration are now provided as substitutions in the YAML. 
+Under the "Your Data" section you can change page names, button names and specify entities to enable the standard features of the configuration. 
+Only components associated with active entities in your Home Assistant will be shown on the device otherwise these features will be hidden. This means that you can just update the substitutions for the entities you require and only those items will be shown on the associated pages. 
+This makes it easy for anyone to get started with this configuration in a few minutes. For those deploying to multiple S3 devices this new design makes it easier to deploy the same configuration with different entities and makes it easy for those who wish to separate the substitutions from the core yaml.
 
 The configuration provides a Wifi QR Code so that guests can scan your screen to be connected to the specified network. 
 This is configured using a secret called "wifi_qr" that needs to be configured in your ESPHome installation.
 This secret uses a format similar to "WIFI:S:your_wifi_ssid;T:WPA;P:your_wifi_password;H:false;;". This is the standard format for Wifi QR codes and more details can be found in the WPA3 specification.
+Two additional secrets are used for wifi credentials for connecting your device to your wifi and these are wifi_ssid and wifi_password.
 
-Two additional secrets are used for wifi credentials for connecting your device to yur wifi and these are wifi_ssid and wifi_password.
+To use the wake, notify and timer sounds with external audio you will need to load the sounds folder to the www folder in your home assistant. This can be done through an add on like Filebrowser or SambaShare.
+
+API encryption is now standard. You can modify the key from your own config or generate one from the Home Assistant Native API web page. 
+
+If you are stuck or unsure or have a suggestion raise an issue or reach out as this configuration is the result of requests from fellow users and benefits from your support and involvement. 

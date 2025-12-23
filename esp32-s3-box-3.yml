@@ -26,7 +26,7 @@ substitutions:
   anim2_replying3: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_3.jpg
   anim2_replying4: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_4.jpg
   anim2_error: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_orange.jpg
-  
+
   voice_assist_idle_phase_id: "1"
   voice_assist_listening_phase_id: "2"
   voice_assist_thinking_phase_id: "3"
@@ -37,9 +37,66 @@ substitutions:
   voice_assist_timer_finished_phase_id: "20"
   voice_assist_timer_finishing_phase_id: "30"
   
+  #Your data
   external_media_player: your_media_player  ##change this to your external media player enity_id: do not include media_player.
   home_assistant_host: http://homeassistant.local:8123 ##change to the full url or IP of your HA server including port
-  tts_voice_speed: "24000" #options #nabu casa "24000" #piper "16000" elevenlabs "44100" must include quotes
+  api_key: QhTgdqqJ3XY9DbDuN8NS1+zXUr8NaY83pab4dqgy8Yk= ##### Device specific API KEY
+  wifi_fallback_pwd: s3box123
+  home_page_title: "Home"
+  climate_page_title: "Climate"
+  climate1_name: "Room 1 AC"
+  climate1_entity: climate.air_conditioner #climate
+  climate2_name: "Room 2"
+  climate2_entity: sensor.temperature2 #sensor
+  climate3_name: "Room 3"
+  climate3_entity: sensor.temperature3 #sensor
+  climate4_name: "Room 4"
+  climate4_entity: sensor.temperature4 #sensor
+  climate5_name: "Room 5"
+  climate5_entity: sensor.temperature5 #sensor
+  climate6_name: "Room 6"
+  climate6_entity: sensor.temperature6 #sensor
+  lights_page_title: "Lights"
+  lights1_name: "Light 1"
+  lights1_entity: switch.light1 #switch or light
+  lights2_name: "Light 2"
+  lights2_entity: switch.light2 #switch or light
+  lights3_name: "Light 3"
+  lights3_entity: light.light3 #switch or light
+  lights4_name: "Light 4"
+  lights4_entity: switch.light4 #switch or light
+  lights5_name: "Light 5"
+  lights5_entity: switch.light5 #switch or light
+  lights6_name: "Light 6"
+  lights6_entity: light.light6 #switch or light
+  controls_page_title: "Controls"
+  controls1_name: "Kettle"
+  controls1_entity: switch.kettle_start #switch
+  controls2_name: "Vacuum"
+  controls2_entity: vacuum.vacuum_cleaner #vacuum
+  controls4_name: "Garage"
+  controls4_entity: switch.garagedoorbutton #switch
+  controls4_state: binary_sensor.garagedoorstate #binary_sensor
+  controls5_name: "Dishwasher" #HomeConnect Dishwasher
+  controls5_programs: select.device_programs #select
+  controls5_start: button.device_start_pause #button
+  controls5_stop: button.device_stop #button
+  controls5_state: sensor.device_bsh_common_status_operationstate #sensor
+  controls5_doorstate: binary_sensor.device_bsh_common_status_doorstate #binary_sensor
+  media_page_title: "Media"
+  scenes_page_title: "Screens"
+  scenes1_name: "TV 1"
+  scenes1_entity: media_player.tv1 #media_player
+  scenes2_name: "TV 2"
+  scenes2_entity: media_player.tv2 #media_player
+  alarmo_entity: alarm_control_panel.alarmo #alarmo
+  security_page_title: "Security"
+  security1_name: "Door"
+  security1_entity: lock.door #lock
+  keypad_page_title: "Code"
+  ssaver_page_title: " "
+  screensaver_weather_entity: weather.home #weather
+  notification_page_title: "Notification"
 
 ###### Fonts & Icons ######
   font_glyphs: '&@!"''%()+=,-_.:°/$€£¥?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюя'
@@ -51,7 +108,7 @@ substitutions:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2025.11.0
+  min_version: 2025.12.0
   name_add_mac_suffix: false
   on_boot:
     priority: 600
@@ -82,7 +139,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.11.20"
+    version: "2025.12.21"
 
 esp32:
   board: esp32s3box
@@ -103,6 +160,8 @@ psram:
   speed: 80MHz
 
 api:
+  encryption:
+    key: ${api_key}
   on_client_connected:
     - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
     - script.execute: draw_display
@@ -132,7 +191,7 @@ wifi:
   password: !secret wifi_password
   ap:
     ssid: ${name}
-    password: s3box123   
+    password: ${wifi_fallback_pwd}   
   on_connect:
     - script.execute: draw_display
     - switch.turn_on: speaker_enable
@@ -376,109 +435,144 @@ sensor:
             return buf;
 
 ##### CLIMATE PAGE SENSORS #####
-  # - platform: homeassistant
-    # id: climate1_temp
-    # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner for the current air conditioner temperature
-    # attribute: current_temperature ## current temmperature attribute
-    # internal: true
-    # on_value:
-      # then:
-        # - lvgl.label.update:
-            # id: temp_climate_1   
-            # text: !lambda |-
-              # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
-              # return buf;
-        # - lvgl.label.update:
-            # id: studioac_currenttemp   
-            # text: !lambda |-
-              # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
-              # return buf; 
+  - platform: homeassistant
+    id: climate1_temp
+    entity_id: ${climate1_entity}
+    attribute: current_temperature
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_climate_1
+        - lvgl.widget.show: temp_climate_1
+        - lvgl.widget.show: but_climate_1
+        - lvgl.label.update:
+            id: temp_climate_1   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf;
+        - lvgl.label.update:
+            id: studioac_currenttemp   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf; 
 
-  # - platform: homeassistant
-    # id: climate1_temp2
-    # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner for the target air conditioner temperature
-    # attribute: temperature ## target temmperature attribute
-    # internal: true
-    # on_value:
-      # then:
-        # - lvgl.label.update:
-            # id: studioac_targettemp   
-            # text: !lambda |-
-              # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
-              # return buf; 
-        # - lambda: |-
-            # float val = roundf(x * 2.0f) / 2.0f;  // Round to nearest 0.5
-            # int scaled = (int)(val * 10);         // Scale for 1 decimal place
-            # lv_spinbox_set_value(id(spinbox_studioac), scaled);
-            # lv_obj_invalidate(id(spinbox_studioac));    // Force redraw
+  - platform: homeassistant
+    id: climate1_temp2
+    entity_id: ${climate1_entity}
+    attribute: temperature
+    internal: true
+    on_value:
+      then:
+        - lvgl.label.update:
+            id: studioac_targettemp   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf; 
+        - lambda: |-
+            float val = roundf(x * 2.0f) / 2.0f;  // Round to nearest 0.5
+            int scaled = (int)(val * 10);         // Scale for 1 decimal place
+            lv_spinbox_set_value(id(spinbox_studioac), scaled);
+            lv_obj_invalidate(id(spinbox_studioac));    // Force redraw
 
-  # - platform: homeassistant
-    # id: climate2_temp
-    # entity_id: sensor.temperature2 ## entity for temperature sensor
-    # internal: true
-    # on_value:
-      # then:
-        # - lvgl.label.update:
-            # id: temp_climate_2   
-            # text: !lambda |-
-              # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
-              # return buf;
+  - platform: homeassistant
+    id: climate2_temp
+    entity_id: ${climate2_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_climate_2
+        - lvgl.widget.show: temp_climate_2
+        - lvgl.widget.show: icon_climate_2
+        - lvgl.label.update:
+            id: temp_climate_2   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf;
 
-  # - platform: homeassistant
-    # id: climate3_temp
-    # entity_id: sensor.temperature3 ## entity for temperature sensor
-    # internal: true
-    # on_value:
-      # then:
-        # - lvgl.label.update:
-            # id: temp_climate_3   
-            # text: !lambda |-
-              # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
-              # return buf;
+  - platform: homeassistant
+    id: climate3_temp
+    entity_id: ${climate3_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_climate_3
+        - lvgl.widget.show: temp_climate_3
+        - lvgl.widget.show: icon_climate_3
+        - lvgl.label.update:
+            id: temp_climate_3   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf;
 
-  # - platform: homeassistant
-    # id: climate4_temp
-    # entity_id: sensor.temperature4 ## entity for temperature sensor
-    # internal: true
-    # on_value:
-      # then:
-        # - lvgl.label.update:
-            # id: temp_climate_4   
-            # text: !lambda |-
-              # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
-              # return buf;
+  - platform: homeassistant
+    id: climate4_temp
+    entity_id: ${climate4_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_climate_4
+        - lvgl.widget.show: temp_climate_4
+        - lvgl.widget.show: icon_climate_4
+        - lvgl.label.update:
+            id: temp_climate_4   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf;
 
-  # - platform: homeassistant
-    # id: climate5_temp
-    # entity_id: sensor.temperature5 ## entity for temperature sensor
-    # internal: true
-    # on_value:
-      # then:
-        # - lvgl.label.update:
-            # id: temp_climate_5   
-            # text: !lambda |-
-              # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
-              # return buf;
+  - platform: homeassistant
+    id: climate5_temp
+    entity_id: ${climate5_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_climate_5
+        - lvgl.widget.show: temp_climate_5
+        - lvgl.widget.show: icon_climate_5
+        - lvgl.label.update:
+            id: temp_climate_5   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf;
 
-  # - platform: homeassistant
-    # id: climate6_temp
-    # entity_id: sensor.temperature6 ## entity for temperature sensor
-    # internal: true
-    # on_value:
-      # then:
-        # - lvgl.label.update:
-            # id: temp_climate_6   
-            # text: !lambda |-
-              # char buf[10];
-              # sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
-              # return buf;
+  - platform: homeassistant
+    id: climate6_temp
+    entity_id: ${climate6_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_climate_6
+        - lvgl.widget.show: temp_climate_6
+        - lvgl.widget.show: icon_climate_6
+        - lvgl.label.update:
+            id: temp_climate_6   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf;
+
+##### SCREENSAVER FORECAST TEMPERATURE #####
+  - platform: homeassistant
+    id: external_temp
+    entity_id: ${screensaver_weather_entity}
+    attribute: temperature
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: temp_ext_label
+        - lvgl.label.update:
+            id: temp_ext_label
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, (strcmp(id(temp_unit).current_option(), "Fahrenheit") == 0 ? "°F" : "°C"));
+              return buf;
+
 ##########
 
 text:
@@ -2556,7 +2650,7 @@ image:
     - file: ${anim2_replying4}
       id: anim2_replying4
     - file: ${anim2_error}
-      id: anim2_error 
+      id: anim2_error
 
 font:
   - file: ${font_file}
@@ -2700,7 +2794,22 @@ font:
       - "\U000F033E"#lock
       - "\U000F033F"#lock-open
       - "\U000F00DF"#brightness 
-
+      - "\U000F0594"# clear-night
+      - "\U000F0590"# cloudy
+      - "\U000F0F2F"# exceptional
+      - "\U000F0592"# hail
+      - "\U000F0593"# lightning
+      - "\U000F067E"# lightning-rainy
+      - "\U000F0595"# partlycloudy
+      - "\U000F0596"# pouring
+      - "\U000F0597"# rainy
+      - "\U000F0598"# snowy
+      - "\U000F067F"# snowy-rainy
+      - "\U000F0599"# sunny
+      - "\U000F059D"# windy
+      - "\U000F059E"# windy-variant
+      - "\U000F14E4"# sunny-off
+      
   - file: ${icon_font_file}
     id: icon_font_20
     size: 20
@@ -2851,295 +2960,363 @@ text_sensor:
 
   - platform: homeassistant
     name: "Alarm Status"
-    entity_id: alarm_control_panel.alarmo ## Replace with alarmo entity
+    entity_id: ${alarmo_entity}
     id: alarm_status
     on_value:
       then:
+        - lvgl.widget.show: lbl_alarm_status
+        - lvgl.widget.show: lbl_alarm
+        - lvgl.widget.show: btn_mx_alarm
         - script.execute: set_alarm_status
 
 ##### CLIMATE PAGE TEXT SENSORS #####
-  # - platform: homeassistant
-    # id: climate1_item
-    # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner
-    # internal: true
-    # on_value:
-      # then:
-        # - if:
-            # condition: 
-                # lambda: return (id(climate1_item).state == "off");
-            # then:
-              # - lvgl.dropdown.update:
-                  # id: dropdown_studioacmode
-                  # selected_index: 0
-              # - lvgl.widget.update:
-                  # id: but_climate_1
-                  # state:
-                    # checked: false
-              # - lvgl.widget.update:
-                  # id: but_studioac_1
-                  # state:
-                    # checked: false
-            # else:
-              # - lvgl.widget.update:
-                  # id: but_climate_1
-                  # state:
-                    # checked: true
-              # - lvgl.widget.update:
-                  # id: but_studioac_1
-                  # state:
-                    # checked: true
-              # - if:
-                  # condition:
-                    # lambda: return (id(climate1_item).state == "heat_cool");
-                  # then:
-                    # - lvgl.dropdown.update:
-                        # id: dropdown_studioacmode
-                        # selected_index: 1
-              # - if:
-                  # condition:
-                    # lambda: return (id(climate1_item).state == "heat");
-                  # then:
-                    # - lvgl.dropdown.update:
-                        # id: dropdown_studioacmode
-                        # selected_index: 2
-              # - if:
-                  # condition:
-                    # lambda: return (id(climate1_item).state == "cool");
-                  # then:
-                    # - lvgl.dropdown.update:
-                        # id: dropdown_studioacmode
-                        # selected_index: 3
-              # - if:
-                  # condition:
-                    # lambda: return (id(climate1_item).state == "dry");
-                  # then:
-                    # - lvgl.dropdown.update:
-                        # id: dropdown_studioacmode
-                        # selected_index: 4
+  - platform: homeassistant
+    id: climate1_item
+    entity_id: ${climate1_entity}
+    internal: true
+    on_value:
+      then:
+        - if:
+            condition: 
+                lambda: return (id(climate1_item).state == "off");
+            then:
+              - lvgl.dropdown.update:
+                  id: dropdown_studioacmode
+                  selected_index: 0
+              - lvgl.widget.update:
+                  id: but_climate_1
+                  state:
+                    checked: false
+              - lvgl.widget.update:
+                  id: but_studioac_1
+                  state:
+                    checked: false
+            else:
+              - lvgl.widget.update:
+                  id: but_climate_1
+                  state:
+                    checked: true
+              - lvgl.widget.update:
+                  id: but_studioac_1
+                  state:
+                    checked: true
+              - if:
+                  condition:
+                    lambda: return (id(climate1_item).state == "heat_cool");
+                  then:
+                    - lvgl.dropdown.update:
+                        id: dropdown_studioacmode
+                        selected_index: 1
+              - if:
+                  condition:
+                    lambda: return (id(climate1_item).state == "heat");
+                  then:
+                    - lvgl.dropdown.update:
+                        id: dropdown_studioacmode
+                        selected_index: 2
+              - if:
+                  condition:
+                    lambda: return (id(climate1_item).state == "cool");
+                  then:
+                    - lvgl.dropdown.update:
+                        id: dropdown_studioacmode
+                        selected_index: 3
+              - if:
+                  condition:
+                    lambda: return (id(climate1_item).state == "dry");
+                  then:
+                    - lvgl.dropdown.update:
+                        id: dropdown_studioacmode
+                        selected_index: 4
+
+##### SCREENSAVER FORECAST CONDITION #####
+  - platform: homeassistant
+    id: external_temp_condition
+    entity_id: ${screensaver_weather_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: temp_condition_label
+        - lvgl.label.update:
+            id: temp_condition_label  
+            text: !lambda |-
+              static char buf[20];
+              std::string icon;
+              if (id(external_temp_condition).state == "clear-night") {
+                  icon = "\U000F0594";
+              } else if (id(external_temp_condition).state == "cloudy") {
+                  icon = "\U000F0590";
+              } else if (id(external_temp_condition).state == "exceptional") {
+                  icon = "\U000F0F2F";
+              } else if (id(external_temp_condition).state == "fog") {
+                  icon = "\U000F0591";
+              } else if (id(external_temp_condition).state == "hail") {
+                  icon = "\U000F0592";
+              } else if (id(external_temp_condition).state == "lightning") {
+                  icon = "\U000F0593";
+              } else if (id(external_temp_condition).state == "lightning-rainy") {
+                  icon = "\U000F067E";
+              } else if (id(external_temp_condition).state == "partlycloudy") {
+                  icon = "\U000F0595";
+              } else if (id(external_temp_condition).state == "pouring") {
+                  icon = "\U000F0596";
+              } else if (id(external_temp_condition).state == "rainy") {
+                  icon = "\U000F0597";
+              } else if (id(external_temp_condition).state == "snowy") {
+                  icon = "\U000F0598";
+              } else if (id(external_temp_condition).state == "snowy-rainy") {
+                  icon = "\U000F067F";
+              } else if (id(external_temp_condition).state == "sunny") {
+                  icon = "\U000F0599";
+              } else if (id(external_temp_condition).state == "windy") {
+                  icon = "\U000F059D";
+              } else if (id(external_temp_condition).state == "windy-variant") {
+                  icon = "\U000F059E";
+              } else if (id(external_temp_condition).state == "sunny-off") {
+                  icon = "\U000F14E4"; 
+              } else {
+                  icon = "\U000F14E4";
+              }
+              snprintf(buf, sizeof(buf), "%s", icon.c_str());
+              return buf;
 
 ##### CONTROL PAGE TEXT SENSORS #####
-  # - platform: homeassistant
-    # id: control1_item
-    # entity_id: switch.kettle ## Replace this with the entity for a kettle
-    # internal: true
-    # on_value:
-      # then:
-        # if:
-          # condition:
-            # lambda: return (id(control1_item).state == "on");
-          # then:
-            # - lvgl.widget.update:
-                  # id: but_control_1
-                  # state:
-                    # checked: !lambda return true;
-          # else:
-            # - lvgl.widget.update:
-                  # id: but_control_1
-                  # state:
-                    # checked: !lambda return false;
+  - platform: homeassistant
+    id: control1_item
+    entity_id: ${controls1_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_control_1
+        - lvgl.widget.show: but_control_1
+        - if:
+            condition:
+              lambda: return (id(control1_item).state == "on");
+            then:
+              - lvgl.widget.update:
+                    id: but_control_1
+                    state:
+                      checked: !lambda return true;
+            else:
+              - lvgl.widget.update:
+                    id: but_control_1
+                    state:
+                      checked: !lambda return false;
 
-  # - platform: homeassistant
-    # id: control2_item
-    # entity_id: vacuum.vacuum_cleaner ## Replace this with the entity for a vacuum cleaner
-    # internal: true
-    # on_value:
-      # then:
-        # - if:
-            # condition:
-              # lambda: return (id(control2_item).state == "docked");
-            # then:
-              # - lvgl.widget.update:
-                  # id: but_control_2
-                  # state:
-                    # checked: !lambda return false;
-              # - lvgl.label.update:
-                        # id: ico_control_2
-                        # text_color: white # icon color for docked state
-            # else:
-              # - lvgl.widget.update:
-                  # id: but_control_2
-                  # state:
-                    # checked: !lambda return true;
-              # - if:
-                  # condition:
-                    # lambda: return (id(control2_item).state == "returning");
-                  # then:
-                    # - lvgl.label.update:
-                        # id: ico_control_2
-                        # text_color: green # icon color for returning state
-                  # else:
-                    # - lvgl.label.update:
-                        # id: ico_control_2
-                        # text_color: yellow # icon color for other active states
+  - platform: homeassistant
+    id: control2_item
+    entity_id: ${controls2_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_control_2
+        - lvgl.widget.show: but_control_2
+        - if:
+            condition:
+              lambda: return (id(control2_item).state == "docked");
+            then:
+              - lvgl.widget.update:
+                  id: but_control_2
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_control_2
+                        text_color: white
+            else:
+              - lvgl.widget.update:
+                  id: but_control_2
+                  state:
+                    checked: !lambda return true;
+              - if:
+                  condition:
+                    lambda: return (id(control2_item).state == "returning");
+                  then:
+                    - lvgl.label.update:
+                        id: ico_control_2
+                        text_color: green
+                  else:
+                    - lvgl.label.update:
+                        id: ico_control_2
+                        text_color: yellow
 
-  # - platform: homeassistant
-    # id: control4_item
-    # entity_id: binary_sensor.garage_door ## Replace this with the sensor for the garage door
-    # internal: true
-    # on_value:
-      # then:
-        # - if:
-            # condition:
-              # lambda: return (id(control4_item).state == "on");
-            # then:
-              # - lvgl.widget.update:
-                  # id: but_control_4
-                  # state:
-                    # checked: !lambda return true;
-              # - lvgl.label.update:
-                        # id: ico_control_4
-                        # text: "\U000F12D4" # icon for garage door open
-            # else:
-              # - lvgl.widget.update:
-                  # id: but_control_4
-                  # state:
-                    # checked: !lambda return false;
-              # - lvgl.label.update:
-                        # id: ico_control_4
-                        # text: "\U000F12D3" # icon for garage door closed
+  - platform: homeassistant
+    id: control4_item
+    entity_id: ${controls4_state}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_control_4
+        - lvgl.widget.show: but_control_4
+        - if:
+            condition:
+              lambda: return (id(control4_item).state == "on");
+            then:
+              - lvgl.widget.update:
+                  id: but_control_4
+                  state:
+                    checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_control_4
+                        text: "\U000F12D4"
+            else:
+              - lvgl.widget.update:
+                  id: but_control_4
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_control_4
+                        text: "\U000F12D3"
 
-  # - platform: homeassistant
-    # id: control5_item
-    # entity_id: sensor.dishwasher_bsh_common_status_operationstate ## replace this with Home Connect dishwasher operation status entity
-    # internal: true
-    # on_value:
-      # then:
-        # - if:
-            # condition:
-              # lambda: return (id(control5_item).state != "Ready");
-            # then:
-              # - lvgl.widget.update:
-                  # id: but_control_5
-                  # state:
-                    # checked: !lambda return true;
-              # - if:
-                  # condition:
-                    # lambda: return (id(control5_item).state == "Pump off");
-                  # then:
-                    # - lvgl.label.update:
-                        # id: ico_control_5
-                        # text_color: green # color for finishing
-                        # text: "\U000F0AAC" # icon for finishing
-                  # else:
-                    # - lvgl.label.update:
-                        # id: ico_control_5
-                        # text_color: yellow # color for finishing
-                        # text: "\U000F0AAC" # icon for active
-            # else:
-              # - lvgl.widget.update:
-                  # id: but_control_5
-                  # state:
-                    # checked: !lambda return false;
-              # - lvgl.label.update:
-                  # id: ico_control_5
-                  # text_color: white
-                  # text: "\U000F0AAC"
+  - platform: homeassistant
+    id: control5_item
+    entity_id: ${controls5_state}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_control_5
+        - lvgl.widget.show: but_control_5
+        - if:
+            condition:
+              lambda: return (id(control5_item).state != "Ready");
+            then:
+              - lvgl.widget.update:
+                  id: but_control_5
+                  state:
+                    checked: !lambda return true;
+              - if:
+                  condition:
+                    lambda: return (id(control5_item).state == "Pump off");
+                  then:
+                    - lvgl.label.update:
+                        id: ico_control_5
+                        text_color: green
+                        text: "\U000F0AAC"
+                  else:
+                    - lvgl.label.update:
+                        id: ico_control_5
+                        text_color: yellow
+                        text: "\U000F0AAC"
+            else:
+              - lvgl.widget.update:
+                  id: but_control_5
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                  id: ico_control_5
+                  text_color: white
+                  text: "\U000F0AAC"
 
-  # - platform: homeassistant
-    # id: control5_item2
-    # entity_id: binary_sensor.dishwasher_bsh_common_status_doorstate ## replace this with Home Connect dishwasher door status entity
-    # internal: true
-    # on_value:
-      # then:
-        # - if:
-            # condition:
-              # lambda: return (id(control5_item).state == "Ready");
-            # then:
-              # - lvgl.widget.update:
-                  # id: but_control_5
-                  # state:
-                    # checked: !lambda return false;
-              # - if:
-                  # condition:
-                    # lambda: return (id(control5_item2).state == "on");
-                  # then:
-                    # - lvgl.label.update:
-                        # id: ico_control_5
-                        # text_color: white
-                        # text: "\U000F11B8" # icon for door open
-                  # else:
-                    # - lvgl.label.update:
-                        # id: ico_control_5
-                        # text_color: white
-                        # text: "\U000F0AAC" # icon for door closed
+  - platform: homeassistant
+    id: control5_item2
+    entity_id: ${controls5_doorstate}
+    internal: true
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: return (id(control5_item).state == "Ready");
+            then:
+              - lvgl.widget.update:
+                  id: but_control_5
+                  state:
+                    checked: !lambda return false;
+              - if:
+                  condition:
+                    lambda: return (id(control5_item2).state == "on");
+                  then:
+                    - lvgl.label.update:
+                        id: ico_control_5
+                        text_color: white
+                        text: "\U000F11B8"
+                  else:
+                    - lvgl.label.update:
+                        id: ico_control_5
+                        text_color: white
+                        text: "\U000F0AAC"
     
-  ##### SCENES PAGE TEXT SENSORS - Used for Screens in default UI #####
-  # - platform: homeassistant
-    # id: scenes1_item
-    # entity_id: media_player.tv1 ## Replace this with entity for a TV/media player
-    # internal: true
-    # on_value:
-      # then:
-        # - if:
-            # condition:
-              # lambda: return (id(scenes1_item).state == "off");
-            # then:
-              # - lvgl.widget.update:
-                  # id: but_scenes_1
-                  # state:
-                    # checked: !lambda return false;
-              # - lvgl.label.update:
-                        # id: ico_scenes_1
-                        # text: "\U000F083B" # icon for tv off
-            # else:
-              # - lvgl.widget.update:
-                  # id: but_scenes_1
-                  # state:
-                    # checked: !lambda return true;
-              # - lvgl.label.update:
-                        # id: ico_scenes_1
-                        # text: "\U000F0502" # icon for tv on
+  ##### SCENES PAGE TEXT SENSORS #####
+  - platform: homeassistant
+    id: scenes1_item
+    entity_id: ${scenes1_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_scenes_1
+        - lvgl.widget.show: but_scenes_1
+        - if:
+            condition:
+              lambda: return (id(scenes1_item).state == "off");
+            then:
+              - lvgl.widget.update:
+                  id: but_scenes_1
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_scenes_1
+                        text: "\U000F083B"
+            else:
+              - lvgl.widget.update:
+                  id: but_scenes_1
+                  state:
+                    checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_scenes_1
+                        text: "\U000F0502"
 
-  # - platform: homeassistant
-    # id: scenes2_item
-    # entity_id: media_player.tv2 ## Replace this with entity for a TV/media player
-    # internal: true
-    # on_value:
-      # then:
-        # - if:
-            # condition:
-              # lambda: return (id(scenes2_item).state == "off");
-            # then:
-              # - lvgl.widget.update:
-                  # id: but_scenes_2
-                  # state:
-                    # checked: !lambda return false;
-              # - lvgl.label.update:
-                        # id: ico_scenes_2
-                        # text: "\U000F083B" # icon for tv off
-            # else:
-              # - lvgl.widget.update:
-                  # id: but_scenes_2
-                  # state:
-                    # checked: !lambda return true;
-              # - lvgl.label.update:
-                        # id: ico_scenes_2
-                        # text: "\U000F0502" # icon for tv on
+  - platform: homeassistant
+    id: scenes2_item
+    entity_id: ${scenes2_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_scenes_2
+        - lvgl.widget.show: but_scenes_2
+        - if:
+            condition:
+              lambda: return (id(scenes2_item).state == "off");
+            then:
+              - lvgl.widget.update:
+                  id: but_scenes_2
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_scenes_2
+                        text: "\U000F083B"
+            else:
+              - lvgl.widget.update:
+                  id: but_scenes_2
+                  state:
+                    checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_scenes_2
+                        text: "\U000F0502"
 
 ##### SECURITY PAGE TEXT SENSORS #####
-  # - platform: homeassistant
-    # id: security1_item
-    # entity_id: lock.front_door ## Replace this with entity for a door lock
-    # internal: true
-    # on_value:
-      # then:
-        # - lvgl.widget.update:
-            # id: but_security_1
-            # state:
-              # checked: !lambda return (id(security1_item).state == "locked");
-        # - if:
-            # condition:
-              # lambda: return (id(security1_item).state == "locked");
-            # then:
-              # - lvgl.label.update:
-                  # id: ico_security_1
-                  # text_color: lime
-                  # text: "\U000F033E" # icon for locked
-            # else:
-              # - lvgl.label.update:
-                  # id: ico_security_1
-                  # text_color: red
-                  # text: "\U000F033F" # icon for unlocked
+  - platform: homeassistant
+    id: security1_item
+    entity_id: ${security1_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_security_1
+        - lvgl.widget.show: but_security_1
+        - lvgl.widget.update:
+            id: but_security_1
+            state:
+              checked: !lambda return (id(security1_item).state == "locked");
+        - if:
+            condition:
+              lambda: return (id(security1_item).state == "locked");
+            then:
+              - lvgl.label.update:
+                  id: ico_security_1
+                  text_color: lime
+                  text: "\U000F033E"
+            else:
+              - lvgl.label.update:
+                  id: ico_security_1
+                  text_color: red
+                  text: "\U000F033F"
 
 color:
   - id: active_timer_color
@@ -3214,7 +3391,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_disarm
                   data:
-                    entity_id: alarm_control_panel.alarmo ## Replace with alarmo entity
+                    entity_id: ${alarmo_entity}
                     code: !lambda return x.c_str();
       - if:
           condition:
@@ -3223,7 +3400,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_arm_home
                   data:
-                    entity_id: alarm_control_panel.alarmo ## Replace with alarmo entity
+                    entity_id: ${alarmo_entity}
                     code: !lambda return x.c_str();
       - if:
           condition:
@@ -3232,7 +3409,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_arm_away
                   data:
-                    entity_id: alarm_control_panel.alarmo ## Replace with alarmo entity
+                    entity_id: ${alarmo_entity}
                     code: !lambda return x.c_str();
       - if:
           condition:
@@ -3241,7 +3418,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_arm_night
                   data:
-                    entity_id: alarm_control_panel.alarmo ## Replace with alarmo entity
+                    entity_id: ${alarmo_entity}
                     code: !lambda return x.c_str();
       - lambda: id(alarm_action) = "";
       - script.execute: set_alarm_status
@@ -3277,7 +3454,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Home" ## Home page title
+                        text: '${home_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -3438,7 +3615,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Climate" ## Climate page title
+                        text: '${climate_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -3458,7 +3635,9 @@ lvgl:
                     grid_rows: [FR(10), FR(10), FR(30), FR(10), FR(10), FR(30)]
                   widgets:
                     - label:
-                        text: "Studio AC"  # Name for temperature 1 with AC
+                        id: lbl_climate_1
+                        hidden: true
+                        text: '${climate1_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3468,6 +3647,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - label:
                         id: temp_climate_1
+                        hidden: true
                         text: " "
                         align: CENTER
                         text_align: CENTER
@@ -3478,6 +3658,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_climate_1
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -3498,18 +3679,19 @@ lvgl:
                           then:
                             - lvgl.page.show: climate_studio_page
                             - delay: 1s
-                            # This button is used to navigate to the ac page but also show ac status, so when we click to navigate we correct the button state 
-                            # - if:
-                                # condition:
-                                  # not:
-                                    # lambda: return (id(climate1_item).state == "off");
-                                # then:
-                                  # - lvgl.widget.update:
-                                      # id: but_climate_1
-                                      # state:
-                                        # checked: true
+                            - if:
+                                condition:
+                                  not:
+                                    lambda: return (id(climate1_item).state == "off");
+                                then:
+                                  - lvgl.widget.update:
+                                      id: but_climate_1
+                                      state:
+                                        checked: true
                     - label:
-                        text: "Room 2" # Name for temperature 2
+                        id: lbl_climate_2
+                        hidden: true
+                        text: '${climate2_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3519,6 +3701,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - label:
                         id: temp_climate_2
+                        hidden: true
                         text: " "
                         align: CENTER
                         text_align: CENTER
@@ -3528,6 +3711,8 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - label:
+                        id: icon_climate_2
+                        hidden: true
                         text_font: icon_font_55
                         text: "\U000F050F"
                         align: CENTER
@@ -3538,7 +3723,9 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - label:
-                        text: "Room 3" # Name for temperature 3
+                        id: lbl_climate_3
+                        hidden: true
+                        text: '${climate3_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3548,6 +3735,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - label:
                         id: temp_climate_3
+                        hidden: true
                         text: " "
                         align: CENTER
                         text_align: CENTER
@@ -3557,6 +3745,8 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - label:
+                        id: icon_climate_3
+                        hidden: true
                         text_font: icon_font_55
                         text: "\U000F050F"
                         align: CENTER
@@ -3567,7 +3757,9 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - label:
-                        text: "Room 4" # Name for temperature 4
+                        id: lbl_climate_4
+                        hidden: true
+                        text: '${climate4_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3577,6 +3769,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - label:
                         id: temp_climate_4
+                        hidden: true
                         text: " "
                         align: CENTER
                         text_align: CENTER
@@ -3586,6 +3779,8 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - label:
+                        id: icon_climate_4
+                        hidden: true
                         text_font: icon_font_55
                         text: "\U000F050F"
                         align: CENTER
@@ -3596,7 +3791,9 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - label:
-                        text: "Room 5" # Name for temperature 5
+                        id: lbl_climate_5
+                        hidden: true
+                        text: '${climate5_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3606,6 +3803,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - label:
                         id: temp_climate_5
+                        hidden: true
                         text: " "
                         align: CENTER
                         text_align: CENTER
@@ -3615,6 +3813,8 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - label:
+                        id: icon_climate_5
+                        hidden: true
                         text_font: icon_font_55
                         text: "\U000F050F"
                         align: CENTER
@@ -3625,7 +3825,9 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - label:
-                        text: "Room 6" # Name for temperature 6
+                        id: lbl_climate_6
+                        hidden: true
+                        text: '${climate6_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3635,6 +3837,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - label:
                         id: temp_climate_6
+                        hidden: true
                         text: " "
                         align: CENTER
                         text_align: CENTER
@@ -3644,6 +3847,8 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - label:
+                        id: icon_climate_6
+                        hidden: true
                         text_font: icon_font_55
                         text: "\U000F050F"
                         align: CENTER
@@ -3665,7 +3870,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Studio AC" ## Climate AC page title
+                        text: '${climate1_name}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -3685,7 +3890,7 @@ lvgl:
                     grid_rows: [FR(10), FR(40), FR(10), FR(40)]
                   widgets:
                     - label:
-                        text: "Studio AC" # Name for temperature 1 with AC
+                        text: '${climate1_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3711,12 +3916,12 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F0210"
-                        # on_release:
-                          # then:
-                            # - homeassistant.service:
-                                # service: climate.toggle
-                                # data:
-                                  # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner
+                        on_release:
+                          then:
+                            - homeassistant.service:
+                                service: climate.toggle
+                                data:
+                                  entity_id: ${climate1_entity}
                     - label:
                         text: "Current Temp"
                         align: CENTER
@@ -3773,7 +3978,7 @@ lvgl:
                   widgets:
                     - dropdown:
                         id: dropdown_studioacmode
-                        options: # these are the available AC modes to show in the dropdown
+                        options:
                           - "Off"
                           - Auto
                           - Heat
@@ -3783,53 +3988,52 @@ lvgl:
                           selected:
                             checked:
                               text_color: 0xFF0000
-                        ## When a mode is selected send a corresponding action to set an hvac mode
-                        # on_value:
-                          # - if:
-                              # condition:
-                                # lambda: return (x == 0);
-                              # then:
-                                # - homeassistant.service:
-                                    # service: climate.set_hvac_mode
-                                    # data:
-                                      # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner
-                                      # hvac_mode: "off"
-                          # - if:
-                              # condition:
-                                # lambda: return (x == 1);
-                              # then:
-                                # - homeassistant.service:
-                                    # service: climate.set_hvac_mode
-                                    # data:
-                                      # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner
-                                      # hvac_mode: heat_cool
-                          # - if:
-                              # condition:
-                                # lambda: return (x == 2);
-                              # then:
-                                # - homeassistant.service:
-                                    # service: climate.set_hvac_mode
-                                    # data:
-                                      # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner
-                                      # hvac_mode: heat
-                          # - if:
-                              # condition:
-                                # lambda: return (x == 3);
-                              # then:
-                                # - homeassistant.service:
-                                    # service: climate.set_hvac_mode
-                                    # data:
-                                      # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner
-                                      # hvac_mode: Cool
-                          # - if:
-                              # condition:
-                                # lambda: return (x == 4);
-                              # then:
-                                # - homeassistant.service:
-                                    # service: climate.set_hvac_mode
-                                    # data:
-                                      # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner
-                                      # hvac_mode: dry
+                        on_value:
+                          - if:
+                              condition:
+                                lambda: return (x == 0);
+                              then:
+                                - homeassistant.service:
+                                    service: climate.set_hvac_mode
+                                    data:
+                                      entity_id: ${climate1_entity}
+                                      hvac_mode: "off"
+                          - if:
+                              condition:
+                                lambda: return (x == 1);
+                              then:
+                                - homeassistant.service:
+                                    service: climate.set_hvac_mode
+                                    data:
+                                      entity_id: ${climate1_entity}
+                                      hvac_mode: heat_cool
+                          - if:
+                              condition:
+                                lambda: return (x == 2);
+                              then:
+                                - homeassistant.service:
+                                    service: climate.set_hvac_mode
+                                    data:
+                                      entity_id: ${climate1_entity}
+                                      hvac_mode: heat
+                          - if:
+                              condition:
+                                lambda: return (x == 3);
+                              then:
+                                - homeassistant.service:
+                                    service: climate.set_hvac_mode
+                                    data:
+                                      entity_id: ${climate1_entity}
+                                      hvac_mode: Cool
+                          - if:
+                              condition:
+                                lambda: return (x == 4);
+                              then:
+                                - homeassistant.service:
+                                    service: climate.set_hvac_mode
+                                    data:
+                                      entity_id: ${climate1_entity}
+                                      hvac_mode: dry
                     - button:
                         id: studioac_spin_down
                         styles: button_style
@@ -3853,18 +4057,17 @@ lvgl:
                         rollover: false
                         digits: 3
                         decimal_places: 1
-                        ## Change the temperature of your AC when the spinbox is updated
-                        # on_change:
-                          # then:
-                            # - homeassistant.service:
-                                # service: climate.set_temperature
-                                # data:
-                                  # entity_id: climate.air_conditioner ## replace this with the entity of your air conditioner
-                                # data_template:
-                                  # temperature: '{{ my_variable }}'
-                                # variables:
-                                  # my_variable: |-
-                                    # return x;
+                        on_change:
+                          then:
+                            - homeassistant.service:
+                                service: climate.set_temperature
+                                data:
+                                  entity_id: ${climate1_entity}
+                                data_template:
+                                  temperature: '{{ my_variable }}'
+                                variables:
+                                  my_variable: |-
+                                    return x;
                     - button:
                         id: studioac_spin_up
                         styles: button_style
@@ -3894,7 +4097,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Lights" ## Lights page title
+                        text: '${lights_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -3914,7 +4117,9 @@ lvgl:
                     grid_rows: [FR(10), FR(40), FR(10), FR(40)]
                   widgets:
                     - label:
-                        text: "Light 1" ## Light 1 Name
+                        id: lbl_light_1
+                        hidden: true
+                        text: '${lights1_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3924,6 +4129,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_light_1
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -3940,15 +4146,17 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F0335"
-                        ## Light 1 toggle
-                        ## This uses a switch toggle as it controls a smart switch 
-                        # on_release:
-                        # - homeassistant.action:
-                            # action: switch.toggle
-                            # data:
-                              # entity_id: switch.light1 ## replace with entity to toggle
+                        on_release:
+                        - homeassistant.action:
+                            action: !lambda |
+                              std::string s = "${lights1_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
+                            data:
+                              entity_id: ${lights1_entity}
                     - label:
-                        text: "Light 2" ## Light 2 Name
+                        id: lbl_light_2
+                        hidden: true
+                        text: '${lights2_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3958,6 +4166,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_light_2
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -3974,15 +4183,17 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F0335"
-                        ## Light 2 toggle
-                        ## This uses a switch toggle as it controls a smart switch 
-                        # on_release:
-                        # - homeassistant.action:
-                            # action: switch.toggle
-                            # data:
-                              # entity_id: switch.light2 ## replace with entity to toggle
+                        on_release:
+                        - homeassistant.action:
+                            action: !lambda |
+                              std::string s = "${lights2_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
+                            data:
+                              entity_id: ${lights2_entity}
                     - label:
-                        text: "Light 3" ## Light 3 Name
+                        id: lbl_light_3
+                        hidden: true
+                        text: '${lights3_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -3992,6 +4203,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_light_3
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4008,15 +4220,17 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F0335"
-                        ## Light 3 toggle
-                        ## This uses a light toggle as it controls a smart globe 
-                        # on_release:
-                        # - homeassistant.action:
-                            # action: light.toggle
-                            # data:
-                              # entity_id: light.light3 ## replace with entity to toggle
+                        on_release:
+                        - homeassistant.action:
+                            action: !lambda |
+                              std::string s = "${lights3_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
+                            data:
+                              entity_id: ${lights3_entity}
                     - label:
-                        text: "Light 4" ## Light 4 Name
+                        id: lbl_light_4
+                        hidden: true
+                        text: '${lights4_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4026,6 +4240,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_light_4
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4042,15 +4257,17 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F0335"
-                        ## Light 4 toggle
-                        ## This uses a switch toggle as it controls a smart switch 
-                        # on_release:
-                        # - homeassistant.action:
-                            # action: switch.toggle
-                            # data:
-                              # entity_id: switch.light4 ## replace with entity to toggle
+                        on_release:
+                        - homeassistant.action:
+                            action: !lambda |
+                              std::string s = "${lights4_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
+                            data:
+                              entity_id: ${lights4_entity}
                     - label:
-                        text: "Light 5" ## Light 5 Name
+                        id: lbl_light_5
+                        hidden: true
+                        text: '${lights5_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4060,6 +4277,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_light_5
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4076,15 +4294,17 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F0335"
-                        ## Light 5 toggle
-                        ## This uses a switch toggle as it controls a smart switch 
-                        # on_release:
-                        # - homeassistant.action:
-                            # action: switch.toggle
-                            # data:
-                              # entity_id: switch.light5 ## replace with entity to toggle
+                        on_release:
+                        - homeassistant.action:
+                            action: !lambda |
+                              std::string s = "${lights5_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
+                            data:
+                              entity_id: ${lights5_entity}
                     - label:
-                        text: "Light 6" ## Light 6 Name
+                        id: lbl_light_6
+                        hidden: true
+                        text: '${lights6_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4094,6 +4314,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_light_6
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4110,13 +4331,13 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F0335"
-                        ## Light 6 toggle
-                        ## This uses a light toggle as it controls a smart globe 
-                        # on_release:
-                        # - homeassistant.action:
-                            # action: light.toggle
-                            # data:
-                              # entity_id: light.light6
+                        on_release:
+                        - homeassistant.action:
+                            action: !lambda |
+                              std::string s = "${lights6_entity}";
+                              return s.substr(0, s.find('.')) + ".toggle";
+                            data:
+                              entity_id: ${lights6_entity}
 
     - id: controls_page
       on_swipe_left:
@@ -4134,7 +4355,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Controls" ## Controls page title
+                        text: '${controls_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -4154,7 +4375,9 @@ lvgl:
                     grid_rows: [FR(10), FR(40), FR(10), FR(40)]
                   widgets:
                     - label:
-                        text: "Kettle" ## Control 1 Name
+                        id: lbl_control_1
+                        hidden: true
+                        text: '${controls1_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4164,6 +4387,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_control_1
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4180,19 +4404,20 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F05FA"
-                        ## Control 1 toggle switch
-                        # on_release:
-                        #   then:
-                        #     if:
-                        #       condition:
-                        #         - lambda: return (id(alarm_status).state == "disarmed");
-                        #       then:
-                        #         - homeassistant.action:
-                        #             action: switch.toggle
-                        #             data:
-                        #               entity_id: switch.kettle_start
+                        on_release:
+                          then:
+                            if:
+                              condition:
+                                - lambda: return (id(alarm_status).state == "disarmed");
+                              then:
+                                - homeassistant.action:
+                                    action: switch.toggle
+                                    data:
+                                      entity_id: ${controls1_entity}
                     - label:
-                        text: "Vacuum" ## Control 2 Name
+                        id: lbl_control_2
+                        hidden: true
+                        text: '${controls2_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4202,6 +4427,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_control_2
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4218,26 +4444,26 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F070D"
-                        ## Control 2 action
-                        ## For Vacuum this can start vaccuming or return to base
-                        # on_release:
-                          # - if:
-                              # condition:
-                               # - and:
-                               #     - lambda: 'return id(control2_item).state == "docked";'
-                               #     - lambda: return (id(alarm_status).state == "disarmed");
-                              # then:
-                                # - homeassistant.service:
-                                    # service: vacuum.start
-                                    # data:
-                                      # entity_id: vacuum.vacuum_cleaner ## Replace this with the entity for a vacuum cleaner
-                              # else: 
-                                # - homeassistant.service:
-                                    # service: vacuum.return_to_base
-                                    # data:
-                                      # entity_id: vacuum.vacuum_cleaner ## Replace this with the entity for a vacuum cleaner
+                        on_release:
+                          - if:
+                              condition:
+                                - and:
+                                    - lambda: 'return id(control2_item).state == "docked";'
+                                    - lambda: return (id(alarm_status).state == "disarmed");
+                              then:
+                                - homeassistant.service:
+                                    service: vacuum.start
+                                    data:
+                                      entity_id: ${controls2_entity}
+                              else: 
+                                - homeassistant.service:
+                                    service: vacuum.return_to_base
+                                    data:
+                                      entity_id: ${controls2_entity}
                     - label:
-                        text: "Garage" ## Control 3 Name
+                        id: lbl_control_4
+                        hidden: true
+                        text: '${controls4_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4247,6 +4473,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_control_4
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4263,19 +4490,20 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F12D3"
-                        ## Control 3 switch toggle
-                        # on_release:
-                        #   then:
-                        #     if:
-                        #       condition:
-                        #         - lambda: return (id(alarm_status).state == "disarmed");
-                        #       then:
-                        #         - homeassistant.action:
-                        #             action: switch.toggle
-                        #             data:
-                        #               entity_id: switch.garage ## replace this with entity to open/close garage
+                        on_release:
+                          then:
+                            if:
+                              condition:
+                                - lambda: return (id(alarm_status).state == "disarmed");
+                              then:
+                                - homeassistant.action:
+                                    action: switch.toggle
+                                    data:
+                                      entity_id: ${controls4_entity}
                     - label:
-                        text: "Dishwasher" ## Control 4 Name
+                        id: lbl_control_5
+                        hidden: true
+                        text: '${controls5_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4285,6 +4513,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_control_5
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4301,30 +4530,28 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F0AAC"
-                        ## Control 4 action
-                        ## For dishwasher this can trigger a preferred program when selected or stop if running
-                        # on_release:
-                          # - if:
-                              # condition:
-                              #   - and:
-                              #       - lambda: return (id(alarm_status).state == "disarmed");
-                              #       - lambda: 'return id(control5_item).state == "Ready" && id(control5_item2).state == "off";'
-                              # then:
-                                # - homeassistant.action:
-                                    # action: select.select_option
-                                    # data:
-                                      # entity_id: select.dishwasher_programs ## Replace this with select entity to set program mode
-                                      # option: "Quick 1h"  ## Desired default program when started
-                                # - delay: 4s
-                                # - homeassistant.service:
-                                    # service: button.press
-                                    # data:
-                                      # entity_id: button.dishwasher_start_pause ## Replace this with entity to start dishwasher
-                              # else:
-                                # - homeassistant.service:
-                                    # service: button.press
-                                    # data:
-                                      # entity_id: button.dishwasher_stop ## Replace this with entity to stop dishwasher
+                        on_release:
+                          - if:
+                              condition:
+                                - and:
+                                    - lambda: return (id(alarm_status).state == "disarmed");
+                                    - lambda: 'return id(control5_item).state == "Ready" && id(control5_item2).state == "off";'
+                              then:
+                                - homeassistant.action:
+                                    action: select.select_option
+                                    data:
+                                      entity_id: ${controls5_programs}
+                                      option: "Quick 1h"
+                                - delay: 4s
+                                - homeassistant.service:
+                                    service: button.press
+                                    data:
+                                      entity_id: ${controls5_start}
+                              else:
+                                - homeassistant.service:
+                                    service: button.press
+                                    data:
+                                      entity_id: ${controls5_stop}
 
     - id: media_page
       on_swipe_left:
@@ -4342,7 +4569,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Media" ## Media page title
+                        text: '${media_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -4594,7 +4821,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Screens" ## Scenes page title
+                        text: '${scenes_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -4614,7 +4841,9 @@ lvgl:
                     grid_rows: [FR(10), FR(40),FR(10), FR(40)]
                   widgets:
                     - label:
-                        text: "TV1" ## scene 1 title
+                        id: lbl_scenes_1
+                        hidden: true
+                        text: '${scenes1_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4624,6 +4853,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_scenes_1
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4640,24 +4870,25 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F083B"
-                        ## Scene 1 action
-                        # on_release:
-                          # then:
-                            # - if:
-                                # condition:
-                                  # lambda: return (id(scenes1_item).state == "off");
-                                # then:
-                                  # - homeassistant.service:
-                                      # service: media_player.turn_on
-                                      # data:
-                                        # entity_id: media_player.tv1
-                                # else: 
-                                  # - homeassistant.service:
-                                      # service: media_player.turn_off
-                                      # data:
-                                        # entity_id: media_player.tv1
+                        on_release:
+                          then:
+                            - if:
+                                condition:
+                                  lambda: return (id(scenes1_item).state == "off");
+                                then:
+                                  - homeassistant.service:
+                                      service: media_player.turn_on
+                                      data:
+                                        entity_id: ${scenes1_entity}
+                                else: 
+                                  - homeassistant.service:
+                                      service: media_player.turn_off
+                                      data:
+                                        entity_id: ${scenes1_entity}
                     - label:
-                        text: "TV2" ## scene 2 title
+                        id: lbl_scenes_2
+                        hidden: true
+                        text: '${scenes2_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4667,6 +4898,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_scenes_2
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4683,22 +4915,21 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F083B"
-                        ## Scene 2 action
-                        # on_release:
-                          # then:
-                            # - if:
-                                # condition:
-                                  # lambda: return (id(scenes2_item).state == "off");
-                                # then:
-                                  # - homeassistant.service:
-                                      # service: media_player.turn_on
-                                      # data:
-                                        # entity_id: media_player.tv2
-                                # else: 
-                                  # - homeassistant.service:
-                                      # service: media_player.turn_off
-                                      # data:
-                                        # entity_id: media_player.tv2
+                        on_release:
+                          then:
+                            - if:
+                                condition:
+                                  lambda: return (id(scenes2_item).state == "off");
+                                then:
+                                  - homeassistant.service:
+                                      service: media_player.turn_on
+                                      data:
+                                        entity_id: ${scenes2_entity}
+                                else: 
+                                  - homeassistant.service:
+                                      service: media_player.turn_off
+                                      data:
+                                        entity_id: ${scenes2_entity}
 
     - id: security_page
       on_swipe_left:
@@ -4716,7 +4947,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Security" ## Security Page Title
+                        text: '${security_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -4736,7 +4967,9 @@ lvgl:
                     grid_rows: [FR(10), FR(40), FR(10), FR(40)]
                   widgets:
                     - label:
-                        text: "Front Door" ## Name of Door Lock
+                        id: lbl_security_1
+                        hidden: true
+                        text: '${security1_name}'
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4746,6 +4979,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - button:
                         id: but_security_1
+                        hidden: true
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -4763,24 +4997,23 @@ lvgl:
                               text_font: icon_font_55
                               text_color: lime
                               text: "\U000F033E"
-                        ## Security Door Lock Action
-                        # on_release:
-                          # then:
-                            # if:
-                              # condition:
-                              #   - and:
-                              #       - lambda: return (id(security1_item).state == "locked");
-                              #       - lambda: return (id(alarm_status).state == "disarmed");
-                              # then:
-                                # - homeassistant.action:
-                                    # action: lock.unlock
-                                    # data:
-                                      # entity_id: lock.front_door ## Replace this with lock entity
-                              # else:
-                                # - homeassistant.action:
-                                    # action: lock.lock
-                                    # data:
-                                      # entity_id: lock.front_door ## Replace this with lock entity
+                        on_release:
+                          then:
+                            if:
+                              condition:
+                                - and:
+                                    - lambda: return (id(security1_item).state == "locked");
+                                    - lambda: return (id(alarm_status).state == "disarmed");
+                              then:
+                                - homeassistant.action:
+                                    action: lock.unlock
+                                    data:
+                                      entity_id: ${security1_entity}
+                              else:
+                                - homeassistant.action:
+                                    action: lock.lock
+                                    data:
+                                      entity_id: ${security1_entity}
               - buttonmatrix:
                   align: CENTER
                   width: 100%
@@ -4792,6 +5025,7 @@ lvgl:
                   text_color: 0xFFFFFF
                   pad_all: 6
                   id: btn_mx_alarm
+                  hidden: true
                   one_checked: true
                   items:
                     text_font: icon_font_55
@@ -4832,7 +5066,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: alarm_control_panel.alarm_arm_home
                                     data:
-                                      entity_id: alarm_control_panel.alarmo ## Replace with alarmo entity
+                                      entity_id: ${alarmo_entity}
                                 - script.execute: set_alarm_status
                               else:
                                 - lambda: |-
@@ -4851,7 +5085,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: alarm_control_panel.alarm_arm_away
                                     data:
-                                      entity_id: alarm_control_panel.alarmo ## Replace with alarmo entity
+                                      entity_id: ${alarmo_entity}
                                 - script.execute: set_alarm_status
                               else:
                                 - lambda: |-
@@ -4870,7 +5104,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: alarm_control_panel.alarm_arm_night
                                     data:
-                                      entity_id: alarm_control_panel.alarmo ## Replace with alarmo entity
+                                      entity_id: ${alarmo_entity}
                                 - script.execute: set_alarm_status
                               else:
                                 - lambda: |-
@@ -4878,6 +5112,7 @@ lvgl:
                                 - lvgl.page.show: alarm_keypad_page
               - label:
                   id: lbl_alarm_status
+                  hidden: true
                   text: " "
                   align: CENTER
                   text_align: CENTER
@@ -4897,7 +5132,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Code"
+                        text: '${keypad_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -4967,7 +5202,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: " "
+                        text: '${ssaver_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -5072,6 +5307,7 @@ lvgl:
             id: temp_label
             hidden: true
             align: TOP_LEFT
+            text: " "
             text_align: LEFT
             styles: clock_style
             text_color: lightblue
@@ -5081,14 +5317,34 @@ lvgl:
         - label:
             id: humidity_label
             hidden: true
+            align: TOP_LEFT
+            text_align: LEFT
+            styles: clock_style
+            text_color: lightblue
+            text_font: my_font12
+            x: 15
+            y: 60
+        - label:
+            id: temp_ext_label
+            hidden: true
             align: TOP_RIGHT
+            text: " "
             text_align: RIGHT
             styles: clock_style
             text_color: lightblue
             text_font: my_font18
             x: -15
             y: 40
-
+        - label:
+            id: temp_condition_label
+            hidden: true
+            align: TOP_RIGHT
+            text_align: RIGHT
+            styles: clock_style
+            text_color: lightblue
+            text_font: icon_font_20
+            x: -15
+            y: 60
     - id: listening_page
       skip: true
       widgets:
@@ -5395,7 +5651,7 @@ lvgl:
                   styles: header_footer 
                   widgets:
                     - label:
-                        text: "Notification"
+                        text: '${notification_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -6721,6 +6977,7 @@ lvgl:
               - switch.toggle: mute_switch
       - label:
           id: lbl_alarm
+          hidden: true
           align: TOP_RIGHT
           x: -80
           y: 7
@@ -7108,142 +7365,154 @@ binary_sensor:
             - script.execute: snoozealarm
 
 ##### LIGHT PAGE BINARY SENSORS #####
-  # - platform: homeassistant
-    # id: light1_item
-    # entity_id: switch.light1 ## replace with light/switch entity to show status
-    # trigger_on_initial_state: true
-    # internal: true
-    # on_state:
-      # then:
-        # - lvgl.widget.update:
-            # id: but_light_1
-            # state:
-              # checked: !lambda return x;
-        # - if:
-            # condition:
-              # lambda: "return x;"
-            # then:
-              # - lvgl.label.update:
-                  # id: ico_light_1
-                  # text: "\U000F06E8" # icon for light on
-            # else:
-              # - lvgl.label.update:
-                  # id: ico_light_1
-                  # text: "\U000F0335" # icon for light off
+  - platform: homeassistant
+    id: light1_item
+    entity_id: ${lights1_entity}
+    trigger_on_initial_state: true
+    internal: true
+    on_state:
+      then:
+        - lvgl.widget.show: lbl_light_1
+        - lvgl.widget.show: but_light_1
+        - lvgl.widget.update:
+            id: but_light_1
+            state:
+              checked: !lambda return x;
+        - if:
+            condition:
+              lambda: "return x;"
+            then:
+              - lvgl.label.update:
+                  id: ico_light_1
+                  text: "\U000F06E8"
+            else:
+              - lvgl.label.update:
+                  id: ico_light_1
+                  text: "\U000F0335"
 
-  # - platform: homeassistant
-    # id: light2_item
-    # entity_id: switch.light2 ## replace with light/switch entity to show status
-    # trigger_on_initial_state: true
-    # internal: true
-    # on_state:
-      # then:
-        # - lvgl.widget.update:
-            # id: but_light_2
-            # state:
-              # checked: !lambda return x;
-        # - if:
-            # condition:
-              # lambda: "return x;"
-            # then:
-              # - lvgl.label.update:
-                  # id: ico_light_2
-                  # text: "\U000F06E8" # icon for light on
-            # else:
-              # - lvgl.label.update:
-                  # id: ico_light_2
-                  # text: "\U000F0335" # icon for light off
+  - platform: homeassistant
+    id: light2_item
+    entity_id: ${lights2_entity}
+    trigger_on_initial_state: true
+    internal: true
+    on_state:
+      then:
+        - lvgl.widget.show: lbl_light_2
+        - lvgl.widget.show: but_light_2
+        - lvgl.widget.update:
+            id: but_light_2
+            state:
+              checked: !lambda return x;
+        - if:
+            condition:
+              lambda: "return x;"
+            then:
+              - lvgl.label.update:
+                  id: ico_light_2
+                  text: "\U000F06E8"
+            else:
+              - lvgl.label.update:
+                  id: ico_light_2
+                  text: "\U000F0335"
 
-  # - platform: homeassistant
-    # id: light3_item
-    # entity_id: light.light3 ## replace with light/switch entity to show status
-    # trigger_on_initial_state: true
-    # internal: true
-    # on_state:
-      # then:
-        # - lvgl.widget.update:
-            # id: but_light_3
-            # state:
-              # checked: !lambda return x;
-        # - if:
-            # condition:
-              # lambda: "return x;"
-            # then:
-              # - lvgl.label.update:
-                  # id: ico_light_3
-                  # text: "\U000F06E8" # icon for light on
-            # else:
-              # - lvgl.label.update:
-                  # id: ico_light_3
-                  # text: "\U000F0335" # icon for light off
+  - platform: homeassistant
+    id: light3_item
+    entity_id: ${lights3_entity}
+    trigger_on_initial_state: true
+    internal: true
+    on_state:
+      then:
+        - lvgl.widget.show: lbl_light_3
+        - lvgl.widget.show: but_light_3
+        - lvgl.widget.update:
+            id: but_light_3
+            state:
+              checked: !lambda return x;
+        - if:
+            condition:
+              lambda: "return x;"
+            then:
+              - lvgl.label.update:
+                  id: ico_light_3
+                  text: "\U000F06E8"
+            else:
+              - lvgl.label.update:
+                  id: ico_light_3
+                  text: "\U000F0335"
 
-  # - platform: homeassistant
-    # id: light4_item
-    # entity_id: switch.light4 ## replace with light/switch entity to show status
-    # trigger_on_initial_state: true
-    # internal: true
-    # on_state:
-      # then:
-        # - lvgl.widget.update:
-            # id: but_light_4
-            # state:
-              # checked: !lambda return x;
-        # - if:
-            # condition:
-              # lambda: "return x;"
-            # then:
-              # - lvgl.label.update:
-                  # id: ico_light_4
-                  # text: "\U000F06E8" # icon for light on
-            # else:
-              # - lvgl.label.update:
-                  # id: ico_light_4
-                  # text: "\U000F0335" # icon for light off
+  - platform: homeassistant
+    id: light4_item
+    entity_id: ${lights4_entity}
+    trigger_on_initial_state: true
+    internal: true
+    on_state:
+      then:
+        - lvgl.widget.show: lbl_light_4
+        - lvgl.widget.show: but_light_4
+        - lvgl.widget.update:
+            id: but_light_4
+            state:
+              checked: !lambda return x;
+        - if:
+            condition:
+              lambda: "return x;"
+            then:
+              - lvgl.label.update:
+                  id: ico_light_4
+                  text: "\U000F06E8"
+            else:
+              - lvgl.label.update:
+                  id: ico_light_4
+                  text: "\U000F0335"
 
-  # - platform: homeassistant
-    # id: light5_item
-    # entity_id: switch.light5 ## replace with light/switch entity to show status
-    # trigger_on_initial_state: true
-    # internal: true
-    # on_state:
-      # then:
-        # - lvgl.widget.update:
-            # id: but_light_5
-            # state:
-              # checked: !lambda return x;
-        # - if:
-            # condition:
-              # lambda: "return x;"
-            # then:
-              # - lvgl.label.update:
-                  # id: ico_light_5
-                  # text: "\U000F06E8" # icon for light on
-            # else:
-              # - lvgl.label.update:
-                  # id: ico_light_5
-                  # text: "\U000F0335" # icon for light off
+  - platform: homeassistant
+    id: light5_item
+    entity_id: ${lights5_entity}
+    trigger_on_initial_state: true
+    internal: true
+    on_state:
+      then:
+        - lvgl.widget.show: lbl_light_5
+        - lvgl.widget.show: but_light_5
+        - lvgl.widget.update:
+            id: but_light_5
+            state:
+              checked: !lambda return x;
+        - if:
+            condition:
+              lambda: "return x;"
+            then:
+              - lvgl.label.update:
+                  id: ico_light_5
+                  text: "\U000F06E8"
+            else:
+              - lvgl.label.update:
+                  id: ico_light_5
+                  text: "\U000F0335"
 
-  # - platform: homeassistant
-    # id: light6_item
-    # entity_id: light.light6 ## replace with light/switch entity to show status
-    # trigger_on_initial_state: true
-    # internal: true
-    # on_state:
-      # then:
-        # - lvgl.widget.update:
-            # id: but_light_6
-            # state:
-              # checked: !lambda return x;
-        # - if:
-            # condition:
-              # lambda: "return x;"
-            # then:
-              # - lvgl.label.update:
-                  # id: ico_light_6
-                  # text: "\U000F06E8" # icon for light on
-            # else:
-              # - lvgl.label.update:
-                  # id: ico_light_6
-                  # text: "\U000F0335" # icon for light off
+  - platform: homeassistant
+    id: light6_item
+    entity_id: ${lights6_entity}
+    trigger_on_initial_state: true
+    internal: true
+    on_state:
+      then:
+        - lvgl.widget.show: lbl_light_6
+        - lvgl.widget.show: but_light_6
+        - lvgl.widget.update:
+            id: but_light_6
+            state:
+              checked: !lambda return x;
+        - if:
+            condition:
+              lambda: "return x;"
+            then:
+              - lvgl.label.update:
+                  id: ico_light_6
+                  text: "\U000F06E8"
+            else:
+              - lvgl.label.update:
+                  id: ico_light_6
+                  text: "\U000F0335"
     
 ################## config end ############################
