@@ -142,8 +142,8 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 ![keypad](https://github.com/user-attachments/assets/38949e87-908c-4192-a79f-7000efd451c5)
 
 # Screensaver
-![analog_screensaver](https://github.com/user-attachments/assets/18a93b15-42e7-4121-88f1-f27fefd607e4)
-![digital_screensaver](https://github.com/user-attachments/assets/aa19666d-d21b-4a8c-8323-a601c1fd1ee9)
+![analog](https://github.com/user-attachments/assets/dfb647fe-6d61-4561-b051-6af23b851f27)
+![digital](https://github.com/user-attachments/assets/ccfa0c24-9ae2-4b64-84ea-2c60173ea339)
 - Temperature and Humidity will not be shown if a sensor dock is not connected.
 
 # Settings
