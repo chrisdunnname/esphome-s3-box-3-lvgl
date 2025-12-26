@@ -59,6 +59,7 @@ Last tested on Home Assistant 2025.12 and ESPHome Version 2025.12.
 
 **Home Page Functions**
 
+- The page title is configurable.
 - Tapping on the time will show the alarm clock page.
 - An alarm clock indicator will appear when the alarm clock is enabled and will launch the alarm settings page. 
 - A timer status indicator will appear while a timer is running and will launch the time remaining page
@@ -104,6 +105,7 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 # Climate
 
 ![climate](https://github.com/user-attachments/assets/688cad8e-7944-4033-bfe1-401e1b1d1427)
+- The page title is configurable.
 
 **Air Conditioner**
 
@@ -111,15 +113,21 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 
 # Lights
 ![lights](https://github.com/user-attachments/assets/d69453d7-d109-435d-addb-da4dd86d2fae)
+- The page title is configurable.
+- The lights page provides buttons to toggle six configurable lights which can be any entity that supports a toggle function including switch, light, media_player, climate, fan, humidifier, cover, script or siren.
 
 # Controls
 ![controls](https://github.com/user-attachments/assets/9b612a6d-4c20-4df4-babb-dce395eaa85f)
+- The icon of this home page button and the page title are configurable.
+- The controls page provides buttons to toggle three configurable controls which can be any entity that supports a toggle function including switch, light, media_player, climate, fan, humidifier, cover, script or siren. Icons can be configured for these 3 controls and must exist in the icon glyphs (default is switch icon).
+- The second row of controls buttons support a garage door (with switch and door state entities), a Home Connect dishwasher (with program, start, stop, state and doorstate entities) and a vacuum cleaner.
 
 # Media
 **Internal Audio**
 
 ![media_green](https://github.com/user-attachments/assets/0634c06b-d91e-40cc-b3f6-841f1e569ac5)
 ![media_red](https://github.com/user-attachments/assets/d887ca67-d660-4fc7-b403-6f7a36013427)
+- The page title is configurable.
 - The volume controls on the media page control the volume of the S3 box including the Voice Assistant.
 
 **External Audio**
@@ -128,10 +136,12 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 
 # Screens
 ![screens](https://github.com/user-attachments/assets/304c2778-a0d5-4183-9f65-31bf96287a61)
+- The icon of this home page button and the page title are configurable.
+- This page provides buttons to toggle six configurable items which can be any entity that supports turn_on, turn_off functions including switch, light, media_player, climate, fan, humidifier, cover, script or siren. Icons for the On and Off state can be configured for each entity.
 
 # Security
 ![security](https://github.com/user-attachments/assets/445e7b62-2109-4f29-89e4-6a72aa173744)
-
+- The page title and code page title are configurable.
 - Keypad - Pin code is required for alarm deactivation or changing modes, but not activation. 
 
 ![keypad](https://github.com/user-attachments/assets/38949e87-908c-4192-a79f-7000efd451c5)
@@ -139,6 +149,7 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 # Screensaver
 ![analog](https://github.com/user-attachments/assets/dfb647fe-6d61-4561-b051-6af23b851f27)
 ![digital](https://github.com/user-attachments/assets/ccfa0c24-9ae2-4b64-84ea-2c60173ea339)
+- The page title is configurable.
 - The left side of the screen shows device Temperature and Humidity and will not be shown if a sensor dock is not connected.
 - The right side of the screen shows your specified weather entity temperature and condition and will not be shown if a valid entity is not specified.
 
@@ -196,9 +207,9 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 ![ota](https://github.com/user-attachments/assets/b72041fb-3402-4387-a839-bb7c78d40b21)
 
 # Getting Started
-The 2025.12.21 release now enables much easier configuration for new users. 
+The 2025.12 release now enables much easier configuration for new users. 
 All standard user functions included in the configuration are now provided as substitutions in the YAML. 
-Under the "Your Data" section you can change page names, button names and specify entities to enable the standard features of the configuration. 
+Under the "Your Data" section you can change page names, button names, icons and specify entities to enable the standard features of the configuration. 
 Only components associated with active entities in your Home Assistant will be shown on the device otherwise these features will be hidden. This means that you can just update the substitutions for the entities you require and only those items will be shown on the associated pages. 
 This makes it easy for anyone to get started with this configuration in a few minutes. For those deploying to multiple S3 devices this new design makes it easier to deploy the same configuration with different entities and makes it easy for those who wish to separate the substitutions from the core yaml.
 

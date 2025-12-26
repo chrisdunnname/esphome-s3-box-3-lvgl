@@ -58,23 +58,29 @@ substitutions:
   climate6_entity: sensor.temperature6 #sensor
   lights_page_title: "Lights"
   lights1_name: "Light 1"
-  lights1_entity: switch.light1 #switch or light
+  lights1_entity: switch.light1 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   lights2_name: "Light 2"
-  lights2_entity: switch.light2 #switch or light
+  lights2_entity: switch.light2 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   lights3_name: "Light 3"
-  lights3_entity: light.light3 #switch or light
+  lights3_entity: light.light3 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   lights4_name: "Light 4"
-  lights4_entity: switch.light4 #switch or light
+  lights4_entity: switch.light4 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   lights5_name: "Light 5"
-  lights5_entity: switch.light5 #switch or light
+  lights5_entity: switch.light5 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   lights6_name: "Light 6"
-  lights6_entity: light.light6 #switch or light
+  lights6_entity: light.light6 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   controls_page_title: "Controls"
+  controls_page_icon: "\U000F097E" #icon from icon_glyphs
   controls1_name: "Kettle"
-  controls1_entity: switch.kettle_start #switch
-  controls2_name: "Vacuum"
-  controls2_entity: vacuum.vacuum_cleaner #vacuum
-  controls4_name: "Garage"
+  controls1_entity: switch.kettle_start #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  controls1_icon: "\U000F05FA" #icon from icon_glyphs
+  controls2_name: "Control 2"
+  controls2_entity: switch.switch2 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  controls2_icon: "\U000F097E" #icon from icon_glyphs
+  controls3_name: "Control 3"
+  controls3_entity: switch.switch3 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  controls3_icon: "\U000F097E" #icon from icon_glyphs
+  controls4_name: "Garage" #Switch with binary sensor to indicate state of door
   controls4_entity: switch.garagedoorbutton #switch
   controls4_state: binary_sensor.garagedoorstate #binary_sensor
   controls5_name: "Dishwasher" #HomeConnect Dishwasher
@@ -83,12 +89,35 @@ substitutions:
   controls5_stop: button.device_stop #button
   controls5_state: sensor.device_bsh_common_status_operationstate #sensor
   controls5_doorstate: binary_sensor.device_bsh_common_status_doorstate #binary_sensor
+  controls6_name: "Vacuum"
+  controls6_entity: vacuum.vacuum_cleaner #vacuum    
   media_page_title: "Media"
   scenes_page_title: "Screens"
-  scenes1_name: "TV 1"
-  scenes1_entity: media_player.tv1 #media_player
-  scenes2_name: "TV 2"
-  scenes2_entity: media_player.tv2 #media_player
+  scenes_page_icon: "\U000F0FCE" #icon from icon_glyphs
+  scenes1_name: "Player 1"
+  scenes1_entity: media_player.media1 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes1_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes1_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes2_name: "Player 2"
+  scenes2_entity: media_player.media2 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes2_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes2_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes3_name: "Player 3"
+  scenes3_entity: media_player.media3 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes3_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes3_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes4_name: "Player 4"
+  scenes4_entity: media_player.media4 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes4_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes4_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes5_name: "Player 5"
+  scenes5_entity: media_player.media5 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes5_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes5_icon_on: "\U000F0502" #icon from icon_glyphs
+  scenes6_name: "Player 6"
+  scenes6_entity: media_player.media6 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes6_icon_off: "\U000F083B" #icon from icon_glyphs
+  scenes6_icon_on: "\U000F0502" #icon from icon_glyphs
   alarmo_entity: alarm_control_panel.alarmo #alarmo
   security_page_title: "Security"
   security1_name: "Door"
@@ -139,7 +168,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.12.21"
+    version: "2025.12.27"
 
 esp32:
   board: esp32s3box
@@ -3113,31 +3142,39 @@ text_sensor:
         - lvgl.widget.show: but_control_2
         - if:
             condition:
-              lambda: return (id(control2_item).state == "docked");
+              lambda: return (id(control2_item).state == "on");
             then:
               - lvgl.widget.update:
-                  id: but_control_2
-                  state:
-                    checked: !lambda return false;
-              - lvgl.label.update:
-                        id: ico_control_2
-                        text_color: white
+                    id: but_control_2
+                    state:
+                      checked: !lambda return true;
             else:
               - lvgl.widget.update:
-                  id: but_control_2
-                  state:
-                    checked: !lambda return true;
-              - if:
-                  condition:
-                    lambda: return (id(control2_item).state == "returning");
-                  then:
-                    - lvgl.label.update:
-                        id: ico_control_2
-                        text_color: green
-                  else:
-                    - lvgl.label.update:
-                        id: ico_control_2
-                        text_color: yellow
+                    id: but_control_2
+                    state:
+                      checked: !lambda return false;
+                      
+  - platform: homeassistant
+    id: control3_item
+    entity_id: ${controls3_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_control_3
+        - lvgl.widget.show: but_control_3
+        - if:
+            condition:
+              lambda: return (id(control3_item).state == "on");
+            then:
+              - lvgl.widget.update:
+                    id: but_control_3
+                    state:
+                      checked: !lambda return true;
+            else:
+              - lvgl.widget.update:
+                    id: but_control_3
+                    state:
+                      checked: !lambda return false;
 
   - platform: homeassistant
     id: control4_item
@@ -3233,7 +3270,43 @@ text_sensor:
                         id: ico_control_5
                         text_color: white
                         text: "\U000F0AAC"
-    
+
+  - platform: homeassistant
+    id: control6_item
+    entity_id: ${controls6_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_control_6
+        - lvgl.widget.show: but_control_6
+        - if:
+            condition:
+              lambda: return (id(control6_item).state == "docked");
+            then:
+              - lvgl.widget.update:
+                  id: but_control_6
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_control_6
+                        text_color: white
+            else:
+              - lvgl.widget.update:
+                  id: but_control_6
+                  state:
+                    checked: !lambda return true;
+              - if:
+                  condition:
+                    lambda: return (id(control6_item).state == "returning");
+                  then:
+                    - lvgl.label.update:
+                        id: ico_control_6
+                        text_color: green
+                  else:
+                    - lvgl.label.update:
+                        id: ico_control_6
+                        text_color: yellow
+
   ##### SCENES PAGE TEXT SENSORS #####
   - platform: homeassistant
     id: scenes1_item
@@ -3253,7 +3326,7 @@ text_sensor:
                     checked: !lambda return false;
               - lvgl.label.update:
                         id: ico_scenes_1
-                        text: "\U000F083B"
+                        text: '${scenes1_icon_off}'
             else:
               - lvgl.widget.update:
                   id: but_scenes_1
@@ -3261,7 +3334,7 @@ text_sensor:
                     checked: !lambda return true;
               - lvgl.label.update:
                         id: ico_scenes_1
-                        text: "\U000F0502"
+                        text: '${scenes1_icon_on}'
 
   - platform: homeassistant
     id: scenes2_item
@@ -3281,7 +3354,7 @@ text_sensor:
                     checked: !lambda return false;
               - lvgl.label.update:
                         id: ico_scenes_2
-                        text: "\U000F083B"
+                        text: '${scenes2_icon_off}'
             else:
               - lvgl.widget.update:
                   id: but_scenes_2
@@ -3289,7 +3362,119 @@ text_sensor:
                     checked: !lambda return true;
               - lvgl.label.update:
                         id: ico_scenes_2
-                        text: "\U000F0502"
+                        text: '${scenes2_icon_on}'
+
+  - platform: homeassistant
+    id: scenes3_item
+    entity_id: ${scenes3_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_scenes_3
+        - lvgl.widget.show: but_scenes_3
+        - if:
+            condition:
+              lambda: return (id(scenes3_item).state == "off");
+            then:
+              - lvgl.widget.update:
+                  id: but_scenes_3
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_scenes_3
+                        text: '${scenes3_icon_off}'
+            else:
+              - lvgl.widget.update:
+                  id: but_scenes_3
+                  state:
+                    checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_scenes_3
+                        text: '${scenes3_icon_on}'
+
+  - platform: homeassistant
+    id: scenes4_item
+    entity_id: ${scenes4_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_scenes_4
+        - lvgl.widget.show: but_scenes_4
+        - if:
+            condition:
+              lambda: return (id(scenes4_item).state == "off");
+            then:
+              - lvgl.widget.update:
+                  id: but_scenes_4
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_scenes_4
+                        text: '${scenes4_icon_off}'
+            else:
+              - lvgl.widget.update:
+                  id: but_scenes_4
+                  state:
+                    checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_scenes_4
+                        text: '${scenes4_icon_on}'
+
+  - platform: homeassistant
+    id: scenes5_item
+    entity_id: ${scenes5_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_scenes_5
+        - lvgl.widget.show: but_scenes_5
+        - if:
+            condition:
+              lambda: return (id(scenes5_item).state == "off");
+            then:
+              - lvgl.widget.update:
+                  id: but_scenes_5
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_scenes_5
+                        text: '${scenes5_icon_off}'
+            else:
+              - lvgl.widget.update:
+                  id: but_scenes_5
+                  state:
+                    checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_scenes_5
+                        text: '${scenes5_icon_on}'
+
+  - platform: homeassistant
+    id: scenes6_item
+    entity_id: ${scenes6_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_scenes_6
+        - lvgl.widget.show: but_scenes_6
+        - if:
+            condition:
+              lambda: return (id(scenes6_item).state == "off");
+            then:
+              - lvgl.widget.update:
+                  id: but_scenes_6
+                  state:
+                    checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_scenes_6
+                        text: '${scenes6_icon_off}'
+            else:
+              - lvgl.widget.update:
+                  id: but_scenes_6
+                  state:
+                    checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_scenes_6
+                        text: '${scenes6_icon_on}'
 
 ##### SECURITY PAGE TEXT SENSORS #####
   - platform: homeassistant
@@ -3532,7 +3717,7 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text_color: fuchsia
-                              text: "\U000F097E"
+                              text: '${controls_page_icon}'
                         on_release:
                           then:
                             lvgl.page.show: controls_page
@@ -3574,7 +3759,7 @@ lvgl:
                               align: CENTER
                               text_font: icon_font_55
                               text_color: aqua
-                              text: "\U000F0FCE"
+                              text: '${scenes_page_icon}'
                         on_release:
                           then:
                             lvgl.page.show: scenes_page
@@ -4403,17 +4588,15 @@ lvgl:
                               id: ico_control_1
                               align: CENTER
                               text_font: icon_font_55
-                              text: "\U000F05FA"
+                              text: '${controls1_icon}'
                         on_release:
                           then:
-                            if:
-                              condition:
-                                - lambda: return (id(alarm_status).state == "disarmed");
-                              then:
-                                - homeassistant.action:
-                                    action: switch.toggle
-                                    data:
-                                      entity_id: ${controls1_entity}
+                            - homeassistant.action:
+                                action: !lambda |
+                                  std::string s = "${controls1_entity}";
+                                  return s.substr(0, s.find('.')) + ".toggle";
+                                data:
+                                  entity_id: ${controls1_entity}
                     - label:
                         id: lbl_control_2
                         hidden: true
@@ -4443,23 +4626,53 @@ lvgl:
                               id: ico_control_2
                               align: CENTER
                               text_font: icon_font_55
-                              text: "\U000F070D"
+                              text: '${controls2_icon}'
                         on_release:
-                          - if:
-                              condition:
-                                - and:
-                                    - lambda: 'return id(control2_item).state == "docked";'
-                                    - lambda: return (id(alarm_status).state == "disarmed");
-                              then:
-                                - homeassistant.service:
-                                    service: vacuum.start
-                                    data:
-                                      entity_id: ${controls2_entity}
-                              else: 
-                                - homeassistant.service:
-                                    service: vacuum.return_to_base
-                                    data:
-                                      entity_id: ${controls2_entity}
+                          then:
+                            - homeassistant.action:
+                                action: !lambda |
+                                  std::string s = "${controls2_entity}";
+                                  return s.substr(0, s.find('.')) + ".toggle";
+                                data:
+                                  entity_id: ${controls2_entity}
+                    - label:
+                        id: lbl_control_3
+                        hidden: true
+                        text: '${controls3_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_control_3
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        checkable: true
+                        widgets:
+                          - label:
+                              id: ico_control_3
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: '${controls3_icon}'
+                        on_release:
+                          then:
+                            - homeassistant.action:
+                                action: !lambda |
+                                  std::string s = "${controls3_entity}";
+                                  return s.substr(0, s.find('.')) + ".toggle";
+                                data:
+                                  entity_id: ${controls3_entity}
                     - label:
                         id: lbl_control_4
                         hidden: true
@@ -4492,14 +4705,12 @@ lvgl:
                               text: "\U000F12D3"
                         on_release:
                           then:
-                            if:
-                              condition:
-                                - lambda: return (id(alarm_status).state == "disarmed");
-                              then:
-                                - homeassistant.action:
-                                    action: switch.toggle
-                                    data:
-                                      entity_id: ${controls4_entity}
+                            - homeassistant.action:
+                                action: !lambda |
+                                  std::string s = "${controls4_entity}";
+                                  return s.substr(0, s.find('.')) + ".toggle";
+                                data:
+                                  entity_id: ${controls4_entity}
                     - label:
                         id: lbl_control_5
                         hidden: true
@@ -4533,9 +4744,7 @@ lvgl:
                         on_release:
                           - if:
                               condition:
-                                - and:
-                                    - lambda: return (id(alarm_status).state == "disarmed");
-                                    - lambda: 'return id(control5_item).state == "Ready" && id(control5_item2).state == "off";'
+                                - lambda: 'return id(control5_item).state == "Ready" && id(control5_item2).state == "off";'
                               then:
                                 - homeassistant.action:
                                     action: select.select_option
@@ -4552,6 +4761,50 @@ lvgl:
                                     service: button.press
                                     data:
                                       entity_id: ${controls5_stop}
+                    - label:
+                        id: lbl_control_6
+                        hidden: true
+                        text: '${controls6_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_control_6
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        checkable: true
+                        widgets:
+                          - label:
+                              id: ico_control_6
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: "\U000F070D"
+                        on_release:
+                          - if:
+                              condition:
+                                - lambda: 'return id(control6_item).state == "docked";'
+                              then:
+                                - homeassistant.service:
+                                    service: vacuum.start
+                                    data:
+                                      entity_id: ${controls6_entity}
+                              else: 
+                                - homeassistant.service:
+                                    service: vacuum.return_to_base
+                                    data:
+                                      entity_id: ${controls6_entity}
 
     - id: media_page
       on_swipe_left:
@@ -4869,7 +5122,7 @@ lvgl:
                               id: ico_scenes_1
                               align: CENTER
                               text_font: icon_font_55
-                              text: "\U000F083B"
+                              text: '${scenes1_icon_off}'
                         on_release:
                           then:
                             - if:
@@ -4877,12 +5130,16 @@ lvgl:
                                   lambda: return (id(scenes1_item).state == "off");
                                 then:
                                   - homeassistant.service:
-                                      service: media_player.turn_on
+                                      action: !lambda |
+                                        std::string s = "${scenes1_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_on";
                                       data:
                                         entity_id: ${scenes1_entity}
                                 else: 
                                   - homeassistant.service:
-                                      service: media_player.turn_off
+                                      action: !lambda |
+                                        std::string s = "${scenes1_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_off";
                                       data:
                                         entity_id: ${scenes1_entity}
                     - label:
@@ -4914,7 +5171,7 @@ lvgl:
                               id: ico_scenes_2
                               align: CENTER
                               text_font: icon_font_55
-                              text: "\U000F083B"
+                              text: '${scenes2_icon_off}'
                         on_release:
                           then:
                             - if:
@@ -4922,14 +5179,214 @@ lvgl:
                                   lambda: return (id(scenes2_item).state == "off");
                                 then:
                                   - homeassistant.service:
-                                      service: media_player.turn_on
+                                      action: !lambda |
+                                        std::string s = "${scenes2_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_on";
                                       data:
                                         entity_id: ${scenes2_entity}
                                 else: 
                                   - homeassistant.service:
-                                      service: media_player.turn_off
+                                      action: !lambda |
+                                        std::string s = "${scenes2_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_off";
                                       data:
                                         entity_id: ${scenes2_entity}
+                    - label:
+                        id: lbl_scenes_3
+                        hidden: true
+                        text: '${scenes3_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_scenes_3
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        checkable: true
+                        widgets:
+                          - label:
+                              id: ico_scenes_3
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: '${scenes3_icon_off}'
+                        on_release:
+                          then:
+                            - if:
+                                condition:
+                                  lambda: return (id(scenes3_item).state == "off");
+                                then:
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${scenes3_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_on";
+                                      data:
+                                        entity_id: ${scenes3_entity}
+                                else: 
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${scenes3_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_off";
+                                      data:
+                                        entity_id: ${scenes3_entity}
+                    - label:
+                        id: lbl_scenes_4
+                        hidden: true
+                        text: '${scenes4_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_scenes_4
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        checkable: true
+                        widgets:
+                          - label:
+                              id: ico_scenes_4
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: '${scenes4_icon_off}'
+                        on_release:
+                          then:
+                            - if:
+                                condition:
+                                  lambda: return (id(scenes4_item).state == "off");
+                                then:
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${scenes4_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_on";
+                                      data:
+                                        entity_id: ${scenes4_entity}
+                                else: 
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${scenes4_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_off";
+                                      data:
+                                        entity_id: ${scenes4_entity}
+                    - label:
+                        id: lbl_scenes_5
+                        hidden: true
+                        text: '${scenes5_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_scenes_5
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        checkable: true
+                        widgets:
+                          - label:
+                              id: ico_scenes_5
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: '${scenes5_icon_off}'
+                        on_release:
+                          then:
+                            - if:
+                                condition:
+                                  lambda: return (id(scenes5_item).state == "off");
+                                then:
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${scenes5_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_on";
+                                      data:
+                                        entity_id: ${scenes5_entity}
+                                else: 
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${scenes5_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_off";
+                                      data:
+                                        entity_id: ${scenes5_entity}
+                    - label:
+                        id: lbl_scenes_6
+                        hidden: true
+                        text: '${scenes6_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_scenes_6
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        checkable: true
+                        widgets:
+                          - label:
+                              id: ico_scenes_6
+                              align: CENTER
+                              text_font: icon_font_55
+                              text: '${scenes6_icon_off}'
+                        on_release:
+                          then:
+                            - if:
+                                condition:
+                                  lambda: return (id(scenes6_item).state == "off");
+                                then:
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${scenes6_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_on";
+                                      data:
+                                        entity_id: ${scenes6_entity}
+                                else: 
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${scenes6_entity}";
+                                        return s.substr(0, s.find('.')) + ".turn_off";
+                                      data:
+                                        entity_id: ${scenes6_entity}
 
     - id: security_page
       on_swipe_left:
