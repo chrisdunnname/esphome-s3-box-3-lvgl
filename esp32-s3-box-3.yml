@@ -3020,7 +3020,12 @@ text_sensor:
                   id: but_studioac_1
                   state:
                     checked: false
-            else:
+        - if:
+            condition: 
+                and:
+                  - lambda: return (id(climate1_item).state != "off");
+                  - lambda: return (id(climate1_item).state != "unavailable");
+            then:
               - lvgl.widget.update:
                   id: but_climate_1
                   state:
@@ -4173,7 +4178,7 @@ lvgl:
                           selected:
                             checked:
                               text_color: 0xFF0000
-                        on_value:
+                        on_change:
                           - if:
                               condition:
                                 lambda: return (x == 0);
