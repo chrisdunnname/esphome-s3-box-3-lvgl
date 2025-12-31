@@ -120,8 +120,18 @@ substitutions:
   scenes6_icon_on: "\U000F0502" #icon from icon_glyphs
   alarmo_entity: alarm_control_panel.alarmo #alarmo
   security_page_title: "Security"
-  security1_name: "Door"
-  security1_entity: lock.door #lock
+  security1_name: "Lock 1"
+  security1_entity: lock.lock1 #lock,switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  security1_icon_off: "\U000F033F" #icon from icon_glyphs
+  security1_icon_on: "\U000F033E" #icon from icon_glyphs
+  security2_name: "Lock 2"
+  security2_entity: lock.lock2 #lock,switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  security2_icon_off: "\U000F033F" #icon from icon_glyphs
+  security2_icon_on: "\U000F033E" #icon from icon_glyphs
+  security3_name: "Lock 3"
+  security3_entity: lock.lock3 #lock,switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  security3_icon_off: "\U000F033F" #icon from icon_glyphs
+  security3_icon_on: "\U000F033E" #icon from icon_glyphs
   keypad_page_title: "Code"
   ssaver_page_title: " "
   screensaver_weather_entity: weather.home #weather
@@ -168,7 +178,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.12.27"
+    version: "2025.12.31"
 
 esp32:
   board: esp32s3box
@@ -2838,6 +2848,8 @@ font:
       - "\U000F059D"# windy
       - "\U000F059E"# windy-variant
       - "\U000F14E4"# sunny-off
+      - "\U000F18F2"# refresh-auto
+      - "\U000F0450"# refresh
       
   - file: ${icon_font_file}
     id: icon_font_20
@@ -3493,21 +3505,73 @@ text_sensor:
         - lvgl.widget.update:
             id: but_security_1
             state:
-              checked: !lambda return (id(security1_item).state == "locked");
+              checked: !lambda return (id(security1_item).state == "locked" || id(security1_item).state == "on");
         - if:
             condition:
-              lambda: return (id(security1_item).state == "locked");
+              lambda: return (id(security1_item).state == "locked" || id(security1_item).state == "on");
             then:
               - lvgl.label.update:
                   id: ico_security_1
                   text_color: lime
-                  text: "\U000F033E"
+                  text: '${security1_icon_on}'
             else:
               - lvgl.label.update:
                   id: ico_security_1
                   text_color: red
-                  text: "\U000F033F"
+                  text: '${security1_icon_off}'
 
+  - platform: homeassistant
+    id: security2_item
+    entity_id: ${security2_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_security_2
+        - lvgl.widget.show: but_security_2
+        - lvgl.widget.update:
+            id: but_security_2
+            state:
+              checked: !lambda return (id(security2_item).state == "locked" || id(security2_item).state == "on");
+        - if:
+            condition:
+              lambda: return (id(security2_item).state == "locked" || id(security2_item).state == "on");
+            then:
+              - lvgl.label.update:
+                  id: ico_security_2
+                  text_color: lime
+                  text: '${security2_icon_on}'
+            else:
+              - lvgl.label.update:
+                  id: ico_security_2
+                  text_color: red
+                  text: '${security2_icon_off}'
+
+  - platform: homeassistant
+    id: security3_item
+    entity_id: ${security3_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lbl_security_3
+        - lvgl.widget.show: but_security_3
+        - lvgl.widget.update:
+            id: but_security_3
+            state:
+              checked: !lambda return (id(security3_item).state == "locked" || id(security3_item).state == "on");
+        - if:
+            condition:
+              lambda: return (id(security3_item).state == "locked" || id(security3_item).state == "on");
+            then:
+              - lvgl.label.update:
+                  id: ico_security_3
+                  text_color: lime
+                  text: '${security3_icon_on}'
+            else:
+              - lvgl.label.update:
+                  id: ico_security_3
+                  text_color: red
+                  text: '${security3_icon_off}'
+                  
 color:
   - id: active_timer_color
     hex: "26ed3a"
@@ -5457,25 +5521,190 @@ lvgl:
                               id: ico_security_1
                               align: CENTER
                               text_font: icon_font_55
-                              text_color: lime
-                              text: "\U000F033E"
+                              text_color: red
+                              text: '${security1_icon_off}'
                         on_release:
                           then:
-                            if:
-                              condition:
-                                - and:
-                                    - lambda: return (id(security1_item).state == "locked");
-                                    - lambda: return (id(alarm_status).state == "disarmed");
-                              then:
-                                - homeassistant.action:
-                                    action: lock.unlock
-                                    data:
-                                      entity_id: ${security1_entity}
-                              else:
-                                - homeassistant.action:
-                                    action: lock.lock
-                                    data:
-                                      entity_id: ${security1_entity}
+                            - if:
+                                condition:
+                                  - and:
+                                      - lambda: return (id(security1_item).state == "locked");
+                                      - lambda: |
+                                          std::string s = "${security1_entity}";
+                                          return (s.substr(0, s.find('.')) == "lock");
+                                then:
+                                  - homeassistant.action:
+                                      action: lock.unlock
+                                      data:
+                                        entity_id: ${security1_entity}
+                            - if:
+                                condition:
+                                  - and:
+                                      - lambda: return (id(security1_item).state == "unlocked" || id(security1_item).state == "open");
+                                      - lambda: |
+                                          std::string s = "${security1_entity}";
+                                          return (s.substr(0, s.find('.')) == "lock");
+                                then:
+                                  - homeassistant.action:
+                                      action: lock.lock
+                                      data:
+                                        entity_id: ${security1_entity}
+                            - if:
+                                condition:
+                                  - and:
+                                      - lambda: return (id(security1_item).state == "off" || id(security1_item).state == "on");
+                                      - lambda: |
+                                          std::string s = "${security1_entity}";
+                                          return (s.substr(0, s.find('.')) != "lock");
+                                then:
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${security1_entity}";
+                                        return s.substr(0, s.find('.')) + ".toggle";
+                                      data:
+                                        entity_id: ${security1_entity}
+                    - label:
+                        id: lbl_security_2
+                        hidden: true
+                        text: '${security2_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_security_2
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        checkable: true
+                        widgets:
+                          - label:
+                              id: ico_security_2
+                              align: CENTER
+                              text_font: icon_font_55
+                              text_color: red
+                              text: '${security2_icon_off}'
+                        on_release:
+                          then:
+                            - if:
+                                condition:
+                                  - and:
+                                      - lambda: return (id(security2_item).state == "locked");
+                                      - lambda: |
+                                          std::string s = "${security2_entity}";
+                                          return (s.substr(0, s.find('.')) == "lock");
+                                then:
+                                  - homeassistant.action:
+                                      action: lock.unlock
+                                      data:
+                                        entity_id: ${security2_entity}
+                            - if:
+                                condition:
+                                  - and:
+                                      - lambda: return (id(security2_item).state == "unlocked" || id(security2_item).state == "open");
+                                      - lambda: |
+                                          std::string s = "${security2_entity}";
+                                          return (s.substr(0, s.find('.')) == "lock");
+                                then:
+                                  - homeassistant.action:
+                                      action: lock.lock
+                                      data:
+                                        entity_id: ${security2_entity}
+                            - if:
+                                condition:
+                                  - and:
+                                      - lambda: return (id(security2_item).state == "off" || id(security2_item).state == "on");
+                                      - lambda: |
+                                          std::string s = "${security2_entity}";
+                                          return (s.substr(0, s.find('.')) != "lock");
+                                then:
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${security2_entity}";
+                                        return s.substr(0, s.find('.')) + ".toggle";
+                                      data:
+                                        entity_id: ${security2_entity}
+                    - label:
+                        id: lbl_security_3
+                        hidden: true
+                        text: '${security3_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        text_color: 0xFFFFFF
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: but_security_3
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        checkable: true
+                        widgets:
+                          - label:
+                              id: ico_security_3
+                              align: CENTER
+                              text_font: icon_font_55
+                              text_color: red
+                              text: '${security3_icon_off}'
+                        on_release:
+                          then:
+                            - if:
+                                condition:
+                                  - and:
+                                      - lambda: return (id(security3_item).state == "locked");
+                                      - lambda: |
+                                          std::string s = "${security3_entity}";
+                                          return (s.substr(0, s.find('.')) == "lock");
+                                then:
+                                  - homeassistant.action:
+                                      action: lock.unlock
+                                      data:
+                                        entity_id: ${security3_entity}
+                            - if:
+                                condition:
+                                  - and:
+                                      - lambda: return (id(security3_item).state == "unlocked" || id(security3_item).state == "open");
+                                      - lambda: |
+                                          std::string s = "${security3_entity}";
+                                          return (s.substr(0, s.find('.')) == "lock");
+                                then:
+                                  - homeassistant.action:
+                                      action: lock.lock
+                                      data:
+                                        entity_id: ${security3_entity}
+                            - if:
+                                condition:
+                                  - and:
+                                      - lambda: return (id(security3_item).state == "off" || id(security3_item).state == "on");
+                                      - lambda: |
+                                          std::string s = "${security3_entity}";
+                                          return (s.substr(0, s.find('.')) != "lock");
+                                then:
+                                  - homeassistant.service:
+                                      action: !lambda |
+                                        std::string s = "${security3_entity}";
+                                        return s.substr(0, s.find('.')) + ".toggle";
+                                      data:
+                                        entity_id: ${security3_entity}
               - buttonmatrix:
                   align: CENTER
                   width: 100%
@@ -5579,9 +5808,9 @@ lvgl:
                   align: CENTER
                   text_align: CENTER
                   text_color: lightblue
-                  text_font: my_font16
-                  x: 45
-                  y: -40
+                  text_font: my_font12
+                  x: 0
+                  y: 10
 
     - id: alarm_keypad_page
       skip: true
