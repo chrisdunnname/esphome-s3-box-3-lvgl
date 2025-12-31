@@ -140,7 +140,7 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 - This page provides buttons to toggle six configurable items which can be any entity that supports turn_on, turn_off functions including switch, light, media_player, climate, fan, humidifier, cover, script or siren. Icons for the On and Off state can be configured for each entity.
 
 # Security
-![security](https://github.com/user-attachments/assets/445e7b62-2109-4f29-89e4-6a72aa173744)
+![s3_security_new](https://github.com/user-attachments/assets/2208367a-a3d0-42c5-906f-5b87edaea400)
 - The page title and code page title are configurable.
 - Keypad - Pin code is required for alarm deactivation or changing modes, but not activation. 
 
