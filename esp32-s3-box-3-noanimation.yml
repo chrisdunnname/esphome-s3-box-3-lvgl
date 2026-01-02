@@ -119,6 +119,9 @@ substitutions:
   scenes6_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes6_icon_on: "\U000F0502" #icon from icon_glyphs
   alarmo_entity: alarm_control_panel.alarmo #alarmo
+  alarmo_background_on: 0x001a00 #Set to 0x000000 to disable
+  alarmo_background_pending: 0x330d00 #Set to 0x000000 to disable
+  alarmo_background_triggered: 0x4d0000 #Set to 0x000000 to disable
   security_page_title: "Security"
   security1_name: "Lock 1"
   security1_entity: lock.lock1 #lock,switch,light,media_player,climate,fan,humidifier,cover,script,siren
@@ -178,7 +181,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2025.12.31"
+    version: "2026.01.02"
 
 esp32:
   board: esp32s3box
@@ -1483,6 +1486,12 @@ script:
             - lvgl.label.update:
                 id: lbl_alarm_status
                 text: "Disarmed"
+            - lvgl.style.update:
+                id: page_content
+                bg_color: 0x000000
+            - lvgl.style.update:
+                id: clock_bg
+                bg_color: 0x000000
             - lvgl.label.update:
                 id: lbl_alarm
                 text: !lambda |-
@@ -1504,6 +1513,12 @@ script:
             - lvgl.label.update:
                 id: lbl_alarm_status
                 text: "Pending"
+            - lvgl.style.update:
+                id: page_content
+                bg_color: ${alarmo_background_pending}
+            - lvgl.style.update:
+                id: clock_bg
+                bg_color: ${alarmo_background_pending}
       - if:
           condition: 
               lambda: return (id(alarm_status).state == "arming");
@@ -1511,6 +1526,12 @@ script:
             - lvgl.label.update:
                 id: lbl_alarm_status
                 text: "Arming"
+            - lvgl.style.update:
+                id: page_content
+                bg_color: ${alarmo_background_pending}
+            - lvgl.style.update:
+                id: clock_bg
+                bg_color: ${alarmo_background_pending}
             - lvgl.label.update:
                 id: lbl_alarm
                 text: !lambda |-
@@ -1527,6 +1548,12 @@ script:
             - lvgl.label.update:
                 id: lbl_alarm_status
                 text: "Armed Home"
+            - lvgl.style.update:
+                id: page_content
+                bg_color: ${alarmo_background_on}
+            - lvgl.style.update:
+                id: clock_bg
+                bg_color: ${alarmo_background_on}
             - lvgl.label.update:
                 id: lbl_alarm
                 text: !lambda |-
@@ -1548,6 +1575,12 @@ script:
             - lvgl.label.update:
                 id: lbl_alarm_status
                 text: "Armed Away"
+            - lvgl.style.update:
+                id: page_content
+                bg_color: ${alarmo_background_on}
+            - lvgl.style.update:
+                id: clock_bg
+                bg_color: ${alarmo_background_on}
             - lvgl.label.update:
                 id: lbl_alarm
                 text: !lambda |-
@@ -1569,6 +1602,12 @@ script:
             - lvgl.label.update:
                 id: lbl_alarm_status
                 text: "Armed Night"
+            - lvgl.style.update:
+                id: page_content
+                bg_color: ${alarmo_background_on}
+            - lvgl.style.update:
+                id: clock_bg
+                bg_color: ${alarmo_background_on}
             - lvgl.label.update:
                 id: lbl_alarm
                 text: !lambda |-
@@ -1590,6 +1629,13 @@ script:
             - lvgl.label.update:
                 id: lbl_alarm_status
                 text: "Triggered"
+            - lvgl.style.update:
+                id: page_content
+                bg_color: ${alarmo_background_triggered}
+            - lvgl.style.update:
+                id: clock_bg
+                bg_color: ${alarmo_background_triggered}
+      - lvgl.widget.redraw:
  
   - id: update_wifi_info
     then:
@@ -5905,7 +5951,7 @@ lvgl:
             align: CENTER
             pad_all: 0
             border_width: 0
-            bg_color: 0x000000
+            styles: clock_bg
             widgets:
               - meter: 
                   id: clockface
@@ -5979,7 +6025,7 @@ lvgl:
             align: CENTER
             pad_all: 0
             border_width: 0
-            bg_color: 0x000000
+            styles: clock_bg
             widgets:
               - label:
                   id: digitaltime
@@ -7886,6 +7932,8 @@ lvgl:
     - id: clock_style
       text_color: 0xFFFFFF
       text_font: my_font
+    - id: clock_bg
+      bg_color: 0x000000
     - id: button_style
       bg_color: 0x000000 #black
       bg_grad_color: 0x005782 #blue

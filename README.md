@@ -145,6 +145,7 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 - The security page provides buttons to toggle three security items. These will work for locks or any other entity that supports a toggle function including switch, light, media_player, climate, fan, humidifier, cover, script or siren. Icons for the On and Off state can be configured for each entity and must exist in the icon glyphs (default is padlock lock/unlock icons).
 - Icons on this page are red for off and green for on to indicate security status.
 - Keypad - Pin code is required for alarm deactivation or changing modes, but not activation.
+- The device background which defaults to black will change color based on alarm status. The colors are configurable.
 
 ![keypad](https://github.com/user-attachments/assets/38949e87-908c-4192-a79f-7000efd451c5)
 
@@ -209,7 +210,6 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 ![ota](https://github.com/user-attachments/assets/b72041fb-3402-4387-a839-bb7c78d40b21)
 
 # Getting Started
-The 2025.12 release now enables much easier configuration for new users. 
 All standard user functions included in the configuration are now provided as substitutions in the YAML. 
 Under the "Your Data" section you can change page names, button names, icons and specify entities to enable the standard features of the configuration. 
 Only components associated with active entities in your Home Assistant will be shown on the device otherwise these features will be hidden. This means that you can just update the substitutions for the entities you require and only those items will be shown on the associated pages. 
