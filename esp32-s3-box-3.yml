@@ -181,7 +181,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.01.02"
+    version: "2026.01.04"
 
 esp32:
   board: esp32s3box
@@ -2366,7 +2366,6 @@ select:
     options:
       - In Home Assistant
       - On device
-    initial_option: In Home Assistant
     on_value:
       - if:
           condition:
@@ -2376,8 +2375,12 @@ select:
                 lambda: return id(voice_assistant_phase) == ${voice_assist_muted_phase_id} || id(voice_assistant_phase) == ${voice_assist_idle_phase_id};
             - if:
                 condition:
-                  lambda: return x == "In Home Assistant";
+                  lambda: return strcmp(id(wake_word_engine_location).current_option(), "In Home Assistant") == 0;
                 then:
+                  - lambda: ESP_LOGD("wake_word_engine_location", "Set to In Home Assistant");
+                  - lvgl.dropdown.update:
+                      id: dropdown_wakeword
+                      selected_index: 0
                   - micro_wake_word.stop
                   - delay: 500ms
                   - if:
@@ -2386,16 +2389,14 @@ select:
                       then:
                         - lambda: id(va).set_use_wake_word(true);
                         - voice_assistant.start_continuous:
-                        - text_sensor.template.publish:
-                            id: wakeword_location
-                            state: !lambda 'return "Home Assistant";'
             - if:
                 condition:
-                  lambda: return x == "On device";
+                  lambda: return strcmp(id(wake_word_engine_location).current_option(), "On device") == 0;
                 then:
-                  - text_sensor.template.publish:
-                      id: wakeword_location
-                      state: !lambda 'return "On Device";'
+                  - lambda: ESP_LOGD("wake_word_engine_location", "Set to On Device");
+                  - lvgl.dropdown.update:
+                      id: dropdown_wakeword
+                      selected_index: 1
                   - lambda: id(va).set_use_wake_word(false);
                   - voice_assistant.stop
                   - delay: 500ms
@@ -2404,6 +2405,15 @@ select:
                         switch.is_off: mute_switch
                       then:
                         - micro_wake_word.start
+          else:
+            - if:
+                condition:
+                  lambda: return strcmp(id(wake_word_engine_location).current_option(), "On device") == 0;
+                then:
+                  - lambda: ESP_LOGD("wake_word_engine_location", "Set to On Device");
+                  - lvgl.dropdown.update:
+                      id: dropdown_wakeword
+                      selected_index: 1
 
   - platform: template
     name: "Wake word sensitivity"
@@ -3034,21 +3044,6 @@ text_sensor:
           text: !lambda |-
             const char* uptime = id(up_sens_text).state.c_str();
             return uptime;
-
-  - platform: template
-    id: wakeword_location
-    on_value:
-      - if:
-          condition:
-            lambda: return id(wakeword_location).state == "Home Assistant";
-          then:
-            - lvgl.dropdown.update:
-                id: dropdown_wakeword
-                selected_index: 0
-          else:
-            - lvgl.dropdown.update:
-                id: dropdown_wakeword
-                selected_index: 1
 
   - platform: template
     id: time_remaining_0
@@ -6707,13 +6702,13 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                         options:
-                          - In Home Assistant
+                          - Home Assistant
                           - On Device
                         dropdown_list:
                           selected:
                             checked:
                               text_color: 0xFF0000
-                        on_value:
+                        on_change:
                           - if:
                               condition:
                                 lambda: return (x == 0);
