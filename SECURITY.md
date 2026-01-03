@@ -6,7 +6,7 @@ Current Supported Versions are listed below.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 2025.x   | :white_check_mark: |
+| 2026.x   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
