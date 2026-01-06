@@ -181,7 +181,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.01.04"
+    version: "2026.01.06"
 
 esp32:
   board: esp32s3box
@@ -1173,9 +1173,14 @@ script:
                                       return (id(voice_assistant_phase) == ${voice_assist_timer_finished_phase_id});
                                   - lambda: |-
                                       return (id(voice_assistant_phase) == ${voice_assist_timer_finishing_phase_id});
+                                  - lvgl.page.is_showing: notification_page
+                                  - lvgl.page.is_showing: image_page
+                                  - lvgl.page.is_showing: alarm_keypad_page
+                                  - lvgl.page.is_showing: time_remaining_page
+                                  - lvgl.page.is_showing: timer_finished_page
                             then:
                               - lvgl.widget.hide: but_snooze
-                              - lvgl.page.show: idle_page                       
+                              - lvgl.page.show: idle_page
                         - if:
                             condition:
                               lambda: |-
@@ -1737,11 +1742,11 @@ script:
           text: !lambda |-
             const char* notifytext = id(notification_text).state.c_str();
             return notifytext;
+      - delay: 15s
+      - lambda: id(previous_notification_text) = "";
       - text.set:
           id: notification_text
           value: ""
-      - delay: 10s
-      - lambda: id(previous_notification_text) = "";
       - lvgl.page.show: idle_page
       - script.execute: draw_display
 
