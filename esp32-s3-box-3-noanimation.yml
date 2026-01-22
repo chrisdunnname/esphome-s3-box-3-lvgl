@@ -2938,6 +2938,7 @@ font:
       - "\U000F0594"# clear-night
       - "\U000F0590"# cloudy
       - "\U000F0F2F"# exceptional
+      - "\U000F0591"# fog
       - "\U000F0592"# hail
       - "\U000F0593"# lightning
       - "\U000F067E"# lightning-rainy
@@ -3661,25 +3662,25 @@ text_sensor:
                   
 color:
   - id: active_timer_color
-    hex: "26ed3a"
+    hex: 26ed3a
   - id: paused_timer_color
-    hex: "3b89e3"
+    hex: 3b89e3
   - id: green
-    hex: '75D15F'
+    hex: 75D15F
   - id: red
-    hex: 'FF3131'
+    hex: FF3131
   - id: blue
-    hex: '47B7E9'
+    hex: 47B7E9
   - id: blue_drk
     hex: '085296'
   - id: amber
-    hex: 'FBAB35'
+    hex: FBAB35
   - id: lime
-    hex: '20FC30'
+    hex: 20FC30
   - id: pink
-    hex: 'D92BBC'
+    hex: D92BBC
   - id: yellow
-    hex: 'FFC000'
+    hex: FFC000
   - id: black
     hex: '000000'
   - id: white
