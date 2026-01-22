@@ -144,6 +144,8 @@ substitutions:
   font_glyphs: '&@!"''%()+=,-_.:°/$€£¥?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюя'
   font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/Montserrat-Regular.ttf
   icon_font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/materialdesignicons-webfont.ttf
+  font_bpp: 1
+  font_icon_bpp: 4
 #Note: LVGL includes a default prerendered fonts and icons.
 ###########################
 
@@ -753,25 +755,31 @@ speaker:
     platform: mixer
     output_speaker: i2s_audio_speaker
     source_speakers:
-     - id: announcement_mixing_input
-     - id: media_mixing_input
+      - id: announcement_mixing_input
+        timeout: never
+      - id: media_mixing_input
+        timeout: never
+
   - platform: resampler
     id: announcement_resampling_speaker
     output_speaker: announcement_mixing_input
     sample_rate: 48000
+    bits_per_sample: 16
+
   - platform: resampler
     id: media_resampling_speaker
     output_speaker: media_mixing_input
     sample_rate: 48000
+    bits_per_sample: 16
 
 media_player:
   - platform: speaker
     name: Media Player
     id: speaker_media_player
+    task_stack_in_psram: true
     volume_increment: 0.05
     volume_min: 0.5
     volume_max: 0.8
-    task_stack_in_psram: true
     announcement_pipeline:
       speaker: announcement_resampling_speaker
       format: FLAC
@@ -1830,7 +1838,7 @@ script:
           then:
             - if:
                 condition: 
-                  lambda: return (id(uimode).current_option() == "Default" || id(uimode).current_option() == "");
+                  lambda: return (id(uimode).current_option() == "Default" || id(uimode).current_option() == "" || id(uimode).current_option().empty());
                 then:
                   - lvgl.style.update:
                       id: header_footer
@@ -2593,7 +2601,7 @@ number:
     unit_of_measurement: '%'
     optimistic: true
     restore_value: true
-    initial_value: 30
+    initial_value: 40
     step: 5
     min_value: 20
     max_value: 100
@@ -2731,6 +2739,7 @@ online_image:
     resize: 318x238
     type: RGB565
     transparency: alpha_channel
+    byte_order: big_endian
     id: online_png_image
     on_download_finished:
       - script.execute: showonlineimage
@@ -2745,6 +2754,7 @@ image:
     type: RGB565
     resize: 318x238
     transparency: alpha_channel
+    byte_order: big_endian
   images:
     - file: ${error_illustration_file}
       id: error_img
@@ -2797,49 +2807,56 @@ font:
   - file: ${font_file}
     id: my_font
     size: 14
+    bpp: ${font_bpp}
     glyphs:
       '${font_glyphs}'
 
   - file: ${font_file}
     id: my_font12
     size: 12
+    bpp: ${font_bpp}
     glyphs:
       '${font_glyphs}'
 
   - file: ${font_file}
     id: my_font16
     size: 16
+    bpp: ${font_bpp}
     glyphs:
       '${font_glyphs}'
 
   - file: ${font_file}
     id: my_font40
     size: 40
+    bpp: ${font_bpp}
     glyphs:
       '${font_glyphs}'
 
   - file: ${font_file}
     id: my_font60
     size: 60
+    bpp: ${font_bpp}
     glyphs:
       '${font_glyphs}'
 
   - file: ${font_file}
     id: my_font18
     size: 18
+    bpp: ${font_bpp}
     glyphs:
       '${font_glyphs}'
 
   - file: ${font_file}
     id: my_font22
     size: 22
+    bpp: ${font_bpp}
     glyphs:
       '${font_glyphs}'
       
   - file: ${icon_font_file}
     id: icon_font_55
     size: 45
-    bpp: 4
+    bpp: ${font_icon_bpp}
     glyphs: &icon_glyphs
       - "\U000F0079"#battery 100%
       - "\U000F007A"#battery 10%
@@ -2957,13 +2974,13 @@ font:
   - file: ${icon_font_file}
     id: icon_font_20
     size: 20
-    bpp: 4
+    bpp: ${font_icon_bpp}
     glyphs: *icon_glyphs
 
   - file: ${icon_font_file}
     id: icon_font_80
     size: 75
-    bpp: 4
+    bpp: ${font_icon_bpp}
     glyphs: *icon_glyphs
 
 text_sensor:
@@ -3775,6 +3792,8 @@ key_collector:
 lvgl:
   id: lvgl_display
   disp_bg_color: 0x000000
+  buffer_size: 100%
+  byte_order: big_endian
   on_idle:
     - timeout: 1s
       then:
@@ -6123,6 +6142,7 @@ lvgl:
             text_font: icon_font_20
             x: -15
             y: 60
+
     - id: listening_page
       skip: true
       widgets:
@@ -7708,7 +7728,7 @@ lvgl:
           y: 10
           text_font: my_font
           text_color: 0xFFFFFF
-          text: ""
+          text: " "
           on_release:
             then:
               lvgl.page.show: alarmclock_page
@@ -7947,6 +7967,9 @@ lvgl:
         border_color: 0x0077b3
         border_width: 1
         text_color: 0xFFFFFF
+    roller:
+      text_font: my_font
+
   style_definitions:
     - id: header_footer
       bg_color: 0x1d5f96
@@ -7961,7 +7984,7 @@ lvgl:
       border_color: 0x0077b3
       text_color: 0xFFFFFF
       width: 100%
-      height: 30
+      height: 30 #taskbar height
     - id: page_content
       bg_color: 0x000000
       width: 100%
