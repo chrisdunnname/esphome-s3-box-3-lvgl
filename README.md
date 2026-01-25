@@ -152,8 +152,9 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 ![keypad](https://github.com/user-attachments/assets/38949e87-908c-4192-a79f-7000efd451c5)
 
 # Screensaver
-![analog](https://github.com/user-attachments/assets/dfb647fe-6d61-4561-b051-6af23b851f27)
-![digital](https://github.com/user-attachments/assets/ccfa0c24-9ae2-4b64-84ea-2c60173ea339)
+![saver_analog](https://github.com/user-attachments/assets/eaf5b57a-bd56-4a2e-b661-d73f0000fd17)
+![saver_digital](https://github.com/user-attachments/assets/eba21284-cef9-4110-9f2d-e9d8aa58dba2)
+
 - The page title is configurable.
 - The left side of the screen shows device Temperature and Humidity and will not be shown if a sensor dock is not connected.
 - The right side of the screen shows your specified weather entity temperature and condition and will not be shown if a valid entity is not specified.
@@ -209,7 +210,7 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 ![wifi](https://github.com/user-attachments/assets/b3d620e6-5143-4904-b3ef-78cab5da5b4a)
 
 # OTA Updates
-![ota](https://github.com/user-attachments/assets/b72041fb-3402-4387-a839-bb7c78d40b21)
+![OTA](https://github.com/user-attachments/assets/7d1bd6bc-216c-4bd0-b760-70dc7f569a53)
 
 # Getting Started
 All standard user functions included in the configuration are now provided as substitutions in the YAML. 
