@@ -156,8 +156,8 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 ![saver_digital](https://github.com/user-attachments/assets/eba21284-cef9-4110-9f2d-e9d8aa58dba2)
 
 - The page title is configurable.
-- The left side of the screen shows device Temperature and Humidity and will not be shown if a sensor dock is not connected.
-- The right side of the screen shows your specified weather entity temperature and condition and will not be shown if a valid entity is not specified.
+- The left side of the screen shows device Temperature and Humidity if an Sensor Dock is connected. Alternatively room temperature and humidity sensors can be defined in substitutions to show data from an external sensor. For custom sensors the screensaver will show temperature or temperature and humidity based on the available entities.
+- The right side of the screen shows your specified weather entity temperature and condition and will not be shown if a valid entity is not specified.  Forecast outside temperature and condition can be provided by Open Weather Map or another weather forecast entity in HA.
 
 # Settings
 ![settings](https://github.com/user-attachments/assets/9f51c38d-4a3f-450a-9771-42b6d3ad4c6e)

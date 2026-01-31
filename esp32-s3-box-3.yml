@@ -37,10 +37,10 @@ substitutions:
   voice_assist_timer_finished_phase_id: "20"
   voice_assist_timer_finishing_phase_id: "30"
   
-  #Your data
+###### Your Configuration Data ######
   external_media_player: your_media_player  ##change this to your external media player enity_id: do not include media_player.
   home_assistant_host: http://homeassistant.local:8123 ##change to the full url or IP of your HA server including port
-  api_key: QhTgdqqJ3XY9DbDuN8NS1+zXUr8NaY83pab4dqgy8Yk= ##### Device specific API KEY
+  api_key: QhTgdqqJ3XY9DbDuN8NS1+zXUr8NaY83pab4dqgy8Yk= ## Device specific API KEY
   wifi_fallback_pwd: s3box123
   home_page_title: "Home"
   climate_page_title: "Climate"
@@ -81,8 +81,8 @@ substitutions:
   controls3_entity: switch.switch3 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   controls3_icon: "\U000F097E" #icon from icon_glyphs
   controls4_name: "Garage" #Switch with binary sensor to indicate state of door
-  controls4_entity: switch.garagedoorbutton #switch
-  controls4_state: binary_sensor.garagedoorstate #binary_sensor
+  controls4_entity: switch.garagedoorbutton #switch,cover
+  controls4_state: binary_sensor.garagedoorstate #binary_sensor,cover
   controls5_name: "Dishwasher" #HomeConnect Dishwasher
   controls5_programs: select.device_programs #select
   controls5_start: button.device_start_pause #button
@@ -90,7 +90,7 @@ substitutions:
   controls5_state: sensor.device_bsh_common_status_operationstate #sensor
   controls5_doorstate: binary_sensor.device_bsh_common_status_doorstate #binary_sensor
   controls6_name: "Vacuum"
-  controls6_entity: vacuum.vacuum_cleaner #vacuum    
+  controls6_entity: vacuum.vacuum_cleaner #vacuum
   media_page_title: "Media"
   scenes_page_title: "Screens"
   scenes_page_icon: "\U000F0FCE" #icon from icon_glyphs
@@ -138,6 +138,8 @@ substitutions:
   keypad_page_title: "Code"
   ssaver_page_title: " "
   screensaver_weather_entity: weather.home #weather
+  room_temperature_entity: sensor.temperature #temperature sensor for local room
+  room_humidity_entity: sensor.humidity #humidity sensor for local room
   notification_page_title: "Notification"
 
 ###### Fonts & Icons ######
@@ -146,9 +148,10 @@ substitutions:
   icon_font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/materialdesignicons-webfont.ttf
   font_bpp: 1
   font_icon_bpp: 4
-#Note: LVGL includes a default prerendered fonts and icons.
+#Note: LVGL includes a default pre-rendered fonts and icons.
 ###########################
 
+###### Standard Configuration ######
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
@@ -183,7 +186,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.01.24"
+    version: "2026.02.01"
 
 esp32:
   board: esp32s3box
@@ -296,25 +299,29 @@ interval:
                   - lambda: "id(wifi_connection) = false;"
   - interval: 10s
     then:
-      - lambda: |-
-          float celsius = id(s3temp).state;
-          if (id(temp_unit).current_option() == "Fahrenheit") {
-            id(display_temp) = celsius * 9.0 / 5.0 + 32.0;
-          } else {
-            id(display_temp) = celsius;
-          }
-      - lvgl.label.update:
-          id: temp_label
-          text: !lambda |-
-            char buf[10];
-            sprintf(buf, "%.1f%s", id(display_temp), id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
-            return buf;
-      - lvgl.label.update:
-          id: humidity_label
-          text: !lambda |-
-            char buf[10];
-            sprintf(buf, "%.1f%s", id(s3humidity).state, "%");
-            return buf;
+      - if:
+          condition:
+            lambda: return !id(use_room_temp);
+          then:
+            - lambda: |-
+                float celsius = id(s3temp).state;
+                if (id(temp_unit).current_option() == "Fahrenheit") {
+                  id(display_temp) = celsius * 9.0 / 5.0 + 32.0;
+                } else {
+                  id(display_temp) = celsius;
+                }
+            - lvgl.label.update:
+                id: temp_label
+                text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.1f%s", id(display_temp), id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+                  return buf;
+            - lvgl.label.update:
+                id: humidity_label
+                text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.1f%s", id(s3humidity).state, "%");
+                  return buf;
 
 button:
   - platform: factory_reset
@@ -371,12 +378,22 @@ sensor:
             return x + id(temp_offset_number).state;
       id: s3temp
       on_value:
-        - lvgl.widget.show: temp_label
+        - delay: 15s
+        - if:
+            condition: 
+              lambda: return !id(use_room_temp);
+            then:
+              - lvgl.widget.show: temp_label
     humidity:
       name: "S3 Humidity"
       id: s3humidity
       on_value:
-        - lvgl.widget.show: humidity_label
+        - delay: 15s
+        - if:
+            condition: 
+              lambda: return !id(use_room_temp);
+            then:
+              - lvgl.widget.show: humidity_label
     update_interval: 30s
 
   - platform: adc
@@ -479,7 +496,7 @@ sensor:
             sprintf(buf, "%.f%%", id(wifi_percent).state);
             return buf;
 
-##### CLIMATE PAGE SENSORS #####
+### CLIMATE PAGE SENSORS ###
   - platform: homeassistant
     id: climate1_temp
     entity_id: ${climate1_entity}
@@ -602,7 +619,7 @@ sensor:
               sprintf(buf, "%.1f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
               return buf;
 
-##### SCREENSAVER FORECAST TEMPERATURE #####
+### SCREENSAVER FORECAST TEMPERATURE ###
   - platform: homeassistant
     id: external_temp
     entity_id: ${screensaver_weather_entity}
@@ -618,7 +635,37 @@ sensor:
               sprintf(buf, "%.1f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
               return buf;
 
-##########
+### SCREENSAVER ROOM TEMPERATURE ###
+  - platform: homeassistant
+    id: room_temp
+    entity_id: ${room_temperature_entity}
+    internal: true
+    on_value:
+      then:
+        - lambda: id(use_room_temp) = true;
+        - lvgl.widget.show: temp_label
+        - lvgl.label.update:
+            id: temp_label   
+            text: !lambda |-
+              char buf[10];
+              sprintf(buf, "%.1f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+              return buf;
+
+### SCREENSAVER ROOM HUMIDITY ###
+  - platform: homeassistant
+    id: room_humidity
+    entity_id: ${room_humidity_entity}
+    internal: true
+    on_value:
+      then:
+        - lambda: id(use_room_temp) = true;
+        - lvgl.widget.show: humidity_label
+        - lvgl.label.update:
+            id: humidity_label   
+            text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.1f%s", x, "%");
+                  return buf;
 
 text:
   - platform: template
@@ -2742,6 +2789,10 @@ globals:
   - id: alarmclock_ringing
     type: bool
     restore_value: false
+  - id: use_room_temp
+    type: bool
+    restore_value: false
+    initial_value: "false"
 
 http_request:
   timeout: 30s
@@ -3135,7 +3186,7 @@ text_sensor:
         - lvgl.widget.show: btn_mx_alarm
         - script.execute: set_alarm_status
 
-##### CLIMATE PAGE TEXT SENSORS #####
+### CLIMATE PAGE TEXT SENSORS ###
   - platform: homeassistant
     id: climate1_item
     entity_id: ${climate1_entity}
@@ -3200,7 +3251,7 @@ text_sensor:
                         id: dropdown_studioacmode
                         selected_index: 4
 
-##### SCREENSAVER FORECAST CONDITION #####
+### SCREENSAVER FORECAST CONDITION ###
   - platform: homeassistant
     id: external_temp_condition
     entity_id: ${screensaver_weather_entity}
@@ -3251,7 +3302,7 @@ text_sensor:
               snprintf(buf, sizeof(buf), "%s", icon.c_str());
               return buf;
 
-##### CONTROL PAGE TEXT SENSORS #####
+### CONTROL PAGE TEXT SENSORS ###
   - platform: homeassistant
     id: control1_item
     entity_id: ${controls1_entity}
@@ -3262,7 +3313,7 @@ text_sensor:
         - lvgl.widget.show: but_control_1
         - if:
             condition:
-              lambda: return (id(control1_item).state == "on");
+              lambda: return (id(control1_item).state == "on" || id(control1_item).state == "open");
             then:
               - lvgl.widget.update:
                     id: but_control_1
@@ -3284,7 +3335,7 @@ text_sensor:
         - lvgl.widget.show: but_control_2
         - if:
             condition:
-              lambda: return (id(control2_item).state == "on");
+              lambda: return (id(control2_item).state == "on" || id(control2_item).state == "open");
             then:
               - lvgl.widget.update:
                     id: but_control_2
@@ -3306,7 +3357,7 @@ text_sensor:
         - lvgl.widget.show: but_control_3
         - if:
             condition:
-              lambda: return (id(control3_item).state == "on");
+              lambda: return (id(control3_item).state == "on" || id(control3_item).state == "open");
             then:
               - lvgl.widget.update:
                     id: but_control_3
@@ -3328,7 +3379,7 @@ text_sensor:
         - lvgl.widget.show: but_control_4
         - if:
             condition:
-              lambda: return (id(control4_item).state == "on");
+              lambda: return (id(control4_item).state == "on" || id(control4_item).state == "open");
             then:
               - lvgl.widget.update:
                   id: but_control_4
@@ -3401,7 +3452,7 @@ text_sensor:
                     checked: !lambda return false;
               - if:
                   condition:
-                    lambda: return (id(control5_item2).state == "on");
+                    lambda: return (id(control5_item2).state == "on" || id(control5_item2).state == "open");
                   then:
                     - lvgl.label.update:
                         id: ico_control_5
@@ -3449,7 +3500,7 @@ text_sensor:
                         id: ico_control_6
                         text_color: yellow
 
-  ##### SCENES PAGE TEXT SENSORS #####
+### SCENES PAGE TEXT SENSORS ###
   - platform: homeassistant
     id: scenes1_item
     entity_id: ${scenes1_entity}
@@ -3460,7 +3511,7 @@ text_sensor:
         - lvgl.widget.show: but_scenes_1
         - if:
             condition:
-              lambda: return (id(scenes1_item).state == "off");
+              lambda: return (id(scenes1_item).state == "off" || id(scenes1_item).state == "closed");
             then:
               - lvgl.widget.update:
                   id: but_scenes_1
@@ -3488,7 +3539,7 @@ text_sensor:
         - lvgl.widget.show: but_scenes_2
         - if:
             condition:
-              lambda: return (id(scenes2_item).state == "off");
+              lambda: return (id(scenes2_item).state == "off" || id(scenes2_item).state == "closed");
             then:
               - lvgl.widget.update:
                   id: but_scenes_2
@@ -3516,7 +3567,7 @@ text_sensor:
         - lvgl.widget.show: but_scenes_3
         - if:
             condition:
-              lambda: return (id(scenes3_item).state == "off");
+              lambda: return (id(scenes3_item).state == "off" || id(scenes3_item).state == "closed");
             then:
               - lvgl.widget.update:
                   id: but_scenes_3
@@ -3544,7 +3595,7 @@ text_sensor:
         - lvgl.widget.show: but_scenes_4
         - if:
             condition:
-              lambda: return (id(scenes4_item).state == "off");
+              lambda: return (id(scenes4_item).state == "off" || id(scenes4_item).state == "closed");
             then:
               - lvgl.widget.update:
                   id: but_scenes_4
@@ -3572,7 +3623,7 @@ text_sensor:
         - lvgl.widget.show: but_scenes_5
         - if:
             condition:
-              lambda: return (id(scenes5_item).state == "off");
+              lambda: return (id(scenes5_item).state == "off" || id(scenes5_item).state == "closed");
             then:
               - lvgl.widget.update:
                   id: but_scenes_5
@@ -3600,7 +3651,7 @@ text_sensor:
         - lvgl.widget.show: but_scenes_6
         - if:
             condition:
-              lambda: return (id(scenes6_item).state == "off");
+              lambda: return (id(scenes6_item).state == "off" || id(scenes6_item).state == "closed");
             then:
               - lvgl.widget.update:
                   id: but_scenes_6
@@ -3618,7 +3669,7 @@ text_sensor:
                         id: ico_scenes_6
                         text: '${scenes6_icon_on}'
 
-##### SECURITY PAGE TEXT SENSORS #####
+### SECURITY PAGE TEXT SENSORS ###
   - platform: homeassistant
     id: security1_item
     entity_id: ${security1_entity}
@@ -3630,10 +3681,10 @@ text_sensor:
         - lvgl.widget.update:
             id: but_security_1
             state:
-              checked: !lambda return (id(security1_item).state == "locked" || id(security1_item).state == "on");
+              checked: !lambda return (id(security1_item).state == "locked" || id(security1_item).state == "on" || id(security1_item).state == "closed");
         - if:
             condition:
-              lambda: return (id(security1_item).state == "locked" || id(security1_item).state == "on");
+              lambda: return (id(security1_item).state == "locked" || id(security1_item).state == "on" || id(security1_item).state == "closed");
             then:
               - lvgl.label.update:
                   id: ico_security_1
@@ -3656,10 +3707,10 @@ text_sensor:
         - lvgl.widget.update:
             id: but_security_2
             state:
-              checked: !lambda return (id(security2_item).state == "locked" || id(security2_item).state == "on");
+              checked: !lambda return (id(security2_item).state == "locked" || id(security2_item).state == "on" || id(security2_item).state == "closed");
         - if:
             condition:
-              lambda: return (id(security2_item).state == "locked" || id(security2_item).state == "on");
+              lambda: return (id(security2_item).state == "locked" || id(security2_item).state == "on" || id(security2_item).state == "closed");
             then:
               - lvgl.label.update:
                   id: ico_security_2
@@ -3682,10 +3733,10 @@ text_sensor:
         - lvgl.widget.update:
             id: but_security_3
             state:
-              checked: !lambda return (id(security3_item).state == "locked" || id(security3_item).state == "on");
+              checked: !lambda return (id(security3_item).state == "locked" || id(security3_item).state == "on" || id(security3_item).state == "closed");
         - if:
             condition:
-              lambda: return (id(security3_item).state == "locked" || id(security3_item).state == "on");
+              lambda: return (id(security3_item).state == "locked" || id(security3_item).state == "on" || id(security3_item).state == "closed");
             then:
               - lvgl.label.update:
                   id: ico_security_3
@@ -3803,12 +3854,12 @@ key_collector:
       - script.execute: set_alarm_status
       - lvgl.page.show: security_page
                     
-########## LVGL Display UI #########
+###### LVGL Display UI ######
 # All UI configuration is below. 
 # The sequences of pages impacts the next/previous buttons.
 # The UI sends actions to entities while entities send status or can change icons/colors/properties.
 # This means most widgets that perform an action on an entity the corresponding entity updates the widget.
-####################################
+#############################
 lvgl:
   id: lvgl_display
   disp_bg_color: 0x000000
@@ -4529,9 +4580,7 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: !lambda |
-                              std::string s = "${lights1_entity}";
-                              return s.substr(0, s.find('.')) + ".toggle";
+                            action: homeassistant.toggle
                             data:
                               entity_id: ${lights1_entity}
                     - label:
@@ -4566,9 +4615,7 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: !lambda |
-                              std::string s = "${lights2_entity}";
-                              return s.substr(0, s.find('.')) + ".toggle";
+                            action: homeassistant.toggle
                             data:
                               entity_id: ${lights2_entity}
                     - label:
@@ -4603,9 +4650,7 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: !lambda |
-                              std::string s = "${lights3_entity}";
-                              return s.substr(0, s.find('.')) + ".toggle";
+                            action: homeassistant.toggle
                             data:
                               entity_id: ${lights3_entity}
                     - label:
@@ -4640,9 +4685,7 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: !lambda |
-                              std::string s = "${lights4_entity}";
-                              return s.substr(0, s.find('.')) + ".toggle";
+                            action: homeassistant.toggle
                             data:
                               entity_id: ${lights4_entity}
                     - label:
@@ -4677,9 +4720,7 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: !lambda |
-                              std::string s = "${lights5_entity}";
-                              return s.substr(0, s.find('.')) + ".toggle";
+                            action: homeassistant.toggle
                             data:
                               entity_id: ${lights5_entity}
                     - label:
@@ -4714,9 +4755,7 @@ lvgl:
                               text: "\U000F0335"
                         on_release:
                         - homeassistant.action:
-                            action: !lambda |
-                              std::string s = "${lights6_entity}";
-                              return s.substr(0, s.find('.')) + ".toggle";
+                            action: homeassistant.toggle
                             data:
                               entity_id: ${lights6_entity}
 
@@ -4788,9 +4827,7 @@ lvgl:
                         on_release:
                           then:
                             - homeassistant.action:
-                                action: !lambda |
-                                  std::string s = "${controls1_entity}";
-                                  return s.substr(0, s.find('.')) + ".toggle";
+                                action: homeassistant.toggle
                                 data:
                                   entity_id: ${controls1_entity}
                     - label:
@@ -4826,9 +4863,7 @@ lvgl:
                         on_release:
                           then:
                             - homeassistant.action:
-                                action: !lambda |
-                                  std::string s = "${controls2_entity}";
-                                  return s.substr(0, s.find('.')) + ".toggle";
+                                action: homeassistant.toggle
                                 data:
                                   entity_id: ${controls2_entity}
                     - label:
@@ -4864,9 +4899,7 @@ lvgl:
                         on_release:
                           then:
                             - homeassistant.action:
-                                action: !lambda |
-                                  std::string s = "${controls3_entity}";
-                                  return s.substr(0, s.find('.')) + ".toggle";
+                                action: homeassistant.toggle
                                 data:
                                   entity_id: ${controls3_entity}
                     - label:
@@ -4902,9 +4935,7 @@ lvgl:
                         on_release:
                           then:
                             - homeassistant.action:
-                                action: !lambda |
-                                  std::string s = "${controls4_entity}";
-                                  return s.substr(0, s.find('.')) + ".toggle";
+                                action: homeassistant.toggle
                                 data:
                                   entity_id: ${controls4_entity}
                     - label:
@@ -5685,9 +5716,7 @@ lvgl:
                                           return (s.substr(0, s.find('.')) != "lock");
                                 then:
                                   - homeassistant.service:
-                                      action: !lambda |
-                                        std::string s = "${security1_entity}";
-                                        return s.substr(0, s.find('.')) + ".toggle";
+                                      action: homeassistant.toggle
                                       data:
                                         entity_id: ${security1_entity}
                     - label:
@@ -5756,9 +5785,7 @@ lvgl:
                                           return (s.substr(0, s.find('.')) != "lock");
                                 then:
                                   - homeassistant.service:
-                                      action: !lambda |
-                                        std::string s = "${security2_entity}";
-                                        return s.substr(0, s.find('.')) + ".toggle";
+                                      action: homeassistant.toggle
                                       data:
                                         entity_id: ${security2_entity}
                     - label:
@@ -5827,9 +5854,7 @@ lvgl:
                                           return (s.substr(0, s.find('.')) != "lock");
                                 then:
                                   - homeassistant.service:
-                                      action: !lambda |
-                                        std::string s = "${security3_entity}";
-                                        return s.substr(0, s.find('.')) + ".toggle";
+                                      action: homeassistant.toggle
                                       data:
                                         entity_id: ${security3_entity}
               - buttonmatrix:
@@ -8033,7 +8058,6 @@ lvgl:
       border_color: 0x000000
       border_width: 1
       text_color: 0xFFFFFF
-      ############## ADD SHADOW
       shadow_color: 0xFFFFFF
       shadow_width: 20
       shadow_ofs_x: 0
@@ -8044,7 +8068,6 @@ lvgl:
     - id: button_pressed_style
       bg_color: 0x666666 #grey
       bg_grad_color: 0x00334d #dark blue
-      ############## ADD SHADOW
       shadow_color: 0xFFFFFF
       shadow_width: 20
       shadow_ofs_x: 0
@@ -8057,7 +8080,6 @@ lvgl:
       bg_grad_color: 0x002233 #darker blue
       bg_grad_dir: VER
       text_color: yellow
-      ############## ADD SHADOW
       shadow_color: 0xFFFFFF
       shadow_width: 20
       shadow_ofs_x: 0
@@ -8071,7 +8093,7 @@ lvgl:
       shadow_width: 0
 
 binary_sensor:
-###### top left hand physical button #######
+### top left hand physical button ###
   - platform: gpio
     pin:
       number: GPIO0
@@ -8109,7 +8131,7 @@ binary_sensor:
         then:
           - button.press: factory_reset_btn
 
-#######     red circle home button   ######
+### red circle home button ###
   - platform: gt911
     id: home_button
     index: 0
@@ -8140,7 +8162,7 @@ binary_sensor:
             - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
       - script.execute: draw_display
 
-###### radar sensor #####
+### radar sensor ###
   - platform: gpio
     pin:
       number: GPIO21
@@ -8193,7 +8215,7 @@ binary_sensor:
             - switch.turn_off: timer_ringing
             - script.execute: snoozealarm
 
-##### LIGHT PAGE BINARY SENSORS #####
+### LIGHT PAGE BINARY SENSORS ###
   - platform: homeassistant
     id: light1_item
     entity_id: ${lights1_entity}
