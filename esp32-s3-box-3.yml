@@ -73,16 +73,21 @@ substitutions:
   controls_page_icon: "\U000F097E" #icon from icon_glyphs
   controls1_name: "Kettle"
   controls1_entity: switch.kettle_start #switch,light,media_player,climate,fan,humidifier,cover,script,siren
-  controls1_icon: "\U000F05FA" #icon from icon_glyphs
+  controls1_icon_off: "\U000F131B" #icon from icon_glyphs
+  controls1_icon_on: "\U000F05FA" #icon from icon_glyphs
   controls2_name: "Control 2"
   controls2_entity: switch.switch2 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
-  controls2_icon: "\U000F097E" #icon from icon_glyphs
+  controls2_icon_off: "\U000F097E" #icon from icon_glyphs
+  controls2_icon_on: "\U000F097E" #icon from icon_glyphs
   controls3_name: "Control 3"
   controls3_entity: switch.switch3 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
-  controls3_icon: "\U000F097E" #icon from icon_glyphs
-  controls4_name: "Garage" #Switch with binary sensor to indicate state of door
-  controls4_entity: switch.garagedoorbutton #switch,cover
-  controls4_state: binary_sensor.garagedoorstate #binary_sensor,cover
+  controls3_icon_off: "\U000F097E" #icon from icon_glyphs
+  controls3_icon_on: "\U000F097E" #icon from icon_glyphs
+  controls4_name: "Garage" #Switch with sensor to indicate state of door (on/off/open/closed)
+  controls4_entity: switch.garagedoorbutton #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  controls4_state: binary_sensor.garagedoorstate #switch,light,fan,cover,sensor,binary_sensor
+  controls4_icon_off: "\U000F12D3" #icon from icon_glyphs
+  controls4_icon_on: "\U000F12D4" #icon from icon_glyphs
   controls5_name: "Dishwasher" #HomeConnect Dishwasher
   controls5_programs: select.device_programs #select
   controls5_start: button.device_start_pause #button
@@ -186,7 +191,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.01"
+    version: "2026.02.03"
 
 esp32:
   board: esp32s3box
@@ -3009,7 +3014,8 @@ font:
       - "\U000F1A1B"#gas
       - "\U000F1C3B"#battery charging/usb powered
       - "\U000F1C6F"#info
-      - "\U000F05FA"#kettle
+      - "\U000F05FA"#kettle on
+      - "\U000F131B"#kettle off
       - "\U000F070D"#vacuum
       - "\U000F0AAC"#dishwasher
       - "\U000F11B8"#dishwasheralert
@@ -3035,6 +3041,10 @@ font:
       - "\U000F14E4"# sunny-off
       - "\U000F18F2"# refresh-auto
       - "\U000F0450"# refresh
+      - "\U000F1011"# blinds open
+      - "\U000F00AC"# blinds closed
+      - "\U000F1A6B"# roller-shade open
+      - "\U000F1A6C"# roller-shade closed
       
   - file: ${icon_font_file}
     id: icon_font_20
@@ -3319,11 +3329,17 @@ text_sensor:
                     id: but_control_1
                     state:
                       checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_control_1
+                        text: '${controls1_icon_on}'
             else:
               - lvgl.widget.update:
                     id: but_control_1
                     state:
                       checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_control_1
+                        text: '${controls1_icon_off}'
 
   - platform: homeassistant
     id: control2_item
@@ -3341,11 +3357,17 @@ text_sensor:
                     id: but_control_2
                     state:
                       checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_control_2
+                        text: '${controls2_icon_on}'
             else:
               - lvgl.widget.update:
                     id: but_control_2
                     state:
                       checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_control_2
+                        text: '${controls2_icon_off}'
                       
   - platform: homeassistant
     id: control3_item
@@ -3363,11 +3385,17 @@ text_sensor:
                     id: but_control_3
                     state:
                       checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_control_3
+                        text: '${controls3_icon_on}'
             else:
               - lvgl.widget.update:
                     id: but_control_3
                     state:
                       checked: !lambda return false;
+              - lvgl.label.update:
+                        id: ico_control_3
+                        text: '${controls3_icon_off}'
 
   - platform: homeassistant
     id: control4_item
@@ -3387,7 +3415,7 @@ text_sensor:
                     checked: !lambda return true;
               - lvgl.label.update:
                         id: ico_control_4
-                        text: "\U000F12D4"
+                        text: '${controls4_icon_on}'
             else:
               - lvgl.widget.update:
                   id: but_control_4
@@ -3395,7 +3423,7 @@ text_sensor:
                     checked: !lambda return false;
               - lvgl.label.update:
                         id: ico_control_4
-                        text: "\U000F12D3"
+                        text: '${controls4_icon_off}'
 
   - platform: homeassistant
     id: control5_item
@@ -4823,7 +4851,7 @@ lvgl:
                               id: ico_control_1
                               align: CENTER
                               text_font: icon_font_55
-                              text: '${controls1_icon}'
+                              text: '${controls1_icon_off}'
                         on_release:
                           then:
                             - homeassistant.action:
@@ -4859,7 +4887,7 @@ lvgl:
                               id: ico_control_2
                               align: CENTER
                               text_font: icon_font_55
-                              text: '${controls2_icon}'
+                              text: '${controls2_icon_off}'
                         on_release:
                           then:
                             - homeassistant.action:
@@ -4895,7 +4923,7 @@ lvgl:
                               id: ico_control_3
                               align: CENTER
                               text_font: icon_font_55
-                              text: '${controls3_icon}'
+                              text: '${controls3_icon_off}'
                         on_release:
                           then:
                             - homeassistant.action:
@@ -4931,7 +4959,7 @@ lvgl:
                               id: ico_control_4
                               align: CENTER
                               text_font: icon_font_55
-                              text: "\U000F12D3"
+                              text: '${controls4_icon_off}'
                         on_release:
                           then:
                             - homeassistant.action:
