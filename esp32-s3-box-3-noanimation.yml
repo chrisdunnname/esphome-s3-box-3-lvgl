@@ -83,19 +83,21 @@ substitutions:
   controls3_entity: switch.switch3 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   controls3_icon_off: "\U000F097E" #icon from icon_glyphs
   controls3_icon_on: "\U000F097E" #icon from icon_glyphs
-  controls4_name: "Garage" #Switch with sensor to indicate state of door (on/off/open/closed)
+  controls4_name: "Garage"
   controls4_entity: switch.garagedoorbutton #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   controls4_state: binary_sensor.garagedoorstate #switch,light,fan,cover,sensor,binary_sensor
   controls4_icon_off: "\U000F12D3" #icon from icon_glyphs
   controls4_icon_on: "\U000F12D4" #icon from icon_glyphs
-  controls5_name: "Dishwasher" #HomeConnect Dishwasher
-  controls5_programs: select.device_programs #select
-  controls5_start: button.device_start_pause #button
-  controls5_stop: button.device_stop #button
-  controls5_state: sensor.device_bsh_common_status_operationstate #sensor
-  controls5_doorstate: binary_sensor.device_bsh_common_status_doorstate #binary_sensor
+  controls5_name: "Dishwasher"
+  controls5_entity: input_boolean.dishwasher #toggle - switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  controls5_state: input_boolean.dishwasher #status - switch,light,fan,cover,sensor,binary_sensor
+  controls5_icon_off: "\U000F0AAC" #icon from icon_glyphs
+  controls5_icon_on: "\U000F11B8" #icon from icon_glyphs
   controls6_name: "Vacuum"
-  controls6_entity: vacuum.vacuum_cleaner #vacuum
+  controls6_entity: input_boolean.vacuum #toggle - switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  controls6_state: input_boolean.vacuum #status - switch,light,fan,cover,sensor,binary_sensor
+  controls6_icon_off: "\U000F1C01" #icon from icon_glyphs
+  controls6_icon_on: "\U000F070D" #icon from icon_glyphs
   media_page_title: "Media"
   scenes_page_title: "Screens"
   scenes_page_icon: "\U000F0FCE" #icon from icon_glyphs
@@ -141,14 +143,18 @@ substitutions:
   security3_icon_off: "\U000F033F" #icon from icon_glyphs
   security3_icon_on: "\U000F033E" #icon from icon_glyphs
   keypad_page_title: "Code"
-  ssaver_page_title: " "
+  screensaver_page_title: " "
   screensaver_weather_entity: weather.home #weather
-  room_temperature_entity: sensor.temperature #temperature sensor for local room
-  room_humidity_entity: sensor.humidity #humidity sensor for local room
+  screensaver_temperature_entity: sensor.temperature #temperature sensor for local room
+  screensaver_humidity_entity: sensor.humidity #humidity sensor for local room
+  screensaver_lower_left_entity: sensor.airquality #sensor
+  screensaver_lower_left_units: " μg"
+  screensaver_lower_right_entity: sensor.allergen_index #sensor
+  screensaver_lower_right_units: " IAI"
   notification_page_title: "Notification"
 
 ###### Fonts & Icons ######
-  font_glyphs: '&@!"''%()+=,-_.:°/$€£¥?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюя'
+  font_glyphs: '&@!"''%()+=,-_.:°/$€£¥?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюяμ'
   font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/Montserrat-Regular.ttf
   icon_font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/materialdesignicons-webfont.ttf
   font_bpp: 1
@@ -191,7 +197,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.03"
+    version: "2026.02.04"
 
 esp32:
   board: esp32s3box
@@ -642,8 +648,8 @@ sensor:
 
 ### SCREENSAVER ROOM TEMPERATURE ###
   - platform: homeassistant
-    id: room_temp
-    entity_id: ${room_temperature_entity}
+    id: screensaver_temperature
+    entity_id: ${screensaver_temperature_entity}
     internal: true
     on_value:
       then:
@@ -658,8 +664,8 @@ sensor:
 
 ### SCREENSAVER ROOM HUMIDITY ###
   - platform: homeassistant
-    id: room_humidity
-    entity_id: ${room_humidity_entity}
+    id: screensaver_humidity
+    entity_id: ${screensaver_humidity_entity}
     internal: true
     on_value:
       then:
@@ -670,6 +676,36 @@ sensor:
             text: !lambda |-
                   char buf[10];
                   sprintf(buf, "%.1f%s", x, "%");
+                  return buf;
+
+### SCREENSAVER LOWER LEFT ###
+  - platform: homeassistant
+    id: screensaver_lower_left
+    entity_id: ${screensaver_lower_left_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lower_left_label
+        - lvgl.label.update:
+            id: lower_left_label  
+            text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.0f%s", x, "${screensaver_lower_left_units}");
+                  return buf;
+                  
+### SCREENSAVER LOWER RIGHT ###
+  - platform: homeassistant
+    id: screensaver_lower_right
+    entity_id: ${screensaver_lower_right_entity}
+    internal: true
+    on_value:
+      then:
+        - lvgl.widget.show: lower_right_label
+        - lvgl.label.update:
+            id: lower_right_label  
+            text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.0f%s", x, "${screensaver_lower_right_units}");
                   return buf;
 
 text:
@@ -731,7 +767,7 @@ i2c:
     scan: true
     sda_pullup_enabled: true
     scl_pullup_enabled: true
-    frequency: 50kHz
+    frequency: 100kHz
     id: bus_b
 
 at581x:
@@ -3017,6 +3053,7 @@ font:
       - "\U000F05FA"#kettle on
       - "\U000F131B"#kettle off
       - "\U000F070D"#vacuum
+      - "\U000F1C01"#vacuum off
       - "\U000F0AAC"#dishwasher
       - "\U000F11B8"#dishwasheralert
       - "\U000F083B"#televisionoff
@@ -3435,66 +3472,27 @@ text_sensor:
         - lvgl.widget.show: but_control_5
         - if:
             condition:
-              lambda: return (id(control5_item).state != "Ready");
+              lambda: return (id(control5_item).state == "on" || id(control5_item).state == "open");
             then:
               - lvgl.widget.update:
                   id: but_control_5
                   state:
                     checked: !lambda return true;
-              - if:
-                  condition:
-                    lambda: return (id(control5_item).state == "Pump off");
-                  then:
-                    - lvgl.label.update:
+              - lvgl.label.update:
                         id: ico_control_5
-                        text_color: green
-                        text: "\U000F0AAC"
-                  else:
-                    - lvgl.label.update:
-                        id: ico_control_5
-                        text_color: yellow
-                        text: "\U000F0AAC"
+                        text: '${controls5_icon_on}'
             else:
               - lvgl.widget.update:
                   id: but_control_5
                   state:
                     checked: !lambda return false;
               - lvgl.label.update:
-                  id: ico_control_5
-                  text_color: white
-                  text: "\U000F0AAC"
-
-  - platform: homeassistant
-    id: control5_item2
-    entity_id: ${controls5_doorstate}
-    internal: true
-    on_value:
-      then:
-        - if:
-            condition:
-              lambda: return (id(control5_item).state == "Ready");
-            then:
-              - lvgl.widget.update:
-                  id: but_control_5
-                  state:
-                    checked: !lambda return false;
-              - if:
-                  condition:
-                    lambda: return (id(control5_item2).state == "on" || id(control5_item2).state == "open");
-                  then:
-                    - lvgl.label.update:
                         id: ico_control_5
-                        text_color: white
-                        text: "\U000F11B8"
-                  else:
-                    - lvgl.label.update:
-                        id: ico_control_5
-                        text_color: white
-                        text: "\U000F0AAC"
+                        text: '${controls5_icon_off}'
 
   - platform: homeassistant
     id: control6_item
-    entity_id: ${controls6_entity}
+    entity_id: ${controls6_state}
     internal: true
     on_value:
       then:
@@ -3502,31 +3500,23 @@ text_sensor:
         - lvgl.widget.show: but_control_6
         - if:
             condition:
-              lambda: return (id(control6_item).state == "docked");
+              lambda: return (id(control6_item).state == "on" || id(control6_item).state == "open");
             then:
+              - lvgl.widget.update:
+                  id: but_control_6
+                  state:
+                    checked: !lambda return true;
+              - lvgl.label.update:
+                        id: ico_control_6
+                        text: '${controls6_icon_on}'
+            else:
               - lvgl.widget.update:
                   id: but_control_6
                   state:
                     checked: !lambda return false;
               - lvgl.label.update:
                         id: ico_control_6
-                        text_color: white
-            else:
-              - lvgl.widget.update:
-                  id: but_control_6
-                  state:
-                    checked: !lambda return true;
-              - if:
-                  condition:
-                    lambda: return (id(control6_item).state == "returning");
-                  then:
-                    - lvgl.label.update:
-                        id: ico_control_6
-                        text_color: green
-                  else:
-                    - lvgl.label.update:
-                        id: ico_control_6
-                        text_color: yellow
+                        text: '${controls6_icon_off}'
 
 ### SCENES PAGE TEXT SENSORS ###
   - platform: homeassistant
@@ -4995,27 +4985,13 @@ lvgl:
                               id: ico_control_5
                               align: CENTER
                               text_font: icon_font_55
-                              text: "\U000F0AAC"
+                              text: '${controls5_icon_off}'
                         on_release:
-                          - if:
-                              condition:
-                                - lambda: 'return id(control5_item).state == "Ready" && id(control5_item2).state == "off";'
-                              then:
-                                - homeassistant.action:
-                                    action: select.select_option
-                                    data:
-                                      entity_id: ${controls5_programs}
-                                      option: "Quick 1h"
-                                - delay: 4s
-                                - homeassistant.service:
-                                    service: button.press
-                                    data:
-                                      entity_id: ${controls5_start}
-                              else:
-                                - homeassistant.service:
-                                    service: button.press
-                                    data:
-                                      entity_id: ${controls5_stop}
+                          then:
+                            - homeassistant.action:
+                                action: homeassistant.toggle
+                                data:
+                                  entity_id: ${controls5_entity}
                     - label:
                         id: lbl_control_6
                         hidden: true
@@ -5045,21 +5021,13 @@ lvgl:
                               id: ico_control_6
                               align: CENTER
                               text_font: icon_font_55
-                              text: "\U000F070D"
+                              text: '${controls6_icon_off}'
                         on_release:
-                          - if:
-                              condition:
-                                - lambda: 'return id(control6_item).state == "docked";'
-                              then:
-                                - homeassistant.service:
-                                    service: vacuum.start
-                                    data:
-                                      entity_id: ${controls6_entity}
-                              else: 
-                                - homeassistant.service:
-                                    service: vacuum.return_to_base
-                                    data:
-                                      entity_id: ${controls6_entity}
+                          then:
+                            - homeassistant.action:
+                                action: homeassistant.toggle
+                                data:
+                                  entity_id: ${controls6_entity}
 
     - id: media_page
       on_swipe_left:
@@ -6073,7 +6041,7 @@ lvgl:
                   bg_opa: 30%
                   widgets:
                     - label:
-                        text: '${ssaver_page_title}'
+                        text: '${screensaver_page_title}'
                         y: 4
                         align: CENTER
                         text_align: CENTER
@@ -6175,7 +6143,7 @@ lvgl:
                   text_align: CENTER
                   text_color: 0xFFFFFF
                   text_font: my_font18
-                  y: 60
+                  y: 40
         - label:
             id: temp_label
             hidden: true
@@ -6218,6 +6186,26 @@ lvgl:
             text_font: icon_font_30
             x: -15
             y: 60
+        - label:
+            id: lower_left_label
+            hidden: true
+            align: BOTTOM_LEFT
+            text_align: LEFT
+            styles: clock_style
+            text_color: 0xFFFFFF
+            text_font: my_font18
+            x: 15
+            y: -15
+        - label:
+            id: lower_right_label
+            hidden: true
+            align: BOTTOM_RIGHT
+            text_align: RIGHT
+            styles: clock_style
+            text_color: 0xFFFFFF
+            text_font: my_font18
+            x: -15
+            y: -15
 
     - id: listening_page
       skip: true

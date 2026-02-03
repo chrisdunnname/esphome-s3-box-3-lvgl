@@ -121,8 +121,8 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 # Controls
 ![controls](https://github.com/user-attachments/assets/9b612a6d-4c20-4df4-babb-dce395eaa85f)
 - The icon of this home page button and the page title are configurable.
-- The controls page provides buttons to toggle three configurable controls which can be any entity that supports a toggle function including switch, light, media_player, climate, fan, humidifier, cover, script or siren. Icons can be configured for these 3 controls and must exist in the icon glyphs (default is switch icon).
-- The second row of controls buttons support a garage door (with switch and door state entities), a Home Connect dishwasher (with program, start, stop, state and doorstate entities) and a vacuum cleaner.
+- The controls page provides buttons to toggle configurable controls which can be any entity that supports a toggle function including switch, light, media_player, climate, fan, humidifier, cover, script or siren. Icons can be configured for on and off states and must exist in the icon glyphs (default is switch icon).
+- The second row of controls buttons include an additional substitution to allow more complex implementations where the sensor for the state is a different entity to the one for the switch. If both the action and state entity are the same for a button these operate the same as the other controls. These three controls are configured with icons to show a garage door, dishwasher and a vacuum cleaner.
 
 # Media
 **Internal Audio**
@@ -156,8 +156,9 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 ![saver_digital](https://github.com/user-attachments/assets/eba21284-cef9-4110-9f2d-e9d8aa58dba2)
 
 - The page title is configurable.
-- The left side of the screen shows device Temperature and Humidity if an Sensor Dock is connected. Alternatively room temperature and humidity sensors can be defined in substitutions to show data from an external sensor. For custom sensors the screensaver will show temperature or temperature and humidity based on the available entities.
-- The right side of the screen shows your specified weather entity temperature and condition and will not be shown if a valid entity is not specified.  Forecast outside temperature and condition can be provided by Open Weather Map or another weather forecast entity in HA.
+- The top left corner of the screen shows device Temperature and Humidity if a Sensor Dock is connected. Alternatively room temperature and humidity sensors can be defined in substitutions. These additional substitutions will show temperature or temperature and humidity based on the available entities.
+- The top right side of the screen shows your specified weather entity temperature and condition and will not be shown if a valid entity is not specified.  Forecast outside temperature and condition can be provided by Open Weather Map or another weather forecast entity in HA.
+- The lower left and right corners include can be configured via substitutions to show any sensor value and any unit of measure. For example these could be air quality indicators. These only show if available. 
 
 # Settings
 ![settings](https://github.com/user-attachments/assets/9f51c38d-4a3f-450a-9771-42b6d3ad4c6e)
