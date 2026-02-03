@@ -153,7 +153,7 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 
 # Screensaver
 ![saver_analog](https://github.com/user-attachments/assets/eaf5b57a-bd56-4a2e-b661-d73f0000fd17)
-![saver_digital](https://github.com/user-attachments/assets/eba21284-cef9-4110-9f2d-e9d8aa58dba2)
+![s3_digital_screensaver](https://github.com/user-attachments/assets/d70aab79-27c3-42ab-b382-856521651d64)
 
 - The page title is configurable.
 - The top left corner of the screen shows device Temperature and Humidity if a Sensor Dock is connected. Alternatively room temperature and humidity sensors can be defined in substitutions. These additional substitutions will show temperature or temperature and humidity based on the available entities.
