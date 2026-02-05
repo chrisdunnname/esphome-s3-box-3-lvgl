@@ -112,13 +112,16 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 **Air Conditioner**
 
 ![climate_ac](https://github.com/user-attachments/assets/e9c9fafe-a0a3-4cb6-83e3-66cfaee51f63)
+Tap the change temperature buttons to move slightly or long press to change faster.
 
 # Lights
+
 ![lights](https://github.com/user-attachments/assets/d69453d7-d109-435d-addb-da4dd86d2fae)
 - The page title is configurable.
 - The lights page provides buttons to toggle six configurable lights which can be any entity that supports a toggle function including switch, light, media_player, climate, fan, humidifier, cover, script or siren.
 
 # Controls
+
 ![controls](https://github.com/user-attachments/assets/9b612a6d-4c20-4df4-babb-dce395eaa85f)
 - The icon of this home page button and the page title are configurable.
 - The controls page provides buttons to toggle configurable controls which can be any entity that supports a toggle function including switch, light, media_player, climate, fan, humidifier, cover, script or siren. Icons can be configured for on and off states and must exist in the icon glyphs (default is switch icon).

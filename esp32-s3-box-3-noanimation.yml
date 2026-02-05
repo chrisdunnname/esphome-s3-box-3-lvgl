@@ -197,7 +197,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.04"
+    version: "2026.02.05"
 
 esp32:
   board: esp32s3box
@@ -544,11 +544,9 @@ sensor:
               char buf[10];
               sprintf(buf, "%.1f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
               return buf; 
-        - lambda: |-
-            float val = roundf(x * 2.0f) / 2.0f;  // Round to nearest 0.5
-            int scaled = (int)(val * 10);         // Scale for 1 decimal place
-            lv_spinbox_set_value(id(spinbox_studioac), scaled);
-            lv_obj_invalidate(id(spinbox_studioac));    // Force redraw
+        - lvgl.spinbox.update:
+            id: spinbox_studioac
+            value: !lambda return x;
 
   - platform: homeassistant
     id: climate2_temp
@@ -760,14 +758,14 @@ i2c:
     scan: true
     sda_pullup_enabled: true
     scl_pullup_enabled: true
-    frequency: 100kHz
+    frequency: 400kHz
 
   - sda: GPIO41
     scl: GPIO40
     scan: true
     sda_pullup_enabled: true
     scl_pullup_enabled: true
-    frequency: 100kHz
+    frequency: 400kHz
     id: bus_b
 
 at581x:
@@ -2932,22 +2930,15 @@ font:
       '${font_glyphs}'
 
   - file: ${font_file}
-    id: my_font40
-    size: 40
-    bpp: ${font_bpp}
-    glyphs:
-      '${font_glyphs}'
-
-  - file: ${font_file}
-    id: my_font60
-    size: 60
-    bpp: ${font_bpp}
-    glyphs:
-      '${font_glyphs}'
-
-  - file: ${font_file}
-    id: my_font18
+    id: labelfont_large
     size: 18
+    bpp: ${font_bpp}
+    glyphs:
+      '${font_glyphs}'
+
+  - file: ${font_file}
+    id: timefont_xlarge
+    size: 60
     bpp: ${font_bpp}
     glyphs:
       '${font_glyphs}'
@@ -3084,7 +3075,7 @@ font:
       - "\U000F1A6C"# roller-shade closed
       
   - file: ${icon_font_file}
-    id: icon_font_20
+    id: iconfont_small
     size: 20
     bpp: ${font_icon_bpp}
     glyphs: *icon_glyphs
@@ -4387,7 +4378,7 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_color: blue
-                        text_font: my_font18
+                        text_font: labelfont_large
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 1
                         grid_cell_x_align: CENTER
@@ -4407,7 +4398,7 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_color: blue
-                        text_font: my_font18
+                        text_font: labelfont_large
                         grid_cell_column_pos: 2
                         grid_cell_row_pos: 1
                         grid_cell_x_align: CENTER
@@ -4428,6 +4419,8 @@ lvgl:
                   widgets:
                     - dropdown:
                         id: dropdown_studioacmode
+                        styles: dropdown_style
+                        text_align: CENTER
                         options:
                           - "Off"
                           - Auto
@@ -4491,15 +4484,28 @@ lvgl:
                           styles: button_pressed_style
                         checked:
                           styles: button_checked_style
-                        on_click:
+                        on_short_click:
                           - lvgl.spinbox.decrement: spinbox_studioac
+                        on_long_press_repeat:
+                          - lvgl.spinbox.decrement: spinbox_studioac
+                          - delay: 1s
+                        on_release:
+                          then:
+                            - homeassistant.service:
+                                service: climate.set_temperature
+                                data:
+                                  entity_id: ${climate1_entity}
+                                  temperature: !lambda |-
+                                    int scaled_value = lv_spinbox_get_value(id(spinbox_studioac));
+                                    float actual_value = scaled_value / 10.0f;
+                                    return actual_value;
                         widgets:
                           - label:
-                               text: "-"
+                               text: "\U000F0B26"
+                               styles: spinbox_button_label_style
                     - spinbox:
                         id: spinbox_studioac
-                        align: CENTER
-                        text_align: CENTER
+                        styles: spinbox_style
                         width: 50
                         range_from: 16
                         range_to: 31
@@ -4507,17 +4513,6 @@ lvgl:
                         rollover: false
                         digits: 3
                         decimal_places: 1
-                        on_change:
-                          then:
-                            - homeassistant.service:
-                                service: climate.set_temperature
-                                data:
-                                  entity_id: ${climate1_entity}
-                                data_template:
-                                  temperature: '{{ my_variable }}'
-                                variables:
-                                  my_variable: |-
-                                    return x;
                     - button:
                         id: studioac_spin_up
                         styles: button_style
@@ -4525,12 +4520,26 @@ lvgl:
                           styles: button_pressed_style
                         checked:
                           styles: button_checked_style
-                        on_click:
+                        on_short_click:
                           - lvgl.spinbox.increment: spinbox_studioac
+                        on_long_press_repeat:
+                          - lvgl.spinbox.increment: spinbox_studioac
+                          - delay: 1s
+                        on_release:
+                          then:
+                            - homeassistant.service:
+                                service: climate.set_temperature
+                                data:
+                                  entity_id: ${climate1_entity}
+                                  temperature: !lambda |-
+                                    int scaled_value = lv_spinbox_get_value(id(spinbox_studioac));
+                                    float actual_value = scaled_value / 10.0f;
+                                    return actual_value;
                         widgets:
                           - label:
-                              text: "+"
-                                     
+                              text: "\U000F0B2C"
+                              styles: spinbox_button_label_style
+
     - id: lights_page
       on_swipe_left:
         - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
@@ -5139,7 +5148,7 @@ lvgl:
                   id: lbl_media_playing
                   align: CENTER
                   text_align: CENTER
-                  text_font: my_font18
+                  text_font: labelfont_large
                   text: "Nothing Playing"
                   text_color: lightblue
                   y: -45
@@ -5276,7 +5285,7 @@ lvgl:
                   hidden: true
                   align: CENTER
                   text_align: CENTER
-                  text_font: my_font18
+                  text_font: labelfont_large
                   text: "Nothing Playing"
                   text_color: lightblue
                   y: -45
@@ -6136,13 +6145,13 @@ lvgl:
                   align: CENTER
                   text_align: CENTER
                   text_color: 0xFFFFFF
-                  text_font: my_font60    
+                  text_font: timefont_xlarge    
               - label:
                   id: daydate_label
                   align: CENTER
                   text_align: CENTER
                   text_color: 0xFFFFFF
-                  text_font: my_font18
+                  text_font: labelfont_large
                   y: 40
         - label:
             id: temp_label
@@ -6152,7 +6161,7 @@ lvgl:
             text_align: LEFT
             styles: clock_style
             text_color: 0xFFFFFF
-            text_font: my_font18
+            text_font: labelfont_large
             x: 15
             y: 40
         - label:
@@ -6173,7 +6182,7 @@ lvgl:
             text_align: RIGHT
             styles: clock_style
             text_color: 0xFFFFFF
-            text_font: my_font18
+            text_font: labelfont_large
             x: -15
             y: 40
         - label:
@@ -6193,7 +6202,7 @@ lvgl:
             text_align: LEFT
             styles: clock_style
             text_color: 0xFFFFFF
-            text_font: my_font18
+            text_font: labelfont_large
             x: 15
             y: -15
         - label:
@@ -6203,7 +6212,7 @@ lvgl:
             text_align: RIGHT
             styles: clock_style
             text_color: 0xFFFFFF
-            text_font: my_font18
+            text_font: labelfont_large
             x: -15
             y: -15
 
@@ -6402,7 +6411,7 @@ lvgl:
                   align: CENTER
                   text_align: CENTER
                   text_color: 0xFFFFFF
-                  text_font: my_font60
+                  text_font: timefont_xlarge
                   text: " "
               - obj:
                   align: TOP_MID
@@ -6495,7 +6504,7 @@ lvgl:
                         widgets:
                           - label:
                               id: ico_snooze
-                              text_font: icon_font_20
+                              text_font: iconfont_small
                               align: CENTER
                               text: "\U000F068E"
                         on_release:
@@ -6790,6 +6799,7 @@ lvgl:
                         grid_cell_y_align: CENTER
                     - dropdown:
                         id: dropdown_wakeword
+                        styles: dropdown_style
                         align: CENTER
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 0
@@ -7001,15 +7011,18 @@ lvgl:
                                  styles: button_pressed_style
                                checked:
                                  styles: button_checked_style
-                               on_click:
+                               on_short_click:
                                  - lvgl.spinbox.decrement: spinbox_delay
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.decrement: spinbox_delay
+                                 - delay: 1s
                                widgets:
                                  - label:
-                                      text: "-"
+                                      text: "\U000F0B26"
+                                      styles: spinbox_button_label_style
                            - spinbox:
                                id: spinbox_delay
-                               align: CENTER
-                               text_align: CENTER
+                               styles: spinbox_style
                                width: 50
                                range_from: 10
                                range_to: 999999
@@ -7034,11 +7047,15 @@ lvgl:
                                  styles: button_pressed_style
                                checked:
                                  styles: button_checked_style
-                               on_click:
+                               on_short_click:
                                  - lvgl.spinbox.increment: spinbox_delay
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.increment: spinbox_delay
+                                 - delay: 1s
                                widgets:
                                  - label:
-                                     text: "+" 
+                                      text: "\U000F0B2C"
+                                      styles: spinbox_button_label_style
                     - label:
                         text: "Screen Off Delay"
                         align: CENTER
@@ -7073,15 +7090,18 @@ lvgl:
                                  styles: button_pressed_style
                                checked:
                                  styles: button_checked_style
-                               on_click:
+                               on_short_click:
                                  - lvgl.spinbox.decrement: spinbox_scr_delay
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.decrement: spinbox_scr_delay
+                                 - delay: 1s
                                widgets:
                                  - label:
-                                      text: "-"
+                                     text: "\U000F0B26"
+                                     styles: spinbox_button_label_style
                            - spinbox:
                                id: spinbox_scr_delay
-                               align: CENTER
-                               text_align: CENTER
+                               styles: spinbox_style
                                width: 50
                                range_from: 10
                                range_to: 999999
@@ -7106,11 +7126,14 @@ lvgl:
                                  styles: button_pressed_style
                                checked:
                                  styles: button_checked_style
-                               on_click:
+                               on_short_click:
+                                 - lvgl.spinbox.increment: spinbox_scr_delay
+                               on_long_press_repeat:
                                  - lvgl.spinbox.increment: spinbox_scr_delay
                                widgets:
                                  - label:
-                                     text: "+"
+                                     text: "\U000F0B2C"
+                                     styles: spinbox_button_label_style
               - obj:
                    align: CENTER
                    y: 75
@@ -7128,7 +7151,7 @@ lvgl:
                     - label:
                         id: ico_dimbrightness_1
                         align: CENTER
-                        text_font: icon_font_20
+                        text_font: iconfont_small
                         text_color: yellow
                         text: "\U000F00DF"
                     - slider:
@@ -7327,15 +7350,18 @@ lvgl:
                                  styles: button_pressed_style
                                checked:
                                  styles: button_checked_style
-                               on_click:
+                               on_short_click:
                                  - lvgl.spinbox.decrement: spinbox_temp_offset
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.decrement: spinbox_temp_offset
+                                 - delay: 1s
                                widgets:
                                  - label:
-                                      text: "-"
+                                     text: "\U000F0B26"
+                                     styles: spinbox_button_label_style
                            - spinbox:
                                id: spinbox_temp_offset
-                               align: CENTER
-                               text_align: CENTER
+                               styles: spinbox_style
                                pad_all: 3
                                width: 50
                                max_height: 42px
@@ -7354,11 +7380,15 @@ lvgl:
                                  styles: button_pressed_style
                                checked:
                                  styles: button_checked_style
-                               on_click:
+                               on_short_click:
                                  - lvgl.spinbox.increment: spinbox_temp_offset
+                               on_long_press_repeat:
+                                 - lvgl.spinbox.increment: spinbox_temp_offset
+                                 - delay: 1s
                                widgets:
                                  - label:
-                                     text: "+"
+                                     text: "\U000F0B2C"
+                                     styles: spinbox_button_label_style
 
               - obj:
                    align: CENTER
@@ -7377,7 +7407,7 @@ lvgl:
                     - label:
                         id: ico_brightness_1
                         align: CENTER
-                        text_font: icon_font_20
+                        text_font: iconfont_small
                         text_color: yellow
                         text: "\U000F00DF"
                     - slider:
@@ -7443,6 +7473,7 @@ lvgl:
                         grid_cell_y_align: CENTER
                     - dropdown:
                         id: dropdown_timeformat
+                        styles: dropdown_style
                         align: CENTER
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 0
@@ -7466,6 +7497,7 @@ lvgl:
                         grid_cell_y_align: CENTER
                     - dropdown:
                         id: dropdown_ssclock
+                        styles: dropdown_style
                         align: CENTER
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 1
@@ -7489,6 +7521,7 @@ lvgl:
                         grid_cell_y_align: CENTER
                     - dropdown:
                         id: dropdown_tempunit
+                        styles: dropdown_style
                         align: CENTER
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 2
@@ -7524,6 +7557,7 @@ lvgl:
                         grid_cell_y_align: CENTER
                     - dropdown:
                         id: dropdown_uimode
+                        styles: dropdown_style
                         align: CENTER
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 3
@@ -7805,7 +7839,7 @@ lvgl:
           align: TOP_RIGHT
           x: -2
           y: 7
-          text_font: icon_font_20
+          text_font: iconfont_small
           text_color: 0xFFFFFF
           text: "\U000F0091"
       - label:
@@ -7827,7 +7861,7 @@ lvgl:
           align: TOP_RIGHT
           x: -44
           y: 7
-          text_font: icon_font_20
+          text_font: iconfont_small
           text_color: 0xFFFFFF
           text: "\U000F07D0"
       - label:
@@ -7835,7 +7869,7 @@ lvgl:
           align: TOP_RIGHT
           x: -64
           y: 7
-          text_font: icon_font_20
+          text_font: iconfont_small
           text_color: 0xFFFFFF
           text: "\U000F036C"
           on_release:
@@ -7847,7 +7881,7 @@ lvgl:
           align: TOP_RIGHT
           x: -80
           y: 7
-          text_font: icon_font_20
+          text_font: iconfont_small
           text_color: 0xFFFFFF
           text: "\U000F099E"
           on_release:
@@ -7859,7 +7893,7 @@ lvgl:
           align: TOP_LEFT
           x: 74
           y: 7
-          text_font: icon_font_20
+          text_font: iconfont_small
           text_color: 0xFFFFFF
           text: "\U000F051B"
           on_release:
@@ -7871,7 +7905,7 @@ lvgl:
           align: TOP_LEFT
           x: 54
           y: 7
-          text_font: icon_font_20
+          text_font: iconfont_small
           text_color: 0xFFFFFF
           text: "\U000F0020"
           on_release:
@@ -8107,6 +8141,16 @@ lvgl:
       bg_color: 0x2F8CD8
       bg_grad_color: 0x005782
       shadow_width: 0
+    - id: dropdown_style
+      text_font: montserrat_16
+    - id: spinbox_style
+      text_font: montserrat_16
+      align: CENTER
+      text_align: CENTER
+    - id: spinbox_button_label_style
+      text_font: iconfont_small
+      align: CENTER
+      text_align: CENTER
 
 binary_sensor:
 ### top left hand physical button ###
