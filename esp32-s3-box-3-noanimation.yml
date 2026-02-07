@@ -197,7 +197,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.05"
+    version: "2026.02.07"
 
 esp32:
   board: esp32s3box
@@ -440,6 +440,13 @@ sensor:
             char buf[10];
             sprintf(buf, "%.f%%", id(battery_percent).state);
             return buf;
+      - if:
+          condition:
+              lambda: return (x > 0);
+          then:
+            - lvgl.widget.show: lbl_battery_status
+          else:
+            - lvgl.widget.hide: lbl_battery_status
       - lvgl.label.update:
           id: lbl_battery_status
           text: !lambda |-
@@ -1890,7 +1897,7 @@ script:
             - lvgl.label.update:
                 id: lbl_time
                 text: 
-                  time_format: "%H:%M"
+                  time_format: "%H:%M "
                   time: !lambda return id(ha_time).now();
             - lvgl.label.update:
                 id: digitaltime
@@ -1901,7 +1908,7 @@ script:
             - lvgl.label.update:
                 id: lbl_time
                 text: 
-                  time_format: "%l:%M"
+                  time_format: "%l:%M "
                   time: !lambda return id(ha_time).now();
             - lvgl.label.update:
                 id: digitaltime
@@ -3896,7 +3903,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${home_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4057,7 +4064,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${climate_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4312,7 +4319,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${climate1_name}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4557,7 +4564,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${lights_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -4803,7 +4810,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${controls_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -5055,7 +5062,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${media_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -5307,7 +5314,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${scenes_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -5637,7 +5644,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${security_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -5980,7 +5987,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${keypad_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6051,7 +6058,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${screensaver_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6245,7 +6252,7 @@ lvgl:
                   widgets:
                     - label:
                         text: " "
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6295,7 +6302,7 @@ lvgl:
                   widgets:
                     - label:
                         text: " "
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6364,7 +6371,7 @@ lvgl:
                   widgets:
                     - label:
                         text: " "
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6395,7 +6402,7 @@ lvgl:
                   widgets:
                     - label:
                         text: " "
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6419,7 +6426,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "Timer"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6436,7 +6443,7 @@ lvgl:
                   widgets:
                     - label:
                         text: " "
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6526,7 +6533,7 @@ lvgl:
                   widgets:
                     - label:
                         text: '${notification_page_title}'
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6558,7 +6565,7 @@ lvgl:
                   widgets:
                     - label:
                         text: " "
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6576,7 +6583,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "OTA"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6599,7 +6606,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "Settings"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6770,7 +6777,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "Voice"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6874,7 +6881,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "Screensaver"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -6959,7 +6966,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "Screensaver"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -7188,7 +7195,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "Info"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -7264,7 +7271,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "Device"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -7444,7 +7451,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "UI"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -7587,7 +7594,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "Wifi"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -7676,7 +7683,7 @@ lvgl:
                   widgets:
                     - label:
                         text: "Alarm Clock"
-                        y: 4
+                        y: 3
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
@@ -7823,102 +7830,111 @@ lvgl:
 
   top_layer:
     widgets:
-      - label:
-          id: lbl_time
-          align: TOP_LEFT
-          x: 5
-          y: 10
-          text_font: my_font
-          text_color: 0xFFFFFF
-          text: " "
-          on_release:
-            then:
-              lvgl.page.show: alarmclock_page
-      - label:
-          id: lbl_battery_status
-          align: TOP_RIGHT
-          x: -2
-          y: 7
-          text_font: iconfont_small
-          text_color: 0xFFFFFF
-          text: "\U000F0091"
-      - label:
-          text: "\uF1EB"
-          id: lbl_wifi
-          hidden: true
-          align: top_right
-          x: -20
-          y: 7
-          text_align: right
-          text_color: 0xFFFFFF
-          text_font: montserrat_20
-          on_release:
-            then:
-              lvgl.page.show: wifi_page
-      - label:
-          id: lbl_api
-          hidden: true
-          align: TOP_RIGHT
-          x: -44
-          y: 7
-          text_font: iconfont_small
-          text_color: 0xFFFFFF
-          text: "\U000F07D0"
-      - label:
-          id: lbl_mic
-          align: TOP_RIGHT
-          x: -64
-          y: 7
-          text_font: iconfont_small
-          text_color: 0xFFFFFF
-          text: "\U000F036C"
-          on_release:
-            then:
-              - switch.toggle: mute_switch
-      - label:
-          id: lbl_alarm
-          hidden: true
-          align: TOP_RIGHT
-          x: -80
-          y: 7
-          text_font: iconfont_small
-          text_color: 0xFFFFFF
-          text: "\U000F099E"
-          on_release:
-            then:
-              - lvgl.page.show: security_page
-      - label:
-          id: lbl_timer
-          hidden: true
-          align: TOP_LEFT
-          x: 74
-          y: 7
-          text_font: iconfont_small
-          text_color: 0xFFFFFF
-          text: "\U000F051B"
-          on_release:
-            then:
-              - lvgl.page.show: time_remaining_page
-      - label:
-          id: lbl_alarmclock
-          hidden: true
-          align: TOP_LEFT
-          x: 54
-          y: 7
-          text_font: iconfont_small
-          text_color: 0xFFFFFF
-          text: "\U000F0020"
-          on_release:
-            then:
-              if:
-                condition:
-                  switch.is_on: timer_ringing
-                then:
-                  - lvgl.widget.show: but_snooze
-                  - lvgl.page.show: timer_finished_page
-                else:
-                  - lvgl.widget.hide: but_snooze
-                  - lvgl.page.show: alarmclock_page
+      - obj:
+          layout: horizontal
+          align: top_left
+          styles: header_footer
+          bg_opa: TRANSP 
+          border_opa: TRANSP
+          widgets:
+            - obj:
+                layout:
+                  type: flex
+                  flex_flow: row
+                  flex_align_main: start
+                  flex_align_track: start
+                  flex_align_cross: start
+                styles: header_footer
+                bg_opa: TRANSP 
+                border_opa: TRANSP
+                widgets:
+                  - label:
+                      id: lbl_time
+                      align: left_mid
+                      text_font: my_font
+                      text_color: 0xFFFFFF
+                      text: " "
+                      on_release:
+                        then:
+                          lvgl.page.show: alarmclock_page
+                  - label:
+                      id: lbl_alarmclock
+                      hidden: true
+                      text_font: iconfont_small
+                      text_color: 0xFFFFFF
+                      text: "\U000F0020"
+                      on_release:
+                        then:
+                          if:
+                            condition:
+                              switch.is_on: timer_ringing
+                            then:
+                              - lvgl.widget.show: but_snooze
+                              - lvgl.page.show: timer_finished_page
+                            else:
+                              - lvgl.widget.hide: but_snooze
+                              - lvgl.page.show: alarmclock_page
+                  - label:
+                      id: lbl_timer
+                      hidden: true
+                      text_font: iconfont_small
+                      text_color: 0xFFFFFF
+                      text: "\U000F051B"
+                      on_release:
+                        then:
+                          - lvgl.page.show: time_remaining_page
+            - obj:
+                layout:
+                  type: flex
+                  flex_flow: row_reverse
+                  flex_align_main: end
+                  flex_align_track: end
+                  flex_align_cross: end
+                styles: header_footer
+                bg_opa: TRANSP 
+                border_opa: TRANSP
+                widgets:
+                  - label:
+                      id: lbl_battery_status
+                      hidden: true
+                      text_align: right
+                      text_font: iconfont_small
+                      text_color: 0xFFFFFF
+                      text: "\U000F0091"
+                  - label:
+                      id: lbl_wifi
+                      text_align: right
+                      text_color: 0xFFFFFF
+                      text_font: montserrat_20
+                      text: "\uF1EB"
+                      on_release:
+                        then:
+                          lvgl.page.show: wifi_page
+                  - label:
+                      id: lbl_api
+                      hidden: true
+                      text_align: right
+                      text_font: iconfont_small
+                      text_color: 0xFFFFFF
+                      text: "\U000F07D0"
+                  - label:
+                      id: lbl_mic
+                      text_align: right
+                      text_font: iconfont_small
+                      text_color: 0xFFFFFF
+                      text: "\U000F036C"
+                      on_release:
+                        then:
+                          - switch.toggle: mute_switch
+                  - label:
+                      id: lbl_alarm
+                      hidden: true
+                      text_font: iconfont_small
+                      text_color: 0xFFFFFF
+                      text: "\U000F099E"
+                      on_release:
+                        then:
+                          - lvgl.page.show: security_page
       - buttonmatrix:
           align: bottom_mid
           styles: header_footer
