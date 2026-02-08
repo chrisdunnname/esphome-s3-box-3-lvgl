@@ -229,9 +229,9 @@ In ESPHome under secrets ensure you have defined three secrets:
 - wifi_password (your wifi Password)
 - wifi_qr (a QR code string)
 
-The wifi_qr provides a Wifi QR Code so that guests can scan your screen to get a link, a message or directly connect to your network.
+The wifi_qr provides a Wifi QR Code so that guests can scan your screen to get details, be navigated to a link or directly connect to your network.
 To provide a QR to connect to your wifi the string should be populate like this: "WIFI:S:your_wifi_ssid;T:WPA;P:your_wifi_password;H:false;;". This is the standard format for Wifi QR codes and more details can be found in the WPA3 specification.
-Alternatively a text string can be used for a message or a hyperlink can be provided to open a dedicated page when the QR code is scanned.
+Alternatively a text string can be used for a message or a hyperlink can be provided to open when the QR code is scanned. Deep-link URLs can use the mobile app [URL handler](https://companion.home-assistant.io/docs/integrations/url-handler/) to launch specific dashboards, call services or fire events for users with the mobile app installed.  [Universal links](https://companion.home-assistant.io/docs/integrations/universal-links/) can be used here to trigger an automation the same way as an NFC tag.
 
 **Additional Information**
 
