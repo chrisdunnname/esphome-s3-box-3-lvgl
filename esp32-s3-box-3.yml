@@ -1,42 +1,7 @@
 substitutions:
   name: esp32-s3box-3
   friendly_name: ESP32-S3-Box-3
-  #Default Images
-  loading_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/loading_lvgl.png
-  # idle_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/idle.png
-  listening_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/listening.png
-  thinking_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/thinking.png
-  replying_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/replying.png
-  error_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/error.png
-  # timer_finished_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/timer_finished_320_240.png
-  # logo_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/logo.png
-  
-  # Animated Voice Assistant images
-  anim_listening1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/listening_1.png #listening
-  anim_listening2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/listening_2.png #listening, thinking
-  anim_thinking1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/thinking_1.png #thinking
-  anim_thinking2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/thinking_2.png #thinking, replying
-  anim_replying1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/replying_1.png #replying
-  anim_replying2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/replying_2.png #replying
-  anim_error1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/error_1.png #error
-  anim2_listening: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_grey.jpg
-  anim2_thinking: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_white.jpg
-  anim2_replying1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_1.jpg
-  anim2_replying2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_2.jpg
-  anim2_replying3: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_3.jpg
-  anim2_replying4: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_4.jpg
-  anim2_error: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_orange.jpg
 
-  voice_assist_idle_phase_id: "1"
-  voice_assist_listening_phase_id: "2"
-  voice_assist_thinking_phase_id: "3"
-  voice_assist_replying_phase_id: "4"
-  voice_assist_not_ready_phase_id: "10"
-  voice_assist_error_phase_id: "11"
-  voice_assist_muted_phase_id: "12"
-  voice_assist_timer_finished_phase_id: "20"
-  voice_assist_timer_finishing_phase_id: "30"
-  
 ###### Your Configuration Data ######
   external_media_player: your_media_player  ##change this to your external media player enity_id: do not include media_player.
   home_assistant_host: http://homeassistant.local:8123 ##change to the full url or IP of your HA server including port
@@ -84,8 +49,8 @@ substitutions:
   controls3_icon_off: "\U000F097E" #icon from icon_glyphs
   controls3_icon_on: "\U000F097E" #icon from icon_glyphs
   controls4_name: "Garage"
-  controls4_entity: switch.garagedoorbutton #switch,light,media_player,climate,fan,humidifier,cover,script,siren
-  controls4_state: binary_sensor.garagedoorstate #switch,light,fan,cover,sensor,binary_sensor
+  controls4_entity: switch.garagedoorbutton #toggle - switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  controls4_state: binary_sensor.garagedoorstate #status - switch,light,fan,cover,sensor,binary_sensor
   controls4_icon_off: "\U000F12D3" #icon from icon_glyphs
   controls4_icon_on: "\U000F12D4" #icon from icon_glyphs
   controls5_name: "Dishwasher"
@@ -125,10 +90,10 @@ substitutions:
   scenes6_entity: media_player.media6 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   scenes6_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes6_icon_on: "\U000F0502" #icon from icon_glyphs
-  alarmo_entity: alarm_control_panel.alarmo #alarmo
-  alarmo_background_on: 0x001a00 #Set to 0x000000 to disable
-  alarmo_background_pending: 0x330d00 #Set to 0x000000 to disable
-  alarmo_background_triggered: 0x4d0000 #Set to 0x000000 to disable
+  alarm_entity: alarm_control_panel.alarmo #Alarm - tested with Alarmo
+  alarm_background_on: 0x001a00 #Set to 0x000000 to disable
+  alarm_background_pending: 0x330d00 #Set to 0x000000 to disable
+  alarm_background_triggered: 0x4d0000 #Set to 0x000000 to disable
   security_page_title: "Security"
   security1_name: "Lock 1"
   security1_entity: lock.lock1 #lock,switch,light,media_player,climate,fan,humidifier,cover,script,siren
@@ -152,6 +117,44 @@ substitutions:
   screensaver_lower_right_entity: sensor.allergen_index #sensor
   screensaver_lower_right_units: " IAI"
   notification_page_title: "Notification"
+  wifi_qr_code: !secret wifi_qr #QR code for wifi
+
+###### Default Images ######
+  loading_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/loading_lvgl.png
+  # idle_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/idle.png
+  listening_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/listening.png
+  thinking_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/thinking.png
+  replying_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/replying.png
+  error_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/error.png
+  # timer_finished_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/timer_finished_320_240.png
+  # logo_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/logo.png
+  
+######  Animated Voice Assistant images ######
+  anim_listening1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/listening_1.png #listening
+  anim_listening2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/listening_2.png #listening, thinking
+  anim_thinking1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/thinking_1.png #thinking
+  anim_thinking2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/thinking_2.png #thinking, replying
+  anim_replying1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/replying_1.png #replying
+  anim_replying2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/replying_2.png #replying
+  anim_error1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/HAL/error_1.png #error
+  anim2_listening: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_grey.jpg
+  anim2_thinking: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_white.jpg
+  anim2_replying1: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_1.jpg
+  anim2_replying2: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_2.jpg
+  anim2_replying3: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_3.jpg
+  anim2_replying4: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_4.jpg
+  anim2_error: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_orange.jpg
+
+######  Voice Assistant Phase IDs ######
+  voice_assist_idle_phase_id: "1"
+  voice_assist_listening_phase_id: "2"
+  voice_assist_thinking_phase_id: "3"
+  voice_assist_replying_phase_id: "4"
+  voice_assist_not_ready_phase_id: "10"
+  voice_assist_error_phase_id: "11"
+  voice_assist_muted_phase_id: "12"
+  voice_assist_timer_finished_phase_id: "20"
+  voice_assist_timer_finishing_phase_id: "30"
 
 ###### Fonts & Icons ######
   font_glyphs: '&@!"''%()+=,-_.:°/$€£¥?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюяμ'
@@ -160,7 +163,6 @@ substitutions:
   font_bpp: 1
   font_icon_bpp: 4
 #Note: LVGL includes a default pre-rendered fonts and icons.
-###########################
 
 ###### Standard Configuration ######
 esphome:
@@ -197,7 +199,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.07"
+    version: "2026.02.08"
 
 esp32:
   board: esp32s3box
@@ -1644,10 +1646,10 @@ script:
                     text_color: amber
             - lvgl.style.update:
                 id: page_content
-                bg_color: ${alarmo_background_pending}
+                bg_color: ${alarm_background_pending}
             - lvgl.style.update:
                 id: clock_bg
-                bg_color: ${alarmo_background_pending}
+                bg_color: ${alarm_background_pending}
             - lvgl.label.update:
                 id: lbl_alarm
                 text_color: amber  
@@ -1665,10 +1667,10 @@ script:
                     text_color: amber
             - lvgl.style.update:
                 id: page_content
-                bg_color: ${alarmo_background_pending}
+                bg_color: ${alarm_background_pending}
             - lvgl.style.update:
                 id: clock_bg
-                bg_color: ${alarmo_background_pending}
+                bg_color: ${alarm_background_pending}
             - lvgl.label.update:
                 id: lbl_alarm
                 text: !lambda |-
@@ -1692,10 +1694,10 @@ script:
                     text_color: lime
             - lvgl.style.update:
                 id: page_content
-                bg_color: ${alarmo_background_on}
+                bg_color: ${alarm_background_on}
             - lvgl.style.update:
                 id: clock_bg
-                bg_color: ${alarmo_background_on}
+                bg_color: ${alarm_background_on}
             - lvgl.label.update:
                 id: lbl_alarm
                 text: !lambda |-
@@ -1724,10 +1726,10 @@ script:
                     text_color: lime
             - lvgl.style.update:
                 id: page_content
-                bg_color: ${alarmo_background_on}
+                bg_color: ${alarm_background_on}
             - lvgl.style.update:
                 id: clock_bg
-                bg_color: ${alarmo_background_on}
+                bg_color: ${alarm_background_on}
             - lvgl.label.update:
                 id: lbl_alarm
                 text: !lambda |-
@@ -1756,10 +1758,10 @@ script:
                     text_color: lime
             - lvgl.style.update:
                 id: page_content
-                bg_color: ${alarmo_background_on}
+                bg_color: ${alarm_background_on}
             - lvgl.style.update:
                 id: clock_bg
-                bg_color: ${alarmo_background_on}
+                bg_color: ${alarm_background_on}
             - lvgl.label.update:
                 id: lbl_alarm
                 text: !lambda |-
@@ -1788,10 +1790,10 @@ script:
                     text_color: red
             - lvgl.style.update:
                 id: page_content
-                bg_color: ${alarmo_background_triggered}
+                bg_color: ${alarm_background_triggered}
             - lvgl.style.update:
                 id: clock_bg
-                bg_color: ${alarmo_background_triggered}
+                bg_color: ${alarm_background_triggered}
             - lvgl.label.update:
                 id: lbl_alarm
                 text_color: red 
@@ -3222,7 +3224,7 @@ text_sensor:
 
   - platform: homeassistant
     name: "Alarm Status"
-    entity_id: ${alarmo_entity}
+    entity_id: ${alarm_entity}
     id: alarm_status
     on_value:
       then:
@@ -3837,7 +3839,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_disarm
                   data:
-                    entity_id: ${alarmo_entity}
+                    entity_id: ${alarm_entity}
                     code: !lambda return x.c_str();
       - if:
           condition:
@@ -3846,7 +3848,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_arm_home
                   data:
-                    entity_id: ${alarmo_entity}
+                    entity_id: ${alarm_entity}
                     code: !lambda return x.c_str();
       - if:
           condition:
@@ -3855,7 +3857,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_arm_away
                   data:
-                    entity_id: ${alarmo_entity}
+                    entity_id: ${alarm_entity}
                     code: !lambda return x.c_str();
       - if:
           condition:
@@ -3864,7 +3866,7 @@ key_collector:
             - homeassistant.service:
                   service: alarm_control_panel.alarm_arm_night
                   data:
-                    entity_id: ${alarmo_entity}
+                    entity_id: ${alarm_entity}
                     code: !lambda return x.c_str();
       - lambda: id(alarm_action) = "";
       - script.execute: set_alarm_status
@@ -5920,7 +5922,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: alarm_control_panel.alarm_arm_home
                                     data:
-                                      entity_id: ${alarmo_entity}
+                                      entity_id: ${alarm_entity}
                                 - script.execute: set_alarm_status
                               else:
                                 - lambda: |-
@@ -5939,7 +5941,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: alarm_control_panel.alarm_arm_away
                                     data:
-                                      entity_id: ${alarmo_entity}
+                                      entity_id: ${alarm_entity}
                                 - script.execute: set_alarm_status
                               else:
                                 - lambda: |-
@@ -5958,7 +5960,7 @@ lvgl:
                                 - homeassistant.service:
                                     service: alarm_control_panel.alarm_arm_night
                                     data:
-                                      entity_id: ${alarmo_entity}
+                                      entity_id: ${alarm_entity}
                                 - script.execute: set_alarm_status
                               else:
                                 - lambda: |-
@@ -7605,7 +7607,7 @@ lvgl:
                   x: -10
                   light_color: black
                   dark_color: white
-                  text: !secret wifi_qr
+                  text: ${wifi_qr_code}
               - label:
                   id: lbl_ssid_title
                   align: CENTER
