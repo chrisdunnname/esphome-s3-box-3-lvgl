@@ -217,15 +217,23 @@ Tap the change temperature buttons to move slightly or long press to change fast
 ![OTA](https://github.com/user-attachments/assets/7d1bd6bc-216c-4bd0-b760-70dc7f569a53)
 
 # Getting Started
-All standard user functions included in the configuration are now provided as substitutions in the YAML. 
-Under the "Your Data" section you can change page names, button names, icons and specify entities to enable the standard features of the configuration. 
-Only components associated with active entities in your Home Assistant will be shown on the device otherwise these features will be hidden. This means that you can just update the substitutions for the entities you require and only those items will be shown on the associated pages. 
-This makes it easy for anyone to get started with this configuration in a few minutes. For those deploying to multiple S3 devices this new design makes it easier to deploy the same configuration with different entities and makes it easy for those who wish to separate the substitutions from the core yaml.
 
-The configuration provides a Wifi QR Code so that guests can scan your screen to be connected to the specified network. 
-This is configured using a secret called "wifi_qr" that needs to be configured in your ESPHome installation.
-This secret uses a format similar to "WIFI:S:your_wifi_ssid;T:WPA;P:your_wifi_password;H:false;;". This is the standard format for Wifi QR codes and more details can be found in the WPA3 specification.
-Two additional secrets are used for wifi credentials for connecting your device to your wifi and these are wifi_ssid and wifi_password.
+**The basics**
+
+All standard user functions included in the configuration are provided as substitutions in the YAML. 
+Under the "Your Configuration Data" section you can change page names, button names, icons and specify entities to enable the standard features of the configuration. 
+Only components associated with active entities in your Home Assistant will be shown on the device otherwise these features will be hidden. This means that you can just update the substitutions for the entities you require and only those items will be shown on the associated pages. This makes it easy for anyone to get started with this configuration in a few minutes. For those deploying to multiple S3 devices this new design makes it easier to deploy the same configuration with different entities and makes it easy for those who wish to separate the substitutions from the core yaml.
+
+In ESPHome under secrets ensure you have defined three secrets:
+- wifi_ssid (your wifi SSID)
+- wifi_password (your wifi Password)
+- wifi_qr (a QR code string)
+
+The wifi_qr provides a Wifi QR Code so that guests can scan your screen to get a link, a message or directly connect to your network.
+To provide a QR to connect to your wifi the string should be populate like this: "WIFI:S:your_wifi_ssid;T:WPA;P:your_wifi_password;H:false;;". This is the standard format for Wifi QR codes and more details can be found in the WPA3 specification.
+Alternatively a text string can be used for a message or a hyperlink can be provided to open a dedicated page when the QR code is scanned.
+
+**Additional Information**
 
 To use the wake, notify and timer sounds with external audio you will need to load the sounds folder to the www folder in your home assistant. This can be done through an add on like Filebrowser or SambaShare.
 
