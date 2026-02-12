@@ -119,6 +119,47 @@ substitutions:
   notification_page_title: "Notification"
   wifi_qr_code: !secret wifi_qr #QR code for wifi
 
+###### Days and Months ######
+## Change the values on the right to match your locale ##
+  sun: Sun
+  mon: Mon
+  tue: Tue
+  wed: Wed
+  thur: Thur
+  fri: Fri
+  sat: Sat
+  sunday: Sunday
+  monday: Monday
+  tuesday: Tuesday
+  wednesday: Wednesday
+  thursday: Thursday
+  friday: Friday
+  saturday: Saturday
+  
+  jan: Jan
+  feb: Feb
+  mar: Mar
+  apr: Apr
+  jun: Jun
+  jul: Jul
+  aug: Aug
+  sept: Sept
+  oct: Oct
+  nov: Nov
+  dec: Dec
+  january: January
+  february: February
+  march: March
+  april: April
+  may: May
+  june: June
+  july: July
+  august: August
+  september: September
+  october: October
+  november: November
+  december: December
+
 ###### Default Images ######
   loading_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/loading_lvgl.png
   # idle_illustration_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/idle.png
@@ -199,7 +240,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.08"
+    version: "2026.02.12"
 
 esp32:
   board: esp32s3box
@@ -1879,19 +1920,27 @@ script:
             return std::fmod(now.hour, 12) * 60 + now.minute;
       - lvgl.label.update:
           id: date_label
-          text: 
-            time_format: "%b %e"
-            time: !lambda return id(ha_time).now();
+          text: !lambda |-
+            static const char* months[] {"${jan}","${feb}","${mar}","${apr}","${may}","${jun}","${jul}","${aug}","${sept}","${oct}","${nov}","${dec}"};
+            auto t = id(ha_time).now();
+            char buffer[50];
+            sprintf(buffer, "%s %d",months[t.month - 1],t.day_of_month);
+            return std::string(buffer);
       - lvgl.label.update:
           id: day_label
-          text: 
-            time_format: "%a"
-            time: !lambda return id(ha_time).now();
+          text: !lambda |-
+            static const char* days[] {"${sun}","${mon}","${tue}","${wed}","${thur}","${fri}","${sat}"};
+            auto t = id(ha_time).now();
+            return days[t.day_of_week - 1];
       - lvgl.label.update:
           id: daydate_label
-          text: 
-            time_format: "%A %e %B %Y"
-            time: !lambda return id(ha_time).now();
+          text: !lambda |-
+            static const char* days[] {"${sunday}","${monday}","${tuesday}","${wednesday}","${thursday}","${friday}","${saturday}"};
+            static const char* months[] {"${january}","${february}","${march}","${april}","${may}","${june}","${july}","${august}","${september}","${october}","${november}","${december}"};
+            auto t = id(ha_time).now();
+            char buffer[50];
+            sprintf(buffer, "%s %d %s %d",days[t.day_of_week - 1],t.day_of_month,months[t.month - 1],t.year);
+            return std::string(buffer);
       - if:
           condition:
             - lambda: 'return { id(time_format).current_option() == "24 Hr" };'
