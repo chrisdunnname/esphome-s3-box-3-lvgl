@@ -240,7 +240,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.12"
+    version: "2026.02.13"
 
 esp32:
   board: esp32s3box
@@ -1981,12 +1981,25 @@ script:
               - switch.is_on: alarmclock
               - lambda: 'return { (id(ha_time).now().hour == id(alarmclock_time).hour) };'
               - lambda: 'return { (id(ha_time).now().minute == id(alarmclock_time).minute) };'
+              - lambda: 'return { (id(ha_time).now().second <= 15) };'
           then:
             - lambda: id(alarmclock_ringing) = true;
             - lvgl.widget.show: but_snooze
             - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
             - switch.turn_on: timer_ringing
-
+            - delay: 15s
+      - if:
+          condition:
+            and:
+              - switch.is_on: reboot_schedule
+              - lambda: 'return { (id(ha_time).now().hour == id(reboot_time).hour) };'
+              - lambda: 'return { (id(ha_time).now().minute == id(reboot_time).minute) };'
+              - lambda: 'return { (id(ha_time).now().second <= 15) };'
+          then:
+            - delay: 10s
+            - button.press: reboot
+    mode: single
+    
   - id: set_uimode
     then:
       - if:
@@ -2317,6 +2330,15 @@ switch:
           id: bar_volume
           indicator:
             bg_color: lime
+
+  - platform: template
+    name: "Reboot Schedule"
+    id: reboot_schedule
+    icon: 'mdi:restart'
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+
   - platform: template
     id: s_saver
     name: ScrSave enable
@@ -2711,6 +2733,19 @@ datetime:
               - select.set_index:
                   id: sel_alarmclock_minutes
                   index: !lambda return (id(alarmclock_time).minute / 5);  
+
+  - id: reboot_time
+    platform: template
+    type: time
+    optimistic: true
+    restore_value: true
+    initial_value:
+      hour: 02
+      minute: 00
+      second: 00
+    name: "Reboot Time"
+    icon: 'mdi:restart-alert'
+    entity_category: config
 
 number:
   - id: s_saver_delay
