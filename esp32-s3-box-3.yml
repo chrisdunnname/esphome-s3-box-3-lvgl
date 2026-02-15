@@ -110,8 +110,11 @@ substitutions:
   keypad_page_title: "Code"
   screensaver_page_title: " "
   screensaver_weather_entity: weather.home #weather
+  screensaver_weather_dp: 1 #decimal places for weather temperature
   screensaver_temperature_entity: sensor.temperature #temperature sensor for local room
+  screensaver_temperature_dp: 1 #decimal places for temperature entity
   screensaver_humidity_entity: sensor.humidity #humidity sensor for local room
+  screensaver_humidity_dp: 0 #decimal places for humidity entity
   screensaver_lower_left_entity: sensor.airquality #sensor
   screensaver_lower_left_units: " μg"
   screensaver_lower_right_entity: sensor.allergen_index #sensor
@@ -369,13 +372,13 @@ interval:
                 id: temp_label
                 text: !lambda |-
                   char buf[10];
-                  sprintf(buf, "%.1f%s", id(display_temp), id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+                  sprintf(buf, "%.${screensaver_temperature_dp}f%s", id(display_temp), id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
                   return buf;
             - lvgl.label.update:
                 id: humidity_label
                 text: !lambda |-
                   char buf[10];
-                  sprintf(buf, "%.1f%s", id(s3humidity).state, "%");
+                  sprintf(buf, "%.${screensaver_humidity_dp}f%s", id(s3humidity).state, "%");
                   return buf;
 
 button:
@@ -692,7 +695,7 @@ sensor:
             id: temp_ext_label
             text: !lambda |-
               char buf[10];
-              sprintf(buf, "%.1f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+              sprintf(buf, "%.${screensaver_weather_dp}f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
               return buf;
 
 ### SCREENSAVER ROOM TEMPERATURE ###
@@ -708,7 +711,7 @@ sensor:
             id: temp_label   
             text: !lambda |-
               char buf[10];
-              sprintf(buf, "%.1f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+              sprintf(buf, "%.${screensaver_temperature_dp}f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
               return buf;
 
 ### SCREENSAVER ROOM HUMIDITY ###
@@ -724,7 +727,7 @@ sensor:
             id: humidity_label   
             text: !lambda |-
                   char buf[10];
-                  sprintf(buf, "%.1f%s", x, "%");
+                  sprintf(buf, "%.${screensaver_humidity_dp}f%s", x, "%");
                   return buf;
 
 ### SCREENSAVER LOWER LEFT ###
