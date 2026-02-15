@@ -812,14 +812,14 @@ i2c:
     scan: true
     sda_pullup_enabled: true
     scl_pullup_enabled: true
-    frequency: 400kHz
+    frequency: 100kHz
 
   - sda: GPIO41
     scl: GPIO40
     scan: true
     sda_pullup_enabled: true
     scl_pullup_enabled: true
-    frequency: 400kHz
+    frequency: 100kHz
     id: bus_b
 
 at581x:
