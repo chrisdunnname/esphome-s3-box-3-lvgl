@@ -118,6 +118,7 @@ substitutions:
   screensaver_lower_right_units: " IAI"
   notification_page_title: "Notification"
   wifi_qr_code: !secret wifi_qr #QR code for wifi
+  default_page: idle_page #set default idle page e.g. idle_page, lights_page, scenes_page, controls_page
 
 ###### Days and Months ######
 ## Change the values on the right to match your locale ##
@@ -240,7 +241,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.13"
+    version: "2026.02.15"
 
 esp32:
   board: esp32s3box
@@ -1325,7 +1326,7 @@ script:
                                   - lvgl.page.is_showing: timer_finished_page
                             then:
                               - lvgl.widget.hide: but_snooze
-                              - lvgl.page.show: idle_page
+                              - lvgl.page.show: ${default_page}
                         - if:
                             condition:
                               lambda: |-
@@ -1384,14 +1385,14 @@ script:
                             id(api_connection) = false;
                         - lvgl.widget.hide: lbl_api
                         - lvgl.widget.hide: boot_screen
-                        - lvgl.page.show: idle_page
+                        - lvgl.page.show: ${default_page}
                 else:
                   - lambda: |-
                       id(wifi_connection) = false;
                   - lvgl.widget.hide: lbl_api
                   - lvgl.widget.hide: lbl_wifi
                   - lvgl.widget.hide: boot_screen
-                  - lvgl.page.show: idle_page
+                  - lvgl.page.show: ${default_page}
             - if:
                 condition:
                   not:
@@ -1904,7 +1905,7 @@ script:
       - text.set:
           id: notification_text
           value: ""
-      - lvgl.page.show: idle_page
+      - lvgl.page.show: ${default_page}
       - script.execute: draw_display
 
   - id: time_update
@@ -2188,7 +2189,7 @@ script:
           id: onlineimage
           src: online_png_image
       - delay: 30s
-      - lvgl.page.show: idle_page
+      - lvgl.page.show: ${default_page}
       - script.execute: draw_display
       - online_image.release: online_png_image
       - text.set:
@@ -6567,7 +6568,7 @@ lvgl:
                             - lambda: id(alarmclock_ringing) = false;
                             - lvgl.widget.hide: but_snooze
                             - switch.turn_off: timer_ringing
-                            - lvgl.page.show: idle_page
+                            - lvgl.page.show: ${default_page}
                             - script.execute: draw_display
                     - label:
                         text: "Tap screen to dismiss"
@@ -6584,7 +6585,7 @@ lvgl:
                             - lambda: id(alarmclock_ringing) = false;
                             - lvgl.widget.hide: but_snooze
                             - switch.turn_off: timer_ringing
-                            - lvgl.page.show: idle_page
+                            - lvgl.page.show: ${default_page}
                             - script.execute: draw_display
                     - button:
                         id: but_snooze
@@ -6609,7 +6610,7 @@ lvgl:
                           - lvgl.widget.hide: but_snooze
                           - switch.turn_off: timer_ringing
                           - script.execute: snoozealarm
-                          - lvgl.page.show: idle_page
+                          - lvgl.page.show: ${default_page}
                           - script.execute: draw_display
 
     - id: notification_page
@@ -8283,7 +8284,7 @@ binary_sensor:
               else:
                 if:
                   condition:
-                    - lvgl.page.is_showing: idle_page
+                    - lvgl.page.is_showing: ${default_page}
                   then:
                     - script.execute: saver_enabled_manual
                   else:
@@ -8322,7 +8323,7 @@ binary_sensor:
             - media_player.stop:
       - if:
           condition:
-            - lvgl.page.is_showing: idle_page
+            - lvgl.page.is_showing: ${default_page}
           then:
             - script.execute: saver_enabled
           else:
@@ -8348,7 +8349,7 @@ binary_sensor:
               - switch.is_on: s_saver_presc
           then:
             - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
-            - lvgl.page.show: idle_page
+            - lvgl.page.show: ${default_page}
             - script.execute: draw_display
       - if:
           condition:
