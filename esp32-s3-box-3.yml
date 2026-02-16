@@ -6183,14 +6183,14 @@ lvgl:
                       ticks:
                         width: 1
                         count: 61
-                        length: 10
+                        length: 5
                         color: 0xFFFFFF
                       indicators:
                         - line:
                             id: minute_hand
                             width: 3
                             color: 0xFFFFFF
-                            r_mod: -4
+                            r_mod: -1
                             value: 0
                     - range_from: 1
                       range_to: 12
@@ -6215,7 +6215,7 @@ lvgl:
                       indicators:
                         - line:
                             id: hour_hand
-                            width: 5
+                            width: 4
                             color: 0xFFFFFF
                             r_mod: -30
                             value: 0
