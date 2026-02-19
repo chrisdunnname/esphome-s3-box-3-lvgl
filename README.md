@@ -40,8 +40,8 @@ Requires [S3-Box-3](https://www.espressif.com/en/dev-board/esp32-s3-box-3-en).
 
 Sensor dock & battery are optional to use radar/presence, battery level and temperature/humidity functionality.
 
-The minimum supported ESPHome version is 2026.1.0.
-Last tested on Home Assistant 2026.2 and ESPHome Version 2026.1.
+The minimum supported ESPHome version is 2026.2.0.
+Last tested on Home Assistant 2026.2 and ESPHome Version 2026.2.
 
 # Loading
 ![loading](https://github.com/user-attachments/assets/55e0a1b8-8873-42a3-864f-297fa6826b6e)

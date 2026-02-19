@@ -213,7 +213,7 @@ substitutions:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2026.1.0
+  min_version: 2026.2.0
   name_add_mac_suffix: false
   on_boot:
     priority: 600
@@ -244,7 +244,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.15"
+    version: "2026.02.19"
 
 esp32:
   board: esp32s3box
@@ -1409,44 +1409,42 @@ script:
   - id: fetch_first_active_timer
     then:
       - lambda: |
-          const auto timers = id(va).get_timers();
-          auto output_timer = timers.begin()->second;
-          for (auto &iterable_timer : timers) {
-            if (iterable_timer.second.is_active && iterable_timer.second.seconds_left <= output_timer.seconds_left) {
-              output_timer = iterable_timer.second;
+          const auto &timers = id(va).get_timers();
+          auto output_timer = *timers.begin();
+          for (const auto &timer : timers) {
+            if (timer.is_active && timer.seconds_left <= output_timer.seconds_left) {
+              output_timer = timer;
             }
           }
           id(global_first_active_timer) = output_timer;
   - id: check_if_timers_active
     then:
       - lambda: |
-          const auto timers = id(va).get_timers();
+          const auto &timers = id(va).get_timers();
           bool output = false;
-          if (timers.size() > 0) {
-            for (auto &iterable_timer : timers) {
-              if(iterable_timer.second.is_active) {
-                output = true;
-              }
+          for (const auto &timer : timers) {
+            if (timer.is_active) {
+              output = true;
             }
           }
           id(global_is_timer_active) = output;
   - id: fetch_first_timer
     then:
       - lambda: |
-          const auto timers = id(va).get_timers();
-          auto output_timer = timers.begin()->second;
-          for (auto &iterable_timer : timers) {
-            if (iterable_timer.second.seconds_left <= output_timer.seconds_left) {
-              output_timer = iterable_timer.second;
+          const auto &timers = id(va).get_timers();
+          auto output_timer = *timers.begin();
+          for (const auto &timer : timers) {
+            if (timer.seconds_left <= output_timer.seconds_left) {
+              output_timer = timer;
             }
           }
           id(global_first_timer) = output_timer;
   - id: check_if_timers
     then:
       - lambda: |
-          const auto timers = id(va).get_timers();
+          const auto &timers = id(va).get_timers();
           bool output = false;
-          if (timers.size() > 0) {
+          for (const auto &timer : timers) {
             output = true;
           }
           id(global_is_timer) = output;
@@ -8363,6 +8361,10 @@ binary_sensor:
               - switch.is_off: snoozeonpresence
           then:
             - switch.turn_off: timer_ringing
+            - lambda: id(alarmclock_ringing) = false;
+            - lvgl.widget.hide: but_snooze
+            - lvgl.page.show: ${default_page}
+            - script.execute: draw_display
       - if:
           condition:
             and:
@@ -8374,6 +8376,9 @@ binary_sensor:
               - lambda: return !id(alarmclock_ringing);
           then:
             - switch.turn_off: timer_ringing
+            - lvgl.widget.hide: but_snooze
+            - lvgl.page.show: ${default_page}
+            - script.execute: draw_display
       - if:
           condition:
             and:
@@ -8383,8 +8388,11 @@ binary_sensor:
               - switch.is_on: alarmclock
               - switch.is_on: timer_ringing
           then:
+            - lvgl.widget.hide: but_snooze
             - switch.turn_off: timer_ringing
             - script.execute: snoozealarm
+            - lvgl.page.show: ${default_page}
+            - script.execute: draw_display
 
 ### LIGHT PAGE BINARY SENSORS ###
   - platform: homeassistant
