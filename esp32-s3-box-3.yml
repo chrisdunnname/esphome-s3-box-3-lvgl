@@ -1262,20 +1262,8 @@ voice_assistant:
     - lambda: id(draw_timer_timeline).execute();
   on_timer_finished:
     - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
-    - if:
-        condition:
-          - switch.is_on: output_audio
-        then:
-          - switch.turn_on: timer_ringing
-          - script.execute: timer_started_external
-          - script.execute: draw_display
-        else:
-          - if:
-              condition:
-                - switch.is_off: output_audio
-              then:
-                - switch.turn_on: timer_ringing
-                - script.execute: draw_display
+    - switch.turn_on: timer_ringing
+    - script.execute: draw_display
 
 script:
   - id: draw_display
@@ -1988,8 +1976,8 @@ script:
             - lambda: id(alarmclock_ringing) = true;
             - lvgl.widget.show: but_snooze
             - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
+            - script.execute: draw_display
             - switch.turn_on: timer_ringing
-            - script.execute: endalarmclock
             - delay: 15s
       - if:
           condition:
@@ -2191,23 +2179,8 @@ script:
       - lambda: id(alarmclock_ringing) = false;
       - lvgl.widget.hide: but_snooze
       - switch.turn_off: timer_ringing
-      - script.stop: endalarmclock
       - lvgl.page.show: ${default_page}
       - script.execute: draw_display
-    mode: restart
-
-  - id: endalarmclock
-    then:
-      - delay: 3600s
-      - lambda: id(alarmclock_ringing) = false;
-      - if:
-          condition:
-            switch.is_on: timer_ringing
-          then:
-            - lvgl.widget.hide: but_snooze
-            - switch.turn_off: timer_ringing
-            - lvgl.page.show: ${default_page}
-            - script.execute: draw_display
     mode: restart
 
   - id: showonlineimage
@@ -2432,6 +2405,7 @@ switch:
 
     on_turn_off:
       - lambda: id(time_remaining_0).publish_state ("0:00:00");
+      - lambda: id(alarmclock_ringing) = false;
       - lambda: |-
               id(speaker_media_player)
                 ->make_call()
@@ -2443,6 +2417,8 @@ switch:
           announcement: true
       - lvgl.widget.hide: lbl_timer
       - lvgl.widget.hide: bar_timer
+      - lvgl.page.show: ${default_page}
+      - script.execute: draw_display
     on_turn_on:
       - lambda: id(led).turn_on().set_brightness(1.0).perform();
       - lambda: |-
@@ -2452,9 +2428,15 @@ switch:
               .set_announcement(true)
               .perform();
             id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 1000);
-      - media_player.speaker.play_on_device_media_file:
-          media_file: timer_finished_sound
-          announcement: true
+      - if:
+          condition:
+            switch.is_on: output_audio
+          then:
+            - script.execute: timer_started_external
+          else:
+            - media_player.speaker.play_on_device_media_file:
+                media_file: timer_finished_sound
+                announcement: true
       - delay: 15min
       - switch.turn_off: timer_ringing
 
