@@ -1989,6 +1989,7 @@ script:
             - lvgl.widget.show: but_snooze
             - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
             - switch.turn_on: timer_ringing
+            - script.execute: endalarmclock
             - delay: 15s
       - if:
           condition:
@@ -2190,8 +2191,23 @@ script:
       - lambda: id(alarmclock_ringing) = false;
       - lvgl.widget.hide: but_snooze
       - switch.turn_off: timer_ringing
+      - script.stop: endalarmclock
       - lvgl.page.show: ${default_page}
       - script.execute: draw_display
+    mode: restart
+
+  - id: endalarmclock
+    then:
+      - delay: 3600s
+      - lambda: id(alarmclock_ringing) = false;
+      - if:
+          condition:
+            switch.is_on: timer_ringing
+          then:
+            - lvgl.widget.hide: but_snooze
+            - switch.turn_off: timer_ringing
+            - lvgl.page.show: ${default_page}
+            - script.execute: draw_display
     mode: restart
 
   - id: showonlineimage
