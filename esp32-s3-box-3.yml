@@ -2544,8 +2544,7 @@ switch:
     icon: 'mdi:alarm'
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_off:
-      - lvgl.widget.hide: but_snooze
-      - switch.turn_off: timer_ringing
+      - script.execute: stopalarmtimer
 
   - platform: lvgl
     name: "Snooze on Presence"
