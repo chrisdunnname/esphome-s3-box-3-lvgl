@@ -2179,7 +2179,7 @@ script:
       - lambda: id(alarmclock_ringing) = false;
       - lvgl.widget.hide: but_snooze
       - switch.turn_off: timer_ringing
-      - lvgl.page.show: ${default_page}
+      - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
       - script.execute: draw_display
     mode: restart
 
@@ -2417,7 +2417,7 @@ switch:
           announcement: true
       - lvgl.widget.hide: lbl_timer
       - lvgl.widget.hide: bar_timer
-      - lvgl.page.show: ${default_page}
+      - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
       - script.execute: draw_display
     on_turn_on:
       - lambda: id(led).turn_on().set_brightness(1.0).perform();
