@@ -190,6 +190,16 @@ substitutions:
   # anim2_replying4: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_colors_4.jpg
   # anim2_error: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/images/Home/g_orange.jpg
 
+######  Audio Files ######
+# FLAC files for on device sounds
+  timerfinished_ondevice: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/timer_finished.flac
+  wakesound_ondevice: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/awake.flac
+  notify_ondevice: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/notify.flac
+# Home Assistant path to MP3 files for external audio sounds
+  timerfinished_external: /local/sounds/timer_finished.mp3
+  wakesound_external: /local/sounds/awake.mp3
+  notify_external: /local/sounds/notify.mp3
+
 ######  Voice Assistant Phase IDs ######
   voice_assist_idle_phase_id: "1"
   voice_assist_listening_phase_id: "2"
@@ -244,7 +254,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.19"
+    version: "2026.02.23"
 
 esp32:
   board: esp32s3box
@@ -933,11 +943,11 @@ media_player:
       sample_rate: 48000
     files:
       - id: timer_finished_sound
-        file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/timer_finished.flac
+        file: ${timerfinished_ondevice}
       - id: wake_sound_file
-        file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/awake.flac
+        file: ${wakesound_ondevice}
       - id: notify_sound_file
-        file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/sounds/notify.flac 
+        file: ${notify_ondevice}
     on_state:
       then:
         - lambda: ESP_LOGD("media_player", "on_state");
@@ -1077,7 +1087,7 @@ micro_wake_word:
                   service: media_player.play_media
                   data:
                     entity_id: media_player.${external_media_player}
-                    media_content_id: '${home_assistant_host}/local/sounds/awake.mp3'
+                    media_content_id: '${home_assistant_host}${wakesound_external}'
                     media_content_type: music                            
               - delay: 500ms
     - voice_assistant.start:
@@ -1118,7 +1128,7 @@ voice_assistant:
                   service: media_player.play_media
                   data:
                     entity_id: media_player.${external_media_player}
-                    media_content_id: '${home_assistant_host}/local/sounds/awake.mp3'
+                    media_content_id: '${home_assistant_host}${wakesound_external}'
                     media_content_type: music
   on_start:
     - script.execute: draw_display
@@ -1612,7 +1622,7 @@ script:
               service: media_player.play_media
               data:
                 entity_id: media_player.${external_media_player}
-                media_content_id: '${home_assistant_host}/local/sounds/timer_finished.mp3'
+                media_content_id: '${home_assistant_host}${timerfinished_external}'
                 media_content_type: music
           - delay: 1700ms
 
@@ -1880,7 +1890,7 @@ script:
                     service: media_player.play_media
                     data:
                       entity_id: media_player.${external_media_player}
-                      media_content_id: '${home_assistant_host}/local/sounds/notify.mp3'
+                      media_content_id: '${home_assistant_host}${notify_external}'
                       media_content_type: music
                 - delay: 500ms
       - lvgl.page.show: notification_page
@@ -2180,6 +2190,7 @@ script:
       - lvgl.widget.hide: but_snooze
       - switch.turn_off: timer_ringing
       - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+      - lvgl.page.show: ${default_page}
       - script.execute: draw_display
     mode: restart
 
@@ -2418,6 +2429,7 @@ switch:
       - lvgl.widget.hide: lbl_timer
       - lvgl.widget.hide: bar_timer
       - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
+      - lvgl.page.show: ${default_page}
       - script.execute: draw_display
     on_turn_on:
       - lambda: id(led).turn_on().set_brightness(1.0).perform();
@@ -2543,6 +2555,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_off:
       - script.execute: stopalarmtimer
+      - script.stop: snoozealarm
 
   - platform: lvgl
     name: "Snooze on Presence"
