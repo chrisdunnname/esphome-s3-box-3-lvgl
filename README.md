@@ -218,6 +218,25 @@ Tap the change temperature buttons to move slightly or long press to change fast
 
 # Getting Started
 
+**First Time?**
+
+The easy way to get started is to get your S3 Box 3 flashed with the default Home Assistant Voice Assistant firmware then you can replace it with this code.
+You can follow these steps to get started: [ESP32-S3-BOX Voice Assistant](https://www.home-assistant.io/voice_control/s3_box_voice_assistant/).
+Once the device is adopted in ESPHOME then you have full control to edit the configuration.
+Your Home Assistant will also recognize the device so you can add it.
+
+When you add the device there is one more option you will need. If you want to use the capabilities of the box to control devices in your Home Assistant you have to give it permission. 
+In Devices>EspHome find the device and click the cog next to it.
+
+![devices-esphome](https://github.com/user-attachments/assets/b2b65e1a-f0a4-41d1-aed0-be1a18f3f057)
+
+Then choose to allow the device to perform Home Assistant Actions.
+
+![allowdeviceactions](https://github.com/user-attachments/assets/9cebb38a-4398-4040-bfd4-b1b20f2d2111)
+
+I recommend starting with the esp32-s3-box-3.yml file in this repository. You can keep the name from your initial installtion but change replace the rest with the content from this file and then compile this and install the updated configuration wirelessly. See the basics below to ensure you have the three required secrets configured before you compile.
+The configuration provided will work out of the box but you won't have any buttons to control lights or switches and it won't connect to an external speaker for audit. This is where the configuration options in the config come into play. The first 200 lines are all options that can be adjusted to tailor your box for you and push out new wireless updates to test your changes. 
+
 **The basics**
 
 All standard user functions included in the configuration are provided as substitutions in the YAML. 
