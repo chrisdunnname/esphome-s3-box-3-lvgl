@@ -67,27 +67,27 @@ substitutions:
   scenes_page_title: "Screens"
   scenes_page_icon: "\U000F0FCE" #icon from icon_glyphs
   scenes1_name: "Player 1"
-  scenes1_entity: media_player.media1 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes1_entity: media_player.media1 #switch,light,media_player,climate,fan,humidifier,cover,script,siren,scene
   scenes1_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes1_icon_on: "\U000F0502" #icon from icon_glyphs
   scenes2_name: "Player 2"
-  scenes2_entity: media_player.media2 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes2_entity: media_player.media2 #switch,light,media_player,climate,fan,humidifier,cover,script,siren,scene
   scenes2_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes2_icon_on: "\U000F0502" #icon from icon_glyphs
   scenes3_name: "Player 3"
-  scenes3_entity: media_player.media3 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes3_entity: media_player.media3 #switch,light,media_player,climate,fan,humidifier,cover,script,siren,scene
   scenes3_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes3_icon_on: "\U000F0502" #icon from icon_glyphs
   scenes4_name: "Player 4"
-  scenes4_entity: media_player.media4 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes4_entity: media_player.media4 #switch,light,media_player,climate,fan,humidifier,cover,script,siren,scene
   scenes4_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes4_icon_on: "\U000F0502" #icon from icon_glyphs
   scenes5_name: "Player 5"
-  scenes5_entity: media_player.media5 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes5_entity: media_player.media5 #switch,light,media_player,climate,fan,humidifier,cover,script,siren,scene
   scenes5_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes5_icon_on: "\U000F0502" #icon from icon_glyphs
   scenes6_name: "Player 6"
-  scenes6_entity: media_player.media6 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  scenes6_entity: media_player.media6 #switch,light,media_player,climate,fan,humidifier,cover,script,siren,scene
   scenes6_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes6_icon_on: "\U000F0502" #icon from icon_glyphs
   alarm_entity: alarm_control_panel.alarmo #Alarm - tested with Alarmo
@@ -254,7 +254,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.02.23"
+    version: "2026.03.01"
 
 esp32:
   board: esp32s3box
@@ -267,6 +267,8 @@ esp32:
       CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
       CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
       CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB: "y" 
+      CONFIG_SPIRAM_RODATA: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: "y"
       CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y" 
       CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
 
@@ -1042,6 +1044,7 @@ media_player:
 micro_wake_word:
   id: mww
   vad:
+  stop_after_detection: false
   models:
     - model: okay_nabu
       id: okay_nabu
@@ -1060,38 +1063,71 @@ micro_wake_word:
       id: okay_hal
     - model: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/microwakeword/hey_luna.json
       id: hey_luna
+    - model: https://github.com/kahrendt/microWakeWord/releases/download/stop/stop.json
+      id: stop
+      internal: true
   on_wake_word_detected:
-    - lambda: id(global_is_assisting) = true;
-    - delay: 50ms
     - if:
         condition:
-          and:
-            - switch.is_off: output_audio
-            - switch.is_on: wake_sound
+          switch.is_on: timer_ringing
         then:
-          - media_player.speaker.play_on_device_media_file:
-              media_file: wake_sound_file
-              announcement: true
-          - wait_until:
-              not:
-                - media_player.is_announcing:
-          - delay: 150ms
+          - script.execute: stopalarmtimer
+        # Stop voice assistant if running
         else:
-          if:
-            condition:
-              and:
-                - switch.is_on: output_audio
-                - switch.is_on: wake_sound
-            then:
-              - homeassistant.service:
-                  service: media_player.play_media
-                  data:
-                    entity_id: media_player.${external_media_player}
-                    media_content_id: '${home_assistant_host}${wakesound_external}'
-                    media_content_type: music                            
-              - delay: 500ms
-    - voice_assistant.start:
-        wake_word: !lambda return wake_word;
+          - if:
+              condition:
+                voice_assistant.is_running:
+              then:
+                voice_assistant.stop:
+              # Stop any other media player announcement
+              else:
+                - if:
+                    condition:
+                      - switch.is_on: output_audio
+                    then:
+                      - homeassistant.service:
+                          service: media_player.media_stop
+                          data:
+                            entity_id: media_player.${external_media_player}
+                - if:
+                    condition:
+                      media_player.is_announcing:
+                    then:
+                      - media_player.stop:
+                          announcement: true
+                    # Start the voice assistant and play the wake sound, if enabled
+                    else:
+                      - lambda: id(global_is_assisting) = true;
+                      - delay: 50ms
+                      - if:
+                          condition:
+                            and:
+                              - switch.is_off: output_audio
+                              - switch.is_on: wake_sound
+                          then:
+                            - media_player.speaker.play_on_device_media_file:
+                                media_file: wake_sound_file
+                                announcement: true
+                            - wait_until:
+                                not:
+                                  - media_player.is_announcing:
+                            - delay: 150ms
+                          else:
+                            - if:
+                                condition:
+                                  and:
+                                    - switch.is_on: output_audio
+                                    - switch.is_on: wake_sound
+                                then:
+                                  - homeassistant.service:
+                                      service: media_player.play_media
+                                      data:
+                                        entity_id: media_player.${external_media_player}
+                                        media_content_id: '${home_assistant_host}${wakesound_external}'
+                                        media_content_type: music                            
+                                  - delay: 500ms
+                      - voice_assistant.start:
+                          wake_word: !lambda return wake_word;
 
 voice_assistant:
   id: va
@@ -1102,34 +1138,56 @@ voice_assistant:
   auto_gain: 31dBFS
   volume_multiplier: 4.0
   on_wake_word_detected:
-    - lambda: id(global_is_assisting) = true;
     - if:
         condition:
-          and:
-            - switch.is_off: output_audio
-            - switch.is_on: wake_sound
+          switch.is_on: timer_ringing
         then:
-          - media_player.speaker.play_on_device_media_file:
-              media_file: wake_sound_file
-              announcement: true
-          - wait_until:
-              not:
-                - media_player.is_announcing:
-          - delay: 150ms
-          - lambda: id(va).set_use_wake_word(false);
+          - script.execute: stopalarmtimer
         else:
-          if:
-            condition:
-              and:
-                - switch.is_on: wake_sound
+          - if:
+              condition:
                 - switch.is_on: output_audio
-            then:
-              - homeassistant.service:
-                  service: media_player.play_media
-                  data:
-                    entity_id: media_player.${external_media_player}
-                    media_content_id: '${home_assistant_host}${wakesound_external}'
-                    media_content_type: music
+              then:
+                - homeassistant.service:
+                    service: media_player.media_stop
+                    data:
+                      entity_id: media_player.${external_media_player}
+          - if:
+              condition:
+                media_player.is_announcing:
+              then:
+                - media_player.stop:
+                    announcement: true
+              # Start the voice assistant and play the wake sound, if enabled
+              else:
+                - lambda: id(global_is_assisting) = true;
+                - delay: 50ms
+                - if:
+                    condition:
+                      and:
+                        - switch.is_off: output_audio
+                        - switch.is_on: wake_sound
+                    then:
+                      - media_player.speaker.play_on_device_media_file:
+                          media_file: wake_sound_file
+                          announcement: true
+                      - wait_until:
+                          not:
+                            - media_player.is_announcing:
+                      - delay: 150ms
+                    else:
+                      if:
+                        condition:
+                          and:
+                            - switch.is_on: wake_sound
+                            - switch.is_on: output_audio
+                        then:
+                          - homeassistant.service:
+                              service: media_player.play_media
+                              data:
+                                entity_id: media_player.${external_media_player}
+                                media_content_id: '${home_assistant_host}${wakesound_external}'
+                                media_content_type: music
   on_start:
     - script.execute: draw_display
   on_listening:
@@ -1150,12 +1208,25 @@ voice_assistant:
         id: text_request
         state: !lambda return x;
     - script.execute: draw_display
+  on_intent_progress:
+    - if:
+        condition:
+          # A nonempty x variable means a streaming TTS url was sent to the media player
+          lambda: 'return !x.empty();'
+        then:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
+          - micro_wake_word.enable_model: stop
   on_tts_start:
-    - text_sensor.template.publish:
-        id: text_response
-        state: !lambda return x;
-    - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
-    - script.execute: draw_display
+    - if:
+        condition:
+          # The intent_progress trigger didn't start the TTS Response
+          lambda: 'return id(voice_assistant_phase) != ${voice_assist_replying_phase_id};'
+        then:
+          - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
+          - text_sensor.template.publish:
+              id: text_response
+              state: !lambda return x;
+          - script.execute: draw_display
   on_tts_end:
     - lambda: ESP_LOGD("voice_assistant", "on_tts_end");
     - if:
@@ -1179,10 +1250,12 @@ voice_assistant:
                 media_content_id: !lambda 'return x;'
                 media_content_type: music
                 announce: "false"
+    - micro_wake_word.enable_model: stop
     - delay: 10s
     - script.execute: draw_display
   on_idle:
     - lambda: ESP_LOGD("voice_assistant", "on_idle");
+    - micro_wake_word.disable_model: stop
     - script.execute: draw_display
   on_end:
     - lambda: ESP_LOGD("voice_assistant", "on_end"); 
@@ -2415,6 +2488,9 @@ switch:
     restore_mode: ALWAYS_OFF
 
     on_turn_off:
+      # Disable stop wake word
+      - micro_wake_word.disable_model: stop
+      - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
       - lambda: id(time_remaining_0).publish_state ("0:00:00");
       - lambda: id(alarmclock_ringing) = false;
       - lambda: |-
@@ -2428,7 +2504,6 @@ switch:
           announcement: true
       - lvgl.widget.hide: lbl_timer
       - lvgl.widget.hide: bar_timer
-      - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
       - lvgl.page.show: ${default_page}
       - script.execute: draw_display
     on_turn_on:
@@ -2449,6 +2524,9 @@ switch:
             - media_player.speaker.play_on_device_media_file:
                 media_file: timer_finished_sound
                 announcement: true
+      # Enable stop wake word
+      - micro_wake_word.start:
+      - micro_wake_word.enable_model: stop
       - delay: 15min
       - switch.turn_off: timer_ringing
 
@@ -2599,7 +2677,7 @@ select:
                   - lvgl.dropdown.update:
                       id: dropdown_wakeword
                       selected_index: 0
-                  - micro_wake_word.stop
+                  - micro_wake_word.stop:
                   - delay: 500ms
                   - if:
                       condition:
@@ -2622,7 +2700,7 @@ select:
                       condition:
                         switch.is_off: mute_switch
                       then:
-                        - micro_wake_word.start
+                        - micro_wake_word.start:
           else:
             - if:
                 condition:
@@ -5482,7 +5560,11 @@ lvgl:
                           then:
                             - if:
                                 condition:
-                                  lambda: return (id(scenes1_item).state == "off");
+                                  or:
+                                    - lambda: return (id(scenes1_item).state == "off");
+                                    - lambda: |
+                                        std::string s = "${scenes1_entity}";
+                                        return s.substr(0, s.find('.')) == "scene";
                                 then:
                                   - homeassistant.service:
                                       action: !lambda |
@@ -5531,7 +5613,11 @@ lvgl:
                           then:
                             - if:
                                 condition:
-                                  lambda: return (id(scenes2_item).state == "off");
+                                  or:
+                                    - lambda: return (id(scenes2_item).state == "off");
+                                    - lambda: |
+                                        std::string s = "${scenes2_entity}";
+                                        return s.substr(0, s.find('.')) == "scene";
                                 then:
                                   - homeassistant.service:
                                       action: !lambda |
@@ -5580,7 +5666,11 @@ lvgl:
                           then:
                             - if:
                                 condition:
-                                  lambda: return (id(scenes3_item).state == "off");
+                                  or:
+                                    - lambda: return (id(scenes3_item).state == "off");
+                                    - lambda: |
+                                        std::string s = "${scenes3_entity}";
+                                        return s.substr(0, s.find('.')) == "scene";
                                 then:
                                   - homeassistant.service:
                                       action: !lambda |
@@ -5629,7 +5719,11 @@ lvgl:
                           then:
                             - if:
                                 condition:
-                                  lambda: return (id(scenes4_item).state == "off");
+                                  or:
+                                    - lambda: return (id(scenes4_item).state == "off");
+                                    - lambda: |
+                                        std::string s = "${scenes4_entity}";
+                                        return s.substr(0, s.find('.')) == "scene";
                                 then:
                                   - homeassistant.service:
                                       action: !lambda |
@@ -5678,7 +5772,11 @@ lvgl:
                           then:
                             - if:
                                 condition:
-                                  lambda: return (id(scenes5_item).state == "off");
+                                  or:
+                                    - lambda: return (id(scenes5_item).state == "off");
+                                    - lambda: |
+                                        std::string s = "${scenes5_entity}";
+                                        return s.substr(0, s.find('.')) == "scene";
                                 then:
                                   - homeassistant.service:
                                       action: !lambda |
@@ -5727,7 +5825,11 @@ lvgl:
                           then:
                             - if:
                                 condition:
-                                  lambda: return (id(scenes6_item).state == "off");
+                                  or:
+                                    - lambda: return (id(scenes6_item).state == "off");
+                                    - lambda: |
+                                        std::string s = "${scenes6_entity}";
+                                        return s.substr(0, s.find('.')) == "scene";
                                 then:
                                   - homeassistant.service:
                                       action: !lambda |
@@ -8303,9 +8405,29 @@ binary_sensor:
                     - script.execute: draw_display
           - if:
               condition:
+                - voice_assistant.is_running
+              then:
+                - switch.turn_on: mute_switch
+                - voice_assistant.stop
+                - switch.turn_off: mute_switch
+          - if:
+              condition:
                 - switch.is_on: timer_ringing
               then:
                 - script.execute: stopalarmtimer
+          - if:
+              condition:
+                - media_player.is_playing:
+              then:
+                - media_player.stop:
+          - if:
+              condition:
+                - switch.is_on: output_audio
+              then:
+                - homeassistant.service:
+                    service: media_player.media_stop
+                    data:
+                      entity_id: media_player.${external_media_player}
       - timing:
           - ON for at least 10s
         then:
@@ -8333,6 +8455,14 @@ binary_sensor:
             - media_player.is_playing:
           then:
             - media_player.stop:
+      - if:
+          condition:
+            - switch.is_on: output_audio
+          then:
+            - homeassistant.service:
+                service: media_player.media_stop
+                data:
+                  entity_id: media_player.${external_media_player}
       - if:
           condition:
             - lvgl.page.is_showing: ${default_page}
