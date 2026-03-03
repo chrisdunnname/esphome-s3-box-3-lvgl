@@ -215,9 +215,156 @@ substitutions:
   font_glyphs: '&@!"''%()+=,-_.:°/$€£¥?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюяμ'
   font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/Montserrat-Regular.ttf
   icon_font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/materialdesignicons-webfont.ttf
-  font_bpp: 1
-  font_icon_bpp: 4
 #Note: LVGL includes a default pre-rendered fonts and icons.
+
+################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
+
+###### Hardware Specific Configuration ######
+
+  font_bpp: 1 #1,2,4,8 - Higher bit depth increases flash usage
+  font_icon_bpp: 4 #1,2,4,8 - Higher bit depth increases flash usage
+  image_byte_order: big_endian
+  image_resize: 318x238 # 2px below width by height of screen
+
+  wifi_fast_connect: false
+
+  screen_max_brightness: 1.0
+
+  speaker_i2s_dout_pin: GPIO15
+  speaker_enable_pin: GPIO46
+
+  side_button_pin: GPIO0
+  
+  page_content_height: 180
+  taskbar_height: 30
+  button_radius: 15
+
+esp32:
+  board: esp32s3box
+  flash_size: 16MB
+  cpu_frequency: 240MHz
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
+      CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
+      CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB: "y" 
+      CONFIG_SPIRAM_RODATA: "y"
+      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: "y"
+      CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y" 
+      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
+
+psram:
+  mode: octal
+  speed: 80MHz
+
+logger:
+  hardware_uart: USB_SERIAL_JTAG
+  level: debug
+  logs:
+    lvgl: info
+    text_sensor: ERROR
+    component: ERROR
+
+output:
+  - platform: ledc
+    pin: GPIO47
+    id: backlight_output
+
+i2c:
+  - id: bus_a
+    sda: GPIO08
+    scl: GPIO18
+    scan: true
+    sda_pullup_enabled: true
+    scl_pullup_enabled: true
+    frequency: 100kHz
+
+  - id: bus_b
+    sda: GPIO41
+    scl: GPIO40
+    scan: true
+    sda_pullup_enabled: true
+    scl_pullup_enabled: true
+    frequency: 100kHz
+
+at581x:
+  id: "Radar"
+  i2c_id: bus_b
+
+touchscreen:
+  - platform: gt911
+    i2c_id: bus_a
+    address: 0x5D
+    id: gt911_touchscreen
+    interrupt_pin:
+      number: GPIO3
+      ignore_strapping_warning: true
+    on_touch:
+      - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
+    on_release:
+      then:
+        - if:
+            condition: lvgl.is_paused
+            then:
+              - light.turn_on: led
+              - lvgl.resume:
+              - lvgl.widget.redraw:
+        - if:
+            condition:
+              - lvgl.page.is_showing: saver_page
+            then:
+              - script.execute: draw_display
+
+i2s_audio:
+  - id: audio_bus
+    i2s_lrclk_pin:
+      number: GPIO45
+      ignore_strapping_warning: true
+    i2s_bclk_pin: GPIO17
+    i2s_mclk_pin: GPIO2
+
+audio_adc:
+  - platform: es7210
+    id: es7210_adc
+    i2c_id: bus_a
+    bits_per_sample: 16bit
+    sample_rate: 16000
+
+audio_dac:
+  - platform: es8311
+    id: es8311_dac
+    i2c_id: bus_a
+    bits_per_sample: 16bit
+    sample_rate: 48000
+
+microphone:
+  - platform: i2s_audio
+    id: box_mic
+    sample_rate: 16000
+    i2s_din_pin: GPIO16
+    bits_per_sample: 16bit
+    adc_type: external
+
+spi:
+  - id: spi_bus
+    clk_pin: 7
+    mosi_pin: 6
+
+display:
+  - platform: ili9xxx
+    id: s3_box_lcd
+    model: S3BOX
+    invert_colors: false
+    data_rate: 40MHz
+    cs_pin: 5
+    dc_pin: 4
+    reset_pin:
+      number: 48
+      inverted: true
+    update_interval: never
+    auto_clear_enabled: false
 
 ###### Standard Configuration ######
 esphome:
@@ -254,27 +401,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.03.01"
-
-esp32:
-  board: esp32s3box
-  flash_size: 16MB
-  cpu_frequency: 240MHz
-  framework:
-    type: esp-idf
-    sdkconfig_options:
-      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
-      CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
-      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
-      CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB: "y" 
-      CONFIG_SPIRAM_RODATA: "y"
-      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: "y"
-      CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y" 
-      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
-
-psram:
-  mode: octal
-  speed: 80MHz
+    version: "2026.03.03"
 
 api:
   encryption:
@@ -289,7 +416,7 @@ ota:
   - platform: esphome
     id: ota_esphome
     on_begin:
-      - lambda: id(led).turn_on().set_brightness(1.0).set_transition_length(0).perform();
+      - lambda: id(led).turn_on().set_brightness(${screen_max_brightness}).set_transition_length(0).perform();
                 id(led).loop();
       - lvgl.page.show: ota_page
       - lvgl.widget.hide: top_layer
@@ -298,15 +425,10 @@ ota:
       then:
         - lambda: "id(lvgl_display).loop();"
 
-logger:
-  hardware_uart: USB_SERIAL_JTAG
-  logs:
-    text_sensor: ERROR
-    component: ERROR
-
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
+  fast_connect: ${wifi_fast_connect}
   ap:
     ssid: ${name}
     password: ${wifi_fallback_pwd}   
@@ -410,11 +532,6 @@ button:
     on_press:
       at581x.reset:
         id: "Radar"
-
-output:
-  - platform: ledc
-    pin: GPIO47
-    id: backlight_output
 
 light:
   - platform: monochromatic
@@ -817,90 +934,15 @@ text:
                         id: onlineimagefile
                         value: ""                    
 
-i2c:
-  - id: bus_a
-    sda: GPIO08
-    scl: GPIO18
-    scan: true
-    sda_pullup_enabled: true
-    scl_pullup_enabled: true
-    frequency: 100kHz
-
-  - sda: GPIO41
-    scl: GPIO40
-    scan: true
-    sda_pullup_enabled: true
-    scl_pullup_enabled: true
-    frequency: 100kHz
-    id: bus_b
-
-at581x:
-  id: "Radar"
-  i2c_id: bus_b
-
-touchscreen:
-  - platform: gt911
-    i2c_id: bus_a
-    address: 0x5D
-    id: gt911_touchscreen
-    interrupt_pin:
-      number: GPIO3
-      ignore_strapping_warning: true
-    on_touch:
-      - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
-    on_release:
-      then:
-        - if:
-            condition: lvgl.is_paused
-            then:
-              - light.turn_on: led
-              - lvgl.resume:
-              - lvgl.widget.redraw:
-        - if:
-            condition:
-              - lvgl.page.is_showing: saver_page
-            then:
-              - script.execute: draw_display
-
-i2s_audio:
-  - id: i2s_audio_bus
-    i2s_lrclk_pin:
-      number: GPIO45
-      ignore_strapping_warning: true
-    i2s_bclk_pin: GPIO17
-    i2s_mclk_pin: GPIO2
-
-audio_adc:
-  - platform: es7210
-    id: es7210_adc
-    i2c_id: bus_a
-    bits_per_sample: 16bit
-    sample_rate: 16000
-
-audio_dac:
-  - platform: es8311
-    id: es8311_dac
-    i2c_id: bus_a
-    bits_per_sample: 16bit
-    sample_rate: 48000
-
-microphone:
-  - platform: i2s_audio
-    id: box_mic
-    sample_rate: 16000
-    i2s_din_pin: GPIO16
-    bits_per_sample: 16bit
-    adc_type: external
-
 speaker:
   - id: i2s_audio_speaker
     platform: i2s_audio
-    i2s_audio_id: i2s_audio_bus
-    i2s_dout_pin: GPIO15
+    i2s_audio_id: audio_bus
+    i2s_dout_pin: ${speaker_i2s_dout_pin}
     dac_type: external
     sample_rate: 48000
     bits_per_sample: 16bit
-    channel: left
+    channel: mono
     audio_dac: es8311_dac
     buffer_duration: 100ms
 
@@ -929,6 +971,8 @@ media_player:
   - platform: speaker
     name: Media Player
     id: speaker_media_player
+    codec_support_enabled: true
+    # buffer_size: 2000000
     task_stack_in_psram: true
     volume_increment: 0.05
     volume_min: 0.5
@@ -1040,6 +1084,13 @@ media_player:
             - script.execute: draw_display
     on_pause:
       - media_player.stop
+    on_volume:
+      - lambda: |-
+          ESP_LOGD("volume", "Volume: %f", x);
+      - lambda: id(speaker_volume) = int(x * 10) ;
+      - lvgl.bar.update:
+          id: bar_volume
+          value: !lambda return id(speaker_volume) * 10 ;
 
 micro_wake_word:
   id: mww
@@ -1588,7 +1639,7 @@ script:
   - id: set_volume
     then:
       - media_player.volume_set:
-          volume: !lambda return 0.5 + id(speaker_volume) * 0.05 ;
+          volume: !lambda return 0.5 + id(speaker_volume) * 0.03 ;
       - lvgl.bar.update:
           id: bar_volume
           value: !lambda return id(speaker_volume) * 10 ;
@@ -2288,8 +2339,8 @@ switch:
   - platform: gpio
     name: Speaker Enable
     id: speaker_enable
-    pin: 
-      number: GPIO46
+    pin:
+      number: ${speaker_enable_pin}
       ignore_strapping_warning: true
     restore_mode: ALWAYS_OFF
     entity_category: config
@@ -2336,7 +2387,7 @@ switch:
     on_turn_off:
       - media_player.volume_set:
           id: speaker_media_player
-          volume: 1.0
+          volume: 0.8
       - lvgl.widget.show: obj_media
       - lvgl.widget.show: lbl_media_playing
       - lvgl.widget.show: bar_volume
@@ -2404,7 +2455,7 @@ switch:
     on_turn_off:
       - media_player.volume_set:
           id: speaker_media_player
-          volume: 1.0
+          volume: 0.8
       - lvgl.label.update:
           id: lbl_media_mute
           text_color: lime
@@ -3036,10 +3087,10 @@ http_request:
 online_image:
   - url: ${loading_illustration_file}
     format: png
-    resize: 318x238
+    resize: ${image_resize}
     type: RGB565
     transparency: alpha_channel
-    byte_order: big_endian
+    byte_order: ${image_byte_order}
     id: online_png_image
     on_download_finished:
       - script.execute: showonlineimage
@@ -3052,9 +3103,9 @@ image:
 ## Default Images
   defaults:
     type: RGB565
-    resize: 318x238
+    resize: ${image_resize}
     transparency: alpha_channel
-    byte_order: big_endian
+    byte_order: ${image_byte_order}
   images:
     - file: ${error_illustration_file}
       id: error_img
@@ -3120,6 +3171,13 @@ font:
 
   - file: ${font_file}
     id: my_font16
+    size: 16
+    bpp: ${font_bpp}
+    glyphs:
+      '${font_glyphs}'
+
+  - file: ${font_file}
+    id: clock_font
     size: 16
     bpp: ${font_bpp}
     glyphs:
@@ -3979,25 +4037,6 @@ color:
   - id: white
     hex: 'ffffff'
 
-spi:
-  - id: spi_bus
-    clk_pin: 7
-    mosi_pin: 6
-
-display:
-  - platform: ili9xxx
-    id: s3_box_lcd
-    model: S3BOX
-    invert_colors: false
-    data_rate: 40MHz
-    cs_pin: 5
-    dc_pin: 4
-    reset_pin:
-      number: 48
-      inverted: true
-    update_interval: never
-    auto_clear_enabled: false
-
 key_collector:
   - source_id: lvgl_keypad
     min_length: 4
@@ -4069,7 +4108,7 @@ lvgl:
   id: lvgl_display
   disp_bg_color: 0x000000
   buffer_size: 100%
-  byte_order: big_endian
+  byte_order: ${image_byte_order}
   on_idle:
     - timeout: 1s
       then:
@@ -4099,7 +4138,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -4260,7 +4299,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -4515,7 +4554,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -4765,7 +4804,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -5011,7 +5050,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -5264,7 +5303,7 @@ lvgl:
                   id: obj_media
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -5371,7 +5410,7 @@ lvgl:
                   hidden: true
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -5515,7 +5554,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -5869,7 +5908,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -6298,6 +6337,7 @@ lvgl:
                   bg_opa: TRANSP
                   border_width: 0
                   text_color: 0xFFFFFF
+                  text_font: clock_font
                   scales:
                     - range_from: 0
                       range_to: 60
@@ -6747,9 +6787,9 @@ lvgl:
                   id: area_notification
                   text: " "
                   align: CENTER
-                  height: 180
+                  height: ${page_content_height}
                   width: 100%
-                  text_font: my_font22
+                  text_font: labelfont_large
                   text_align: CENTER
                   bg_color: 0x000000
                   border_color: 0x000000
@@ -6819,7 +6859,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -6990,7 +7030,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -7094,7 +7134,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -7179,7 +7219,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -7484,7 +7524,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -7664,7 +7704,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -7896,7 +7936,7 @@ lvgl:
               - obj:
                   align: CENTER
                   width: 100%
-                  height: 180
+                  height: ${page_content_height}
                   pad_all: 6
                   bg_opa: TRANSP
                   border_opa: TRANSP
@@ -8308,7 +8348,7 @@ lvgl:
       border_color: 0x0077b3
       text_color: 0xFFFFFF
       width: 100%
-      height: 30 #taskbar height
+      height: ${taskbar_height}
     - id: page_content
       bg_color: 0x000000
       width: 100%
@@ -8335,7 +8375,7 @@ lvgl:
       shadow_ofs_x: 0
       shadow_ofs_y: 0
       shadow_opa: 50%
-      radius: 15
+      radius: ${button_radius}
       bg_dither_mode: ORDERED
     - id: button_pressed_style
       bg_color: 0x666666 #grey
@@ -8345,7 +8385,7 @@ lvgl:
       shadow_ofs_x: 0
       shadow_ofs_y: 0
       shadow_opa: 50%
-      radius: 15
+      radius: ${button_radius}
       bg_dither_mode: ORDERED
     - id: button_checked_style
       bg_color: 0x000000 #black
@@ -8357,7 +8397,7 @@ lvgl:
       shadow_ofs_x: 0
       shadow_ofs_y: 0
       shadow_opa: 50%
-      radius: 15
+      radius: ${button_radius}
       bg_dither_mode: ORDERED
     - id: button_standard_style
       bg_color: 0x2F8CD8
@@ -8375,14 +8415,14 @@ lvgl:
       text_align: CENTER
 
 binary_sensor:
-### top left hand physical button ###
+### side physical button ###
   - platform: gpio
     pin:
-      number: GPIO0
+      number: ${side_button_pin}
       mode: INPUT_PULLUP
       inverted: true
       ignore_strapping_warning: true
-    id: left_top_button
+    id: side_top_button
     internal: true
     on_multi_click:
       - timing:
