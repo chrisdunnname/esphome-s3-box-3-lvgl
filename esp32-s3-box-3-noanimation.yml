@@ -212,7 +212,7 @@ substitutions:
   voice_assist_timer_finishing_phase_id: "30"
 
 ###### Fonts & Icons ######
-  font_glyphs: '*&@!"''%()+=,-_.:°/$€£¥?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюяμ–'
+  font_glyphs: '*&@!"''%()+=,-_.:°/$€£¥?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyzÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюяμ–—’'
   font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/Montserrat-Regular.ttf
   icon_font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/materialdesignicons-webfont.ttf
 #Note: LVGL includes a default pre-rendered fonts and icons.
@@ -302,6 +302,7 @@ touchscreen:
       number: GPIO3
       ignore_strapping_warning: true
     on_touch:
+      - lambda: ESP_LOGD("touchscreen", "on_touch");
       - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
     on_release:
       then:
@@ -366,6 +367,24 @@ display:
     update_interval: never
     auto_clear_enabled: false
 
+#### WIFI
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: ${wifi_fast_connect}
+  ap:
+    ssid: ${name}
+    password: ${wifi_fallback_pwd}   
+  on_connect:
+    - lambda: id(wifi_connection) = true;
+    - script.execute: draw_display
+    - switch.turn_on: speaker_enable
+  on_disconnect:
+    - lambda: id(wifi_connection) = false;
+    - script.execute: draw_display
+
+captive_portal:
+
 ###### Standard Configuration ######
 esphome:
   name: ${name}
@@ -415,15 +434,17 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.03.03"
+    version: "2026.03.05"
 
 api:
   encryption:
     key: ${api_key}
   on_client_connected:
+    - lambda: id(api_connection) = true;
     - lambda: id(led).turn_on().set_brightness(id(s_default_brightness).state /100).perform();
     - script.execute: draw_display
   on_client_disconnected:
+    - lambda: id(api_connection) = false;
     - script.execute: draw_display
 
 ota:
@@ -439,21 +460,6 @@ ota:
       then:
         - lambda: "id(lvgl_display).loop();"
 
-wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-  fast_connect: ${wifi_fast_connect}
-  ap:
-    ssid: ${name}
-    password: ${wifi_fallback_pwd}   
-  on_connect:
-    - script.execute: draw_display
-    - switch.turn_on: speaker_enable
-  on_disconnect:
-    - script.execute: draw_display
-
-captive_portal:
-
 time:
   - platform: homeassistant
     id: ha_time
@@ -466,43 +472,40 @@ time:
           - script.execute: time_update
 
 interval:
-  - interval: 10s
+  - interval: 30s 
     then:
       - if:
           condition:
-            - lambda: 'return { (id(api_connection) != true) };'
+            api.connected:
           then:
-            - if:
-                condition:
-                  api.connected:
-                then:
-                  - lambda: "id(api_connection) = true;"
+            - lambda: id(api_connection) = true;
           else:
-            - if:
-                condition:
-                  not:
-                    api.connected:
-                then:
-                  - lambda: "id(api_connection) = false;"
-  - interval: 10s
-    then:
-      - if:
+            - lambda: id(api_connection) = false;
+      - if: #requires WIFI
           condition:
-            - lambda: 'return { (id(wifi_connection) != true) };'
+            - lambda: return id(wifi_connection);
           then:
-            - if:
-                condition:
-                  wifi.connected:
-                then:
-                  - lambda: "id(wifi_connection) = true;"
-                  - script.execute: update_wifi_info
-          else:
-            - if:
-                condition:
-                  not:
-                    wifi.connected:
-                then:
-                  - lambda: "id(wifi_connection) = false;"
+            - lvgl.label.update:
+                id: lbl_ip
+                text: !lambda |-
+                  const char* ip = id(ip_addr).state.c_str();
+                  return ip;
+            - lvgl.label.update:
+                id: lbl_ssid
+                text: !lambda |-
+                  const char* ssid = id(connected_ssid).state.c_str();
+                  return ssid;
+            - lvgl.label.update:
+                id: lbl_bssid
+                text: !lambda |-
+                  const char* bssid = id(connected_bssid).state.c_str();
+                  return bssid;
+            - lvgl.label.update:
+                id: lbl_mac
+                text: !lambda |-
+                  const char* mac = id(device_mac).state.c_str();
+                  return mac;
+
   - interval: 10s
     then:
       - if:
@@ -682,12 +685,12 @@ sensor:
           id(up_sens_text).publish_state(str_sprintf("%03d:%02d:%02d:%02d", days, hours, minutes, seconds));
     update_interval: 300s
 
-  - platform: wifi_signal
+  - platform: wifi_signal #requires WIFI
     name: "WiFi db"
     id: wifi_signal_db
     update_interval: 30s
 
-  - platform: copy
+  - platform: copy #requires WIFI
     source_id: wifi_signal_db
     name: "WiFi Signal"
     id: wifi_percent
@@ -1423,23 +1426,20 @@ script:
             - script.execute: saver_enabled
             - if:
                 condition:
-                  wifi.connected:
+                  or:
+                    - lambda: return id(ethernet_connection);
+                    - lambda: return id(wifi_connection);
                 then:
-                  - lambda: |-
-                      id(wifi_connection) = true;
-                  - script.execute: update_wifi_info
                   - lvgl.widget.show: lbl_wifi
                   - if:
                       condition:
-                        api.connected:
+                        - lambda: return id(api_connection);
                       then:
                         - if:
                             condition:
                               switch.is_on: timer_ringing
                             then:
                               - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
-                        - lambda: |-
-                            id(api_connection) = true;
                         - lvgl.widget.show: lbl_api
                         - script.execute: set_uimode
                         - if:
@@ -1520,14 +1520,10 @@ script:
                               - lvgl.page.show: time_remaining_page
                         - lvgl.widget.hide: boot_screen
                       else:
-                        - lambda: |-
-                            id(api_connection) = false;
                         - lvgl.widget.hide: lbl_api
                         - lvgl.widget.hide: boot_screen
                         - lvgl.page.show: ${default_page}
                 else:
-                  - lambda: |-
-                      id(wifi_connection) = false;
                   - lvgl.widget.hide: lbl_api
                   - lvgl.widget.hide: lbl_wifi
                   - lvgl.widget.hide: boot_screen
@@ -1977,29 +1973,6 @@ script:
                 id: lbl_alarm
                 text_color: red 
       - lvgl.widget.redraw:
- 
-  - id: update_wifi_info
-    then:
-      - lvgl.label.update:
-          id: lbl_ip
-          text: !lambda |-
-            const char* ip = id(ip_addr).state.c_str();
-            return ip;
-      - lvgl.label.update:
-          id: lbl_ssid
-          text: !lambda |-
-            const char* ssid = id(connected_ssid).state.c_str();
-            return ssid;
-      - lvgl.label.update:
-          id: lbl_bssid
-          text: !lambda |-
-            const char* bssid = id(connected_bssid).state.c_str();
-            return bssid;
-      - lvgl.label.update:
-          id: lbl_mac
-          text: !lambda |-
-            const char* mac = id(device_mac).state.c_str();
-            return mac;
 
   - id: show_notification
     then:
@@ -3037,6 +3010,10 @@ globals:
     type: bool
     restore_value: false
     initial_value: "true"
+  - id: ethernet_connection
+    type: bool
+    restore_value: false
+    initial_value: "false"
   - id: voice_assistant_phase
     type: int
     restore_value: false
@@ -3442,7 +3419,7 @@ text_sensor:
                 text: !lambda |-
                   return id(text_response).state;
       
-  - platform: wifi_info
+  - platform: wifi_info #requires WIFI
     ip_address:
       name: IP Address
       id: ip_addr
