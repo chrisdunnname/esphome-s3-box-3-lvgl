@@ -261,7 +261,6 @@ psram:
 
 logger:
   hardware_uart: USB_SERIAL_JTAG
-  level: debug
   logs:
     lvgl: info
     text_sensor: ERROR
@@ -434,7 +433,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.03.05"
+    version: "2026.03.10"
 
 api:
   encryption:
@@ -472,7 +471,7 @@ time:
           - script.execute: time_update
 
 interval:
-  - interval: 30s 
+  - interval: 15s #requires WIFI
     then:
       - if:
           condition:
@@ -495,11 +494,6 @@ interval:
                 text: !lambda |-
                   const char* ssid = id(connected_ssid).state.c_str();
                   return ssid;
-            - lvgl.label.update:
-                id: lbl_bssid
-                text: !lambda |-
-                  const char* bssid = id(connected_bssid).state.c_str();
-                  return bssid;
             - lvgl.label.update:
                 id: lbl_mac
                 text: !lambda |-
@@ -638,8 +632,12 @@ sensor:
               lambda: return (x > 0);
           then:
             - lvgl.widget.show: lbl_battery_status
+            - lvgl.widget.show: lbl_battery_title
+            - lvgl.widget.show: lbl_battery
           else:
             - lvgl.widget.hide: lbl_battery_status
+            - lvgl.widget.hide: lbl_battery_title
+            - lvgl.widget.hide: lbl_battery
       - lvgl.label.update:
           id: lbl_battery_status
           text: !lambda |-
@@ -1283,7 +1281,6 @@ voice_assistant:
           lambda: 'return !x.empty();'
         then:
           - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
-          - micro_wake_word.enable_model: stop
   on_tts_start:
     - if:
         condition:
@@ -1318,12 +1315,10 @@ voice_assistant:
                 media_content_id: !lambda 'return x;'
                 media_content_type: music
                 announce: "false"
-    - micro_wake_word.enable_model: stop
     - delay: 10s
     - script.execute: draw_display
   on_idle:
     - lambda: ESP_LOGD("voice_assistant", "on_idle");
-    - micro_wake_word.disable_model: stop
     - script.execute: draw_display
   on_end:
     - lambda: ESP_LOGD("voice_assistant", "on_end"); 
@@ -7461,66 +7456,80 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
-              - label:
-                  id: lbl_ip_title
+              - obj:
                   align: CENTER
-                  text_align: CENTER
-                  text: "IP Address"
-                  text_color: 0xFFFFFF
-                  y: -70
-              - label:
-                  id: lbl_ip
-                  align: CENTER
-                  text_align: CENTER
-                  text: " "
-                  text_color: blue
-                  y: -50
-              - label:
-                  id: lbl_host_title
-                  align: CENTER
-                  text_align: CENTER
-                  text: "Host Name"
-                  text_color: 0xFFFFFF
-                  y: -30
-              - label:
-                  id: lbl_host
-                  align: CENTER
-                  text_align: CENTER
-                  text: !lambda |-
-                    char buf[30];
-                    sprintf(buf, "%s", "${name}.local");
-                    return buf;
-                  text_color: blue
-                  y: -10
-              - label:
-                  id: lbl_uptime_title
-                  align: CENTER
-                  text_align: CENTER
-                  text: "Uptime D:H:M:S"
-                  text_color: 0xFFFFFF
-                  y: 10
-              - label:
-                  id: lbl_uptime
-                  align: CENTER
-                  text_align: CENTER
-                  text: " "
-                  text_color: blue
-                  y: 30
-              - label:
-                  id: lbl_battery_title
-                  align: CENTER
-                  text_align: CENTER
-                  text: "Battery Level"
-                  text_color: 0xFFFFFF
-                  y: 50
-              - label:
-                  id: lbl_battery
-                  align: CENTER
-                  text_align: CENTER
-                  text: " "
-                  text_color: blue
-                  y: 70
-                        
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 6
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 6
+                    pad_column: 8
+                    type: FLEX
+                    flex_flow: COLUMN
+                    flex_align_main: CENTER
+                    flex_align_cross: STRETCH
+                    flex_align_track: CENTER
+                  widgets:
+                    - label:
+                        id: lbl_ip_title
+                        width: 100%
+                        text_align: CENTER
+                        text: "IP Address"
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: lbl_ip
+                        width: 100%
+                        text_align: CENTER
+                        text: " "
+                        text_color: blue
+                        flex_grow: 1
+                    - label:
+                        id: lbl_host_title
+                        width: 100%
+                        text_align: CENTER
+                        text: "Host Name"
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: lbl_host
+                        width: 100%
+                        text_align: CENTER
+                        text: !lambda |-
+                          char buf[30];
+                          sprintf(buf, "%s", "${name}.local");
+                          return buf;
+                        text_color: blue
+                        flex_grow: 1
+                    - label:
+                        id: lbl_uptime_title
+                        width: 100%
+                        text_align: CENTER
+                        text: "Uptime D:H:M:S"
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: lbl_uptime
+                        width: 100%
+                        text_align: CENTER
+                        text: " "
+                        text_color: blue
+                        flex_grow: 1
+                    - label:
+                        id: lbl_battery_title
+                        hidden: true
+                        width: 100%
+                        text_align: CENTER
+                        text: "Battery Level"
+                        text_color: 0xFFFFFF
+                    - label:
+                        id: lbl_battery
+                        hidden: true
+                        width: 100%
+                        text_align: CENTER
+                        text: " "
+                        text_color: blue
+                        flex_grow: 1
+
     - id: device_set_page
       skip: true
       widgets:
@@ -7846,6 +7855,14 @@ lvgl:
 
     - id: wifi_page
       skip: true
+      on_load:
+        then:
+          - delay: 100ms
+          - lambda: |-
+              auto w = lv_obj_get_width(id(qr_container));
+              auto h = lv_obj_get_height(id(qr_container));
+              int size = std::min(w, h) * 0.8;
+              lv_obj_set_size(id(lv_qr), size, size);
       widgets:
         - obj:
             styles: page_content
@@ -7860,78 +7877,97 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_color: 0xFFFFFF
-              - qrcode:
-                  id: lv_qr
-                  align: RIGHT_MID
-                  size: 100
-                  x: -10
-                  light_color: black
-                  dark_color: white
-                  text: ${wifi_qr_code}
-              - label:
-                  id: lbl_ssid_title
-                  align: CENTER
-                  text_align: CENTER
-                  text: "SSID"
-                  text_color: 0xFFFFFF
-                  x: -60
-                  y: -70
-              - label:
-                  id: lbl_ssid
-                  align: CENTER
-                  text_align: CENTER
-                  text: " "
-                  text_color: blue
-                  x: -60
-                  y: -50
-              - label:
-                  id: lbl_bssid_title
-                  align: CENTER
-                  text_align: CENTER
-                  text: "BSSID"
-                  text_color: 0xFFFFFF
-                  x: -60
-                  y: -30
-              - label:
-                  id: lbl_bssid
-                  align: CENTER
-                  text_align: CENTER
-                  text: " "
-                  text_color: blue
-                  x: -60
-                  y: -10
-              - label:
-                  id: lbl_mac_title
-                  align: CENTER
-                  text_align: CENTER
-                  text: "MAC"
-                  text_color: 0xFFFFFF
-                  x: -60
-                  y: 10
-              - label:
-                  id: lbl_mac
-                  align: CENTER
-                  text_align: CENTER
-                  text: " "
-                  text_color: blue
-                  x: -60
-                  y: 30
-              - label:
-                  id: lbl_ss_title
-                  align: CENTER
-                  text_align: CENTER
-                  text: "Signal Strength"
-                  text_color: 0xFFFFFF
-                  x: -60
-                  y: 50
-              - label:
-                  id: lbl_ss
-                  align: CENTER
-                  text_align: CENTER
-                  text: " "
-                  text_color: blue
-                  x: -60
-                  y: 70
+              - obj:
+                  align: center
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 0
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    type: grid
+                    grid_rows: [FR(1)]
+                    grid_columns: [FR(60), FR(40)]
+                  widgets:
+                    # LEFT COLUMN (labels)
+                    - obj:
+                        width: 58%
+                        height: 90%
+                        grid_cell_row_pos: 0
+                        grid_cell_column_pos: 0
+                        pad_all: 0
+                        bg_color: 0x000000
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        layout:
+                          type: flex
+                          flex_flow: COLUMN
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                        widgets:                        
+                          - label:
+                              id: lbl_ssid_title
+                              text: "SSID"
+                              text_color: 0xFFFFFF
+                              width: 100%
+                              text_align: CENTER
+                          - label:
+                              id: lbl_ssid
+                              text: " "
+                              text_color: blue
+                              width: 100%
+                              text_align: CENTER
+                              flex_grow: 1
+                          - label:
+                              id: lbl_mac_title
+                              text: "MAC"
+                              text_color: 0xFFFFFF
+                              width: 100%
+                              text_align: CENTER
+                          - label:
+                              id: lbl_mac
+                              text: " "
+                              text_color: blue
+                              width: 100%
+                              text_align: CENTER
+                              flex_grow: 1
+                          - label:
+                              id: lbl_ss_title
+                              text: "Signal Strength"
+                              text_color: 0xFFFFFF
+                              width: 100%
+                              text_align: CENTER
+                          - label:
+                              id: lbl_ss
+                              text: " "
+                              text_color: blue
+                              width: 100%
+                              text_align: CENTER
+                              flex_grow: 1
+                    # RIGHT COLUMN (QR)
+                    - obj:
+                        id: qr_container
+                        width: 38%
+                        height: 90%
+                        grid_cell_row_pos: 0
+                        grid_cell_column_pos: 1
+                        pad_all: 0
+                        bg_color: 0x000000
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
+                        layout:
+                          type: flex
+                          flex_flow: COLUMN
+                          flex_align_main: CENTER
+                          flex_align_cross: CENTER
+                        widgets:
+                          - qrcode:
+                              id: lv_qr
+                              size: 100
+                              light_color: black
+                              dark_color: white
+                              text: ${wifi_qr_code}
+                              text_align: CENTER
 
     - id: alarmclock_page
       skip: true
