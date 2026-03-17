@@ -227,6 +227,8 @@ substitutions:
   image_resize: 318x238 # 2px below width by height of screen
 
   wifi_fast_connect: false
+  wifi_power_save_mode: LIGHT #NONE, LIGHT(default for esp32), HIGH
+  wifi_use_native_roaming: true #if false uses ESPHome post connect roaming
 
   screen_max_brightness: 1.0
 
@@ -371,6 +373,9 @@ wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
   fast_connect: ${wifi_fast_connect}
+  power_save_mode: ${wifi_power_save_mode}
+  enable_btm: ${wifi_use_native_roaming}  # 802.11v BSS Transition Management
+  enable_rrm: ${wifi_use_native_roaming}  # 802.11k Radio Resource Management
   ap:
     ssid: ${name}
     password: ${wifi_fallback_pwd}   
@@ -433,7 +438,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.03.10"
+    version: "2026.03.17"
 
 api:
   encryption:
