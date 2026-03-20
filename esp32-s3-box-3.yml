@@ -252,10 +252,10 @@ esp32:
       CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
       CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
       CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB: "y" 
-      CONFIG_SPIRAM_RODATA: "y"
-      CONFIG_SPIRAM_FETCH_INSTRUCTIONS: "y"
       CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y" 
       CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
+    advanced:
+      execute_from_psram: true
 
 psram:
   mode: octal
@@ -393,7 +393,7 @@ captive_portal:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2026.2.0
+  min_version: 2026.3.0
   name_add_mac_suffix: false
   on_boot:
     priority: 600
@@ -438,7 +438,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.03.17"
+    version: "2026.03.20"
 
 api:
   encryption:
