@@ -438,7 +438,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.03.20"
+    version: "2026.03.26"
 
 api:
   encryption:
@@ -1319,7 +1319,7 @@ voice_assistant:
                 entity_id: media_player.${external_media_player}
                 media_content_id: !lambda 'return x;'
                 media_content_type: music
-                announce: "false"
+                announce: "true"
     - delay: 10s
     - script.execute: draw_display
   on_idle:
@@ -3367,6 +3367,10 @@ text_sensor:
             - lvgl.label.update:
                 id: lbl_v_text_request2
                 long_mode: SCROLL_CIRCULAR
+            - lambda: |-
+                lv_obj_set_style_anim_speed(id(lbl_v_text_request1), 70, LV_PART_MAIN);
+            - lambda: |-
+                lv_obj_set_style_anim_speed(id(lbl_v_text_request2), 70, LV_PART_MAIN);
           else:
             - lvgl.label.update:
                 id: lbl_v_text_request1
@@ -3406,6 +3410,8 @@ text_sensor:
             - lvgl.label.update:
                 id: lbl_v_text_response
                 long_mode: SCROLL_CIRCULAR
+            - lambda: |-
+                lv_obj_set_style_anim_speed(id(lbl_v_text_response), 70, LV_PART_MAIN);
           else:
             - lvgl.label.update:
                 id: lbl_v_text_response
