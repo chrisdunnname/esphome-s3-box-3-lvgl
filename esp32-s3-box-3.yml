@@ -116,8 +116,10 @@ substitutions:
   screensaver_humidity_entity: sensor.humidity #humidity sensor for local room
   screensaver_humidity_dp: 0 #decimal places for humidity entity
   screensaver_lower_left_entity: sensor.airquality #sensor
+  screensaver_lower_left_dp: 0 #decimal places for lower left entity
   screensaver_lower_left_units: " μg"
   screensaver_lower_right_entity: sensor.allergen_index #sensor
+  screensaver_lower_right_dp: 0 #decimal places for lower right entity
   screensaver_lower_right_units: " IAI"
   notification_page_title: "Notification"
   wifi_qr_code: !secret wifi_qr #QR code for wifi
@@ -891,7 +893,7 @@ sensor:
             id: lower_left_label  
             text: !lambda |-
                   char buf[10];
-                  sprintf(buf, "%.0f%s", x, "${screensaver_lower_left_units}");
+                  sprintf(buf, "%.${screensaver_lower_left_dp}f%s", x, "${screensaver_lower_left_units}");
                   return buf;
                   
 ### SCREENSAVER LOWER RIGHT ###
@@ -906,7 +908,7 @@ sensor:
             id: lower_right_label  
             text: !lambda |-
                   char buf[10];
-                  sprintf(buf, "%.0f%s", x, "${screensaver_lower_right_units}");
+                  sprintf(buf, "%.${screensaver_lower_right_dp}f%s", x, "${screensaver_lower_right_units}");
                   return buf;
 
 text:
