@@ -8512,9 +8512,7 @@ binary_sensor:
               condition:
                 - voice_assistant.is_running
               then:
-                - switch.turn_on: mute_switch
                 - voice_assistant.stop
-                - switch.turn_off: mute_switch
           - if:
               condition:
                 - switch.is_on: timer_ringing
@@ -8547,9 +8545,7 @@ binary_sensor:
           condition:
             - voice_assistant.is_running
           then:
-            - switch.turn_on: mute_switch
             - voice_assistant.stop
-            - switch.turn_off: mute_switch
       - if:
           condition:
             - switch.is_on: timer_ringing
