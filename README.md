@@ -256,7 +256,8 @@ Alternatively a text string can be used for a message or a hyperlink can be prov
 
 To use the wake, notify and timer sounds with external audio you will need to load the sounds folder to the www folder in your home assistant. This can be done through an add on like Filebrowser or SambaShare.
 
-API encryption is now standard. You can modify the key from your own config or generate one from the Home Assistant Native API web page.
+API encryption is now standard. 
+The `api_key` is a 32-byte base64-encoded string to be used as the encryption key. You can modify the key from your own config or generate one from the Home Assistant Native API web page and replace it. This is not a long live access token. You'll find more details and a generator in the official esphome documentation: https://esphome.io/components/api/#configuration-variables.
 
 Alarm integration was designed for Alarmo but can support other integrations like Envisalink where alarm modes and statuses are consistent.
 
