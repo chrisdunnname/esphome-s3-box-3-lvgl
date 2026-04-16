@@ -225,7 +225,8 @@ substitutions:
 
   font_bpp: 1 #1,2,4,8 - Higher bit depth increases flash usage
   font_icon_bpp: 4 #1,2,4,8 - Higher bit depth increases flash usage
-  image_byte_order: big_endian
+  image_byte_order: little_endian
+  lvgl_byte_order: big_endian
   image_resize: 318x238 # 2px below width by height of screen
 
   wifi_fast_connect: false
@@ -246,7 +247,7 @@ substitutions:
 esp32:
   board: esp32s3box
   flash_size: 16MB
-  cpu_frequency: 240MHz
+  cpu_frequency: 240MHz #160MHz to improve battery life, 240MHz otherwise.
   framework:
     type: esp-idf
     sdkconfig_options:
@@ -357,10 +358,9 @@ spi:
     mosi_pin: 6
 
 display:
-  - platform: ili9xxx
+  - platform: mipi_spi
     id: s3_box_lcd
     model: S3BOX
-    invert_colors: false
     data_rate: 40MHz
     cs_pin: 5
     dc_pin: 4
@@ -369,6 +369,8 @@ display:
       inverted: true
     update_interval: never
     auto_clear_enabled: false
+    color_order: bgr
+    invert_colors: false
 
 #### WIFI
 wifi:
@@ -395,7 +397,7 @@ captive_portal:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2026.3.0
+  min_version: 2026.4.0
   name_add_mac_suffix: false
   on_boot:
     priority: 600
@@ -440,7 +442,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.03.26"
+    version: "2026.04.16"
 
 api:
   encryption:
@@ -3369,10 +3371,6 @@ text_sensor:
             - lvgl.label.update:
                 id: lbl_v_text_request2
                 long_mode: SCROLL_CIRCULAR
-            - lambda: |-
-                lv_obj_set_style_anim_speed(id(lbl_v_text_request1), 70, LV_PART_MAIN);
-            - lambda: |-
-                lv_obj_set_style_anim_speed(id(lbl_v_text_request2), 70, LV_PART_MAIN);
           else:
             - lvgl.label.update:
                 id: lbl_v_text_request1
@@ -3412,8 +3410,6 @@ text_sensor:
             - lvgl.label.update:
                 id: lbl_v_text_response
                 long_mode: SCROLL_CIRCULAR
-            - lambda: |-
-                lv_obj_set_style_anim_speed(id(lbl_v_text_response), 70, LV_PART_MAIN);
           else:
             - lvgl.label.update:
                 id: lbl_v_text_response
@@ -4130,9 +4126,10 @@ key_collector:
 #############################
 lvgl:
   id: lvgl_display
-  disp_bg_color: 0x000000
+  bottom_layer:
+    bg_color: 0x000000
   buffer_size: 100%
-  byte_order: ${image_byte_order}
+  byte_order: ${lvgl_byte_order}
   on_idle:
     - timeout: 1s
       then:
@@ -4332,7 +4329,7 @@ lvgl:
                     pad_column: 8
                     type: GRID
                     grid_columns: [FR(1), FR(1), FR(1)]
-                    grid_rows: [FR(10), FR(10), FR(30), FR(10), FR(10), FR(30)]
+                    grid_rows: [FR(12), FR(12), FR(20), FR(12), FR(12), FR(20)]
                   widgets:
                     - label:
                         id: lbl_climate_1
@@ -4373,7 +4370,7 @@ lvgl:
                           - label:
                               id: ico_climate_1
                               align: CENTER
-                              text_font: icon_font_55
+                              text_font: icon_font_30
                               text: "\U000F0210"
                         on_release:
                           then:
@@ -4413,7 +4410,7 @@ lvgl:
                     - label:
                         id: icon_climate_2
                         hidden: true
-                        text_font: icon_font_55
+                        text_font: icon_font_30
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
@@ -4447,7 +4444,7 @@ lvgl:
                     - label:
                         id: icon_climate_3
                         hidden: true
-                        text_font: icon_font_55
+                        text_font: icon_font_30
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
@@ -4481,7 +4478,7 @@ lvgl:
                     - label:
                         id: icon_climate_4
                         hidden: true
-                        text_font: icon_font_55
+                        text_font: icon_font_30
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
@@ -4515,7 +4512,7 @@ lvgl:
                     - label:
                         id: icon_climate_5
                         hidden: true
-                        text_font: icon_font_55
+                        text_font: icon_font_30
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
@@ -4549,7 +4546,7 @@ lvgl:
                     - label:
                         id: icon_climate_6
                         hidden: true
-                        text_font: icon_font_55
+                        text_font: icon_font_30
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
@@ -6377,7 +6374,7 @@ lvgl:
                             id: minute_hand
                             width: 3
                             color: 0xFFFFFF
-                            r_mod: -1
+                            length: -1
                             value: 0
                     - range_from: 1
                       range_to: 12
@@ -6397,14 +6394,12 @@ lvgl:
                       range_to: 720
                       angle_range: 360
                       rotation: 270
-                      ticks:
-                        count: 0
                       indicators:
                         - line:
                             id: hour_hand
                             width: 4
                             color: 0xFFFFFF
-                            r_mod: -30
+                            length: -30
                             value: 0
               - label:
                   id: day_label
@@ -7473,17 +7468,15 @@ lvgl:
                   align: CENTER
                   width: 100%
                   height: ${page_content_height}
-                  pad_all: 6
+                  pad_all: 2
                   bg_opa: TRANSP
                   border_opa: TRANSP
                   layout:
-                    pad_row: 6
-                    pad_column: 8
-                    type: FLEX
-                    flex_flow: COLUMN
-                    flex_align_main: CENTER
-                    flex_align_cross: STRETCH
-                    flex_align_track: CENTER
+                    pad_row: 2
+                    pad_column: 0
+                    type: GRID
+                    grid_columns: [FR(1)]
+                    grid_rows: [FR(1), FR(1), FR(1), FR(1), FR(1), FR(1), FR(1), FR(1)]
                   widgets:
                     - label:
                         id: lbl_ip_title
@@ -7491,19 +7484,30 @@ lvgl:
                         text_align: CENTER
                         text: "IP Address"
                         text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
                     - label:
                         id: lbl_ip
                         width: 100%
                         text_align: CENTER
                         text: " "
                         text_color: blue
-                        flex_grow: 1
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
                     - label:
                         id: lbl_host_title
                         width: 100%
                         text_align: CENTER
                         text: "Host Name"
                         text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
                     - label:
                         id: lbl_host
                         width: 100%
@@ -7513,20 +7517,30 @@ lvgl:
                           sprintf(buf, "%s", "${name}.local");
                           return buf;
                         text_color: blue
-                        flex_grow: 1
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
                     - label:
                         id: lbl_uptime_title
                         width: 100%
                         text_align: CENTER
                         text: "Uptime D:H:M:S"
                         text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 4
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
                     - label:
                         id: lbl_uptime
                         width: 100%
                         text_align: CENTER
                         text: " "
                         text_color: blue
-                        flex_grow: 1
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 5
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
                     - label:
                         id: lbl_battery_title
                         hidden: true
@@ -7534,6 +7548,10 @@ lvgl:
                         text_align: CENTER
                         text: "Battery Level"
                         text_color: 0xFFFFFF
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 6
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
                     - label:
                         id: lbl_battery
                         hidden: true
@@ -7541,7 +7559,10 @@ lvgl:
                         text_align: CENTER
                         text: " "
                         text_color: blue
-                        flex_grow: 1
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 7
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: CENTER
 
     - id: device_set_page
       skip: true
@@ -8437,21 +8458,20 @@ lvgl:
       text_color: 0xFFFFFF
       shadow_color: 0xFFFFFF
       shadow_width: 20
-      shadow_ofs_x: 0
-      shadow_ofs_y: 0
+      shadow_offset_x: 0
+      shadow_offset_y: 0
       shadow_opa: 50%
       radius: ${button_radius}
-      bg_dither_mode: ORDERED
     - id: button_pressed_style
       bg_color: 0x666666 #grey
       bg_grad_color: 0x00334d #dark blue
+      bg_grad_dir: VER
       shadow_color: 0xFFFFFF
       shadow_width: 20
-      shadow_ofs_x: 0
-      shadow_ofs_y: 0
+      shadow_offset_x: 0
+      shadow_offset_y: 0
       shadow_opa: 50%
       radius: ${button_radius}
-      bg_dither_mode: ORDERED
     - id: button_checked_style
       bg_color: 0x000000 #black
       bg_grad_color: 0x002233 #darker blue
@@ -8459,11 +8479,10 @@ lvgl:
       text_color: yellow
       shadow_color: 0xFFFFFF
       shadow_width: 20
-      shadow_ofs_x: 0
-      shadow_ofs_y: 0
+      shadow_offset_x: 0
+      shadow_offset_y: 0
       shadow_opa: 50%
       radius: ${button_radius}
-      bg_dither_mode: ORDERED
     - id: button_standard_style
       bg_color: 0x2F8CD8
       bg_grad_color: 0x005782
