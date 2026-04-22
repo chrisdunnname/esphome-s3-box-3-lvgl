@@ -266,6 +266,7 @@ psram:
 
 logger:
   hardware_uart: USB_SERIAL_JTAG
+  level: WARN
 
 output:
   - platform: ledc
