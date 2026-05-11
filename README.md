@@ -10,15 +10,16 @@ A weather service from Home Assistant (e.g. open weather map) can provide temper
 
 A large number of entities are exposed to Home Assistant including a notification text entity that provides the ability to push notifications to the device which will display on screen for 10 seconds (with an optional notification sound) and an Image URL entity that provides the ability to push the URL for a PNG image to the device which will display on screen for 30 seconds (with no notification sound). This can be used with a [JPG to PNG Converter](https://github.com/youkorr/hacs-jpg-to-png-converter) in an automation to capture a snapshot from a camera and push it to the device.
 
-A UI Mode feature provides the ability to switch the user experience with 3 modes: Default, HAL, Home.
+A UI Mode feature provides the ability to switch the UI theme with 3 modes: Default, Dark, Grey.
+A VA Mode feature provides the ability to switch the voice assistant animated UI with 3 modes: Default, HAL, Home.
 Each provides a different theme and voice assistant interface.
-- Default provides the original theme and a more standard Home Assistant experience. 
-- HAL provides a darker theme and an animated Space Odyssey inspired 2001 HAL voice assistant.
-- Home provides a more subtle theme and an animated Google inspired voice assistant.
+- Default provides a standard ESPHome and Home Assistant experience. 
+- HAL provides an animated Space Odyssey inspired 2001 HAL voice assistant.
+- Home provides an animated Google inspired voice assistant.
 
-A no animation YAML configuration is provided that provides the UI Mode but without the animated voice assistants for much smaller firmware.
+A no animation YAML configuration is provided that provides the UI Mode but the VA mode does not apply for much smaller firmware.
 
-The wakeword is not tied to the UI Mode providing flexibility for your preferred experience.
+The wakeword is not tied to the VA Mode providing flexibility for your preferred experience.
 
 The On Device Wake Word includes the standard ESPHome wakeword models (4) but also some experimental models including okay hal and hey luna.
 Additional experimental wake words for okay computer and hey home assistant and included in the config but disabled by default. 
@@ -52,11 +53,11 @@ Last tested on Home Assistant 2026.4 and ESPHome Version 2026.4.
 
 ![home_default](https://github.com/user-attachments/assets/54e5eae1-fa0b-4545-9eec-5a903b5f264f)
 
-**HAL UI Mode**
+**Dark UI Mode**
 
 ![home_hal](https://github.com/user-attachments/assets/21a0d09a-dbd0-4998-8ca4-be346b89780c)
 
-**Home UI Mode**
+**Grey UI Mode**
 
 ![home_home](https://github.com/user-attachments/assets/6fffa773-5d6b-4262-989d-89adf5a64335)
 
@@ -78,14 +79,14 @@ Last tested on Home Assistant 2026.4 and ESPHome Version 2026.4.
 
 # Voice Assistant
 ![voice](https://github.com/user-attachments/assets/8c36d316-00ce-40dd-b0ed-fcafdacbfcda)
-- Standard experience in Default UI Mode
+- Standard experience in Default VA Mode
 
 **Voice Timer Started**
 
 ![voice_timer](https://github.com/user-attachments/assets/51b9e7ec-b701-449e-9680-143d9a2e822d)
-- Standard experience in Default UI Mode
+- Standard experience in Default VA Mode
 
-**Voice Assistant in HAL UI Mode**
+**Voice Assistant in HAL VA Mode**
 
 https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 
@@ -171,9 +172,10 @@ Tap the change temperature buttons to move slightly or long press to change fast
 
 ![voice_settings](https://github.com/user-attachments/assets/00cc9687-eafa-4b36-a2cc-2d3736bf3ed7)
 - WakeWord Location can be changed from On Device to Home Assistant
+- VA Mode changes the animated voice assistant
 - Mute Responses will mute any response
-- Wake Sound will play a wake sound when voice assistant wakes
 - Show Responses will display the conversation on the voice assistant screens.
+- Wake Sound will play a wake sound when voice assistant wakes
 
 **Screensaver Settings**
 
@@ -209,7 +211,7 @@ Tap the change temperature buttons to move slightly or long press to change fast
 - Time Format provides 12 or 24 HR time shown in all places
 - ScreenSaver Clock allows Analog or Digital clock to be shown
 - Temperature Unit updates all displayed temperatures to be Celsius or Fahrenheit
-- UI Mode provides the ability to choose the theme and corresponding voice assistant experience.
+- UI Mode provides the ability to choose the theme.
 
 # Wifi
 ![wifi](https://github.com/user-attachments/assets/b3d620e6-5143-4904-b3ef-78cab5da5b4a)
