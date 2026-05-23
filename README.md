@@ -10,7 +10,7 @@ A weather service from Home Assistant (e.g. open weather map) can provide temper
 
 A large number of entities are exposed to Home Assistant including a notification text entity that provides the ability to push notifications to the device which will display on screen for 10 seconds (with an optional notification sound) and an Image URL entity that provides the ability to push the URL for a PNG image to the device which will display on screen for 30 seconds (with no notification sound). This can be used with a [JPG to PNG Converter](https://github.com/youkorr/hacs-jpg-to-png-converter) in an automation to capture a snapshot from a camera and push it to the device.
 
-A UI Mode feature provides the ability to switch the UI theme with 3 modes: Default, Dark, Grey.
+A UI Mode feature provides the ability to switch the UI theme with 4 modes: Default, Dark, Grey, Light.
 A VA Mode feature provides the ability to switch the voice assistant animated UI with 3 modes: Default, HAL, Home.
 Each provides a different theme and voice assistant interface.
 - Default provides a standard ESPHome and Home Assistant experience. 
@@ -42,8 +42,8 @@ Requires [S3-Box-3](https://www.espressif.com/en/dev-board/esp32-s3-box-3-en).
 
 Sensor dock & battery are optional to use radar/presence, battery level and temperature/humidity functionality.
 
-The minimum supported ESPHome version is 2026.4.0.
-Last tested on Home Assistant 2026.4 and ESPHome Version 2026.4.
+The minimum supported ESPHome version is 2026.5.0.
+Last tested on Home Assistant 2026.5 and ESPHome Version 2026.5.
 
 # Loading
 ![loading](https://github.com/user-attachments/assets/55e0a1b8-8873-42a3-864f-297fa6826b6e)
