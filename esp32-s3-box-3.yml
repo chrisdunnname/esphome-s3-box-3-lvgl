@@ -440,7 +440,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.05.22"
+    version: "2026.05.25"
 
 api:
   encryption:
@@ -557,7 +557,7 @@ light:
     entity_category: config
     output: backlight_output
     restore_mode: ALWAYS_ON
-    internal: true
+    # internal: true
     default_transition_length: 50ms
     on_turn_on:
       - lvgl.resume:
@@ -1034,7 +1034,7 @@ media_player:
               - lvgl.label.update:
                   id: lbl_media_playing
                   text: "Nothing Playing"
-                  text_color: lightblue
+              - script.execute: set_uimode
         - if:
             condition:
               and:
@@ -1342,11 +1342,22 @@ voice_assistant:
         timeout: 0.5s
     - lambda: ESP_LOGD("voice_assistant", "on_end announcement finished");
     - wait_until:
-        - and:
-            - not:
-                media_player.is_announcing:
-            - not:
-                media_player.is_playing:
+        condition:
+          - and:
+              - not:
+                  media_player.is_announcing:
+              - not:
+                  media_player.is_playing:
+        timeout: !lambda |-
+          return id(voice_assistant_timeout);
+    - if:
+        condition:
+          any:
+            - media_player.is_announcing:
+            - media_player.is_playing:
+        then:
+          - lambda: ESP_LOGD("voice_assistant", "Forced Reboot");
+          - button.press: reboot
     - mixer_speaker.apply_ducking:
         id: media_mixing_input
         decibel_reduction: 0
@@ -2169,6 +2180,9 @@ script:
                       id: label_text_color
                       line_color: 0xFFFFFF
                       text_color: 0xFFFFFF
+                  - lvgl.style.update:
+                      id: label_text_color_blue
+                      text_color: lightblue
                   - lambda: |-
                       auto color = lv_color_hex(0xFFFFFF);
                       lv_obj_set_style_line_color(id(minute_hand).obj, color, LV_PART_MAIN);
@@ -2225,6 +2239,9 @@ script:
                       id: label_text_color
                       line_color: 0xFFFFFF
                       text_color: 0xFFFFFF
+                  - lvgl.style.update:
+                      id: label_text_color_blue
+                      text_color: lightblue
                   - lambda: |-
                       auto color = lv_color_hex(0xFFFFFF);
                       lv_obj_set_style_line_color(id(minute_hand).obj, color, LV_PART_MAIN);
@@ -2281,6 +2298,9 @@ script:
                       id: label_text_color
                       line_color: 0xFFFFFF
                       text_color: 0xFFFFFF
+                  - lvgl.style.update:
+                      id: label_text_color_blue
+                      text_color: lightblue
                   - lambda: |-
                       auto color = lv_color_hex(0xFFFFFF);
                       lv_obj_set_style_line_color(id(minute_hand).obj, color, LV_PART_MAIN);
@@ -2337,6 +2357,9 @@ script:
                       id: label_text_color
                       line_color: 0x000000
                       text_color: 0x000000
+                  - lvgl.style.update:
+                      id: label_text_color_blue
+                      text_color: blue
                   - lambda: |-
                       auto color = lv_color_hex(0x000000);
                       lv_obj_set_style_line_color(id(minute_hand).obj, color, LV_PART_MAIN);
@@ -2621,13 +2644,13 @@ switch:
       - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
       - lvgl.label.update:
           id: lbl_mic
-          styles: label_text_color
           text: !lambda |-
               static char buf[10];
               std::string icon;
               icon = "\U000F036C";
               snprintf(buf, sizeof(buf), "%s", icon.c_str());
               return buf;
+      - script.execute: set_uimode
       - script.execute: draw_display
     on_turn_on:
       - microphone.mute:
@@ -3307,6 +3330,10 @@ globals:
     type: bool
     restore_value: false
     initial_value: "false"
+  - id: voice_assistant_timeout
+    type: int
+    restore_value: false
+    initial_value: '15000'
   - id: radar_state
     type: bool
     restore_value: true
@@ -3646,6 +3673,7 @@ text_sensor:
                 long_mode: SCROLL_CIRCULAR
             - lambda: |-
                 lv_obj_set_style_anim_time(id(lbl_v_text_response), id(text_response).state.length()*125, LV_PART_MAIN);
+            - lambda: id(voice_assistant_timeout) = 10000 + (id(text_response).state.length()*125);
           else:
             - lvgl.label.update:
                 id: lbl_v_text_response
@@ -4426,7 +4454,7 @@ lvgl:
                               id: ico_home_1
                               align: CENTER
                               text_font: icon_font_55
-                              text_color: lightblue
+                              styles: label_text_color_blue
                               text: "\U000F050F"
                         on_long_press:
                           then:
@@ -4588,7 +4616,7 @@ lvgl:
                         text: " "
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -4642,7 +4670,7 @@ lvgl:
                         text: " "
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -4654,7 +4682,7 @@ lvgl:
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 2
                         grid_cell_x_align: STRETCH
@@ -4676,7 +4704,7 @@ lvgl:
                         text: " "
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 2
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -4688,7 +4716,7 @@ lvgl:
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 2
                         grid_cell_row_pos: 2
                         grid_cell_x_align: STRETCH
@@ -4710,7 +4738,7 @@ lvgl:
                         text: " "
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 4
                         grid_cell_x_align: STRETCH
@@ -4722,7 +4750,7 @@ lvgl:
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 5
                         grid_cell_x_align: STRETCH
@@ -4744,7 +4772,7 @@ lvgl:
                         text: " "
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 4
                         grid_cell_x_align: STRETCH
@@ -4756,7 +4784,7 @@ lvgl:
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 5
                         grid_cell_x_align: STRETCH
@@ -4778,7 +4806,7 @@ lvgl:
                         text: " "
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 2
                         grid_cell_row_pos: 4
                         grid_cell_x_align: STRETCH
@@ -4790,7 +4818,7 @@ lvgl:
                         text: "\U000F050F"
                         align: CENTER
                         text_align: CENTER
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 2
                         grid_cell_row_pos: 5
                         grid_cell_x_align: STRETCH
@@ -4873,7 +4901,7 @@ lvgl:
                         id: studioac_currenttemp
                         align: CENTER
                         text_align: CENTER
-                        text_color: blue
+                        styles: label_text_color_blue
                         text_font: labelfont_large
                         grid_cell_column_pos: 1
                         grid_cell_row_pos: 1
@@ -4893,7 +4921,7 @@ lvgl:
                         id: studioac_targettemp
                         align: CENTER
                         text_align: CENTER
-                        text_color: blue
+                        styles: label_text_color_blue
                         text_font: labelfont_large
                         grid_cell_column_pos: 2
                         grid_cell_row_pos: 1
@@ -5661,7 +5689,7 @@ lvgl:
                   text_align: CENTER
                   text_font: labelfont_large
                   text: "Nothing Playing"
-                  text_color: lightblue
+                  styles: label_text_color_blue
                   y: -45
               - bar:
                   id: bar_volume
@@ -5798,7 +5826,7 @@ lvgl:
                   text_align: CENTER
                   text_font: labelfont_large
                   text: "Nothing Playing"
-                  text_color: lightblue
+                  styles: label_text_color_blue
                   y: -45
  
     - id: scenes_page
@@ -6499,7 +6527,7 @@ lvgl:
                   text: " "
                   align: CENTER
                   text_align: CENTER
-                  text_color: lightblue
+                  styles: label_text_color_blue
                   text_font: my_font12
                   x: 0
                   y: 10
@@ -6989,7 +7017,7 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_font: icon_font_80
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 0
                         grid_cell_x_align: STRETCH
@@ -7002,7 +7030,7 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         text_font: my_font22
-                        text_color: lightblue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -7767,7 +7795,7 @@ lvgl:
                         width: 100%
                         text_align: CENTER
                         text: " "
-                        text_color: blue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
@@ -7790,7 +7818,7 @@ lvgl:
                           char buf[30];
                           sprintf(buf, "%s", "${name}.local");
                           return buf;
-                        text_color: blue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 3
                         grid_cell_x_align: STRETCH
@@ -7810,7 +7838,7 @@ lvgl:
                         width: 100%
                         text_align: CENTER
                         text: " "
-                        text_color: blue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 5
                         grid_cell_x_align: STRETCH
@@ -7832,7 +7860,7 @@ lvgl:
                         width: 100%
                         text_align: CENTER
                         text: " "
-                        text_color: blue
+                        styles: label_text_color_blue
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 7
                         grid_cell_x_align: STRETCH
@@ -8223,7 +8251,7 @@ lvgl:
                           - label:
                               id: lbl_ssid
                               text: " "
-                              text_color: blue
+                              styles: label_text_color_blue
                               width: 100%
                               text_align: CENTER
                               flex_grow: 1
@@ -8236,7 +8264,7 @@ lvgl:
                           - label:
                               id: lbl_mac
                               text: " "
-                              text_color: blue
+                              styles: label_text_color_blue
                               width: 100%
                               text_align: CENTER
                               flex_grow: 1
@@ -8249,7 +8277,7 @@ lvgl:
                           - label:
                               id: lbl_ss
                               text: " "
-                              text_color: blue
+                              styles: label_text_color_blue
                               width: 100%
                               text_align: CENTER
                               flex_grow: 1
@@ -8726,6 +8754,8 @@ lvgl:
     - id: label_text_color
       text_color: 0xFFFFFF
       line_color: 0xFFFFFF
+    - id: label_text_color_blue
+      text_color: lightblue
     - id: bg_color
       bg_color: 0x000000
     - id: button_style
