@@ -226,7 +226,7 @@ Tap the change temperature buttons to move slightly or long press to change fast
 The easy way to get started is to get your S3 Box 3 flashed with the default Home Assistant Voice Assistant firmware then you can replace it with this code.
 You can follow these steps to get started: [ESP32-S3-BOX Voice Assistant](https://www.home-assistant.io/voice_control/s3_box_voice_assistant/).
 Once the device is adopted in ESPHOME then you have full control to edit the configuration.
-Your Home Assistant will also recognize the device so you can add it.
+Your Home Assistant will recognize the device so you can add it.
 
 When you add the device there is one more option you will need. If you want to use the capabilities of the box to control devices in your Home Assistant you have to give it permission. 
 In Devices>EspHome find the device and click the cog next to it.
@@ -237,36 +237,18 @@ Then choose to allow the device to perform Home Assistant Actions.
 
 ![allowdeviceactions](https://github.com/user-attachments/assets/9cebb38a-4398-4040-bfd4-b1b20f2d2111)
 
-I recommend starting with the esp32-s3-box-3.yml file in this repository. You can keep the name from your initial installtion but change replace the rest with the content from this file and then compile this and install the updated configuration wirelessly. See the basics below to ensure you have the three required secrets configured before you compile.
+I recommend starting with the esp32-s3-box-3.yml file in this repository. You can keep the name from your initial installation but change the rest with the content from this file and then compile this and install the updated configuration wirelessly. See the basics below to ensure you have the three required secrets configured before you compile.
 The configuration provided will work out of the box but you won't have any buttons to control lights or switches and it won't connect to an external speaker for audit. This is where the configuration options in the config come into play. The first 200 lines are all options that can be adjusted to tailor your box for you and push out new wireless updates to test your changes. 
 
-**The basics**
+**Configuration**
 
-All standard user functions included in the configuration are provided as substitutions in the YAML. 
-Under the "Your Configuration Data" section you can change page names, button names, icons and specify entities to enable the standard features of the configuration. 
-Only components associated with active entities in your Home Assistant will be shown on the device otherwise these features will be hidden. This means that you can just update the substitutions for the entities you require and only those items will be shown on the associated pages. This makes it easy for anyone to get started with this configuration in a few minutes. For those deploying to multiple S3 devices this new design makes it easier to deploy the same configuration with different entities and makes it easy for those who wish to separate the substitutions from the core yaml.
-
-In ESPHome under secrets ensure you have defined three secrets:
-- wifi_ssid (your wifi SSID)
-- wifi_password (your wifi Password)
-- wifi_qr (a QR code string)
-
-The wifi_qr provides a Wifi QR Code so that guests can scan your screen to get details, be navigated to a link or directly connect to your network.
-To provide a QR to connect to your wifi the string should be populate like this: "WIFI:S:your_wifi_ssid;T:WPA;P:your_wifi_password;H:false;;". This is the standard format for Wifi QR codes and more details can be found in the WPA3 specification.
-Alternatively a text string can be used for a message or a hyperlink can be provided to open when the QR code is scanned. Deep-link URLs can use the mobile app [URL handler](https://companion.home-assistant.io/docs/integrations/url-handler/) to launch specific dashboards, call services or fire events for users with the mobile app installed.  [Universal links](https://companion.home-assistant.io/docs/integrations/universal-links/) can be used here to trigger an automation the same way as an NFC tag.
+See [CONFIGURATION.md](https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/blob/main/CONFIGURATION.md) for further details on the YAML configuration.
 
 **Additional Information**
 
-To use the wake, notify and timer sounds with external audio you will need to load the sounds folder to the www folder in your home assistant. This can be done through an add on like Filebrowser or SambaShare.
+See [USAGE.md](https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/blob/main/USAGE.md) for further details of the available Home Assistant entities and how they can be used.
 
-API encryption is now standard. 
-The `api_key` is a 32-byte base64-encoded string to be used as the encryption key. You can modify the key from your own config or generate one from the Home Assistant Native API web page and replace it. This is not a long live access token. You'll find more details and a generator in the official esphome documentation: https://esphome.io/components/api/#configuration-variables.
-
-Alarm integration was designed for Alarmo but can support other integrations like Envisalink where alarm modes and statuses are consistent.
-
-Binary Sensors or sensors with an on/off status will work as entities for the lights, controls and scenes pages to show status. Users can still press the buttons and they may appear to turn on/off but they won't do anything and any status update will make the indicator show the HA status. 
-
-For triggering more complex scenarios, helper Toggles (input_boolean) and automations can be really useful. You can set an input_boolean as the entity for any of the configurable buttons. You can create an automation using the input_boolean turning on as the trigger, have it perform some actions and then set the input_boolean to off. On the S3 pushing the button will turn this on, triggering the automation and showing the on status and when the automation completes it will go back to off. 
+**Thank You!**
 
 If you are stuck or unsure or have a suggestion raise an issue or reach out as this configuration is the result of requests from fellow users and benefits from your support and involvement.
 
