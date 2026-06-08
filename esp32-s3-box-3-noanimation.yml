@@ -7,8 +7,36 @@ substitutions:
   home_assistant_host: http://homeassistant.local:8123 ##change to the full url or IP of your HA server including port
   api_key: QhTgdqqJ3XY9DbDuN8NS1+zXUr8NaY83pab4dqgy8Yk= ## Device specific API KEY
   wifi_fallback_pwd: s3box123
+
   home_page_title: "Home"
+  home_page_hide_from_navigation: false
+  home1_icon: "\U000F050F"
+  home1_color: lightblue
+  home1_page: climate_page
+  home1_hidden: false
+  home2_icon: "\U000F06E8"
+  home2_color: yellow
+  home2_page: lights_page
+  home2_hidden: false
+  home3_icon: "\U000F097E"
+  home3_color: fuchsia
+  home3_page: controls_page
+  home3_hidden: false
+  home4_icon: "\U000F075A"
+  home4_color: red
+  home4_page: media_page
+  home4_hidden: false
+  home5_icon: "\U000F0FCE"
+  home5_color: aqua
+  home5_page: scenes_page
+  home5_hidden: false
+  home6_icon: "\U000F033E"
+  home6_color: lime
+  home6_page: security_page
+  home6_hidden: false
+
   climate_page_title: "Climate"
+  climate_page_hide_from_navigation: false
   climate1_name: "Room 1 AC"
   climate1_entity: climate.air_conditioner #climate
   climate2_name: "Room 2"
@@ -21,7 +49,9 @@ substitutions:
   climate5_entity: sensor.temperature5 #sensor
   climate6_name: "Room 6"
   climate6_entity: sensor.temperature6 #sensor
+
   lights_page_title: "Lights"
+  lights_page_hide_from_navigation: false
   lights1_name: "Light 1"
   lights1_entity: switch.light1 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   lights2_name: "Light 2"
@@ -34,8 +64,9 @@ substitutions:
   lights5_entity: switch.light5 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   lights6_name: "Light 6"
   lights6_entity: light.light6 #switch,light,media_player,climate,fan,humidifier,cover,script,siren
+  
   controls_page_title: "Controls"
-  controls_page_icon: "\U000F097E" #icon from icon_glyphs
+  controls_page_hide_from_navigation: false
   controls1_name: "Kettle"
   controls1_entity: switch.kettle_start #switch,light,media_player,climate,fan,humidifier,cover,script,siren
   controls1_icon_off: "\U000F131B" #icon from icon_glyphs
@@ -63,9 +94,12 @@ substitutions:
   controls6_state: input_boolean.vacuum #status - switch,light,fan,cover,sensor,binary_sensor
   controls6_icon_off: "\U000F1C01" #icon from icon_glyphs
   controls6_icon_on: "\U000F070D" #icon from icon_glyphs
+  
   media_page_title: "Media"
+  media_page_hide_from_navigation: false
+  
   scenes_page_title: "Screens"
-  scenes_page_icon: "\U000F0FCE" #icon from icon_glyphs
+  scenes_page_hide_from_navigation: false
   scenes1_name: "Player 1"
   scenes1_entity: media_player.media1 #switch,light,media_player,climate,fan,humidifier,cover,script,siren,scene
   scenes1_icon_off: "\U000F083B" #icon from icon_glyphs
@@ -90,11 +124,14 @@ substitutions:
   scenes6_entity: media_player.media6 #switch,light,media_player,climate,fan,humidifier,cover,script,siren,scene
   scenes6_icon_off: "\U000F083B" #icon from icon_glyphs
   scenes6_icon_on: "\U000F0502" #icon from icon_glyphs
+  
   alarm_entity: alarm_control_panel.alarmo #Alarm - tested with Alarmo
   alarm_background_on: 0x001a00 #Set to 0x000000 to disable
   alarm_background_pending: 0x330d00 #Set to 0x000000 to disable
   alarm_background_triggered: 0x4d0000 #Set to 0x000000 to disable
+  
   security_page_title: "Security"
+  security_page_hide_from_navigation: false
   security1_name: "Lock 1"
   security1_entity: lock.lock1 #lock,switch,light,media_player,climate,fan,humidifier,cover,script,siren
   security1_icon_off: "\U000F033F" #icon from icon_glyphs
@@ -108,6 +145,7 @@ substitutions:
   security3_icon_off: "\U000F033F" #icon from icon_glyphs
   security3_icon_on: "\U000F033E" #icon from icon_glyphs
   keypad_page_title: "Code"
+  
   screensaver_page_title: " "
   screensaver_weather_entity: weather.home #weather
   screensaver_weather_dp: 1 #decimal places for weather temperature
@@ -121,9 +159,11 @@ substitutions:
   screensaver_lower_right_entity: sensor.allergen_index #sensor
   screensaver_lower_right_dp: 0 #decimal places for lower right entity
   screensaver_lower_right_units: " IAI"
+  
   notification_page_title: "Notification"
+  
   wifi_qr_code: !secret wifi_qr #QR code for wifi
-  default_page: idle_page #set default idle page e.g. idle_page, lights_page, scenes_page, controls_page
+  default_page: home_page #set default idle page e.g. home_page, lights_page, scenes_page, controls_page
 
 ###### Days and Months ######
 ## Change the values on the right to match your locale ##
@@ -440,7 +480,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.05.25"
+    version: "2026.06.09"
 
 api:
   encryption:
@@ -4403,7 +4443,8 @@ lvgl:
         - script.execute: saver_enabled
 
   pages:
-    - id: idle_page
+    - id: home_page
+      skip: ${home_page_hide_from_navigation}
       on_swipe_left:
         - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
         - lvgl.page.next:
@@ -4441,6 +4482,7 @@ lvgl:
                     - button:
                         id: but_home_1
                         styles: button_style
+                        hidden: ${home1_hidden}
                         pressed:
                           styles: button_pressed_style
                         checked:
@@ -4454,14 +4496,15 @@ lvgl:
                               id: ico_home_1
                               align: CENTER
                               text_font: icon_font_55
-                              styles: label_text_color_blue
-                              text: "\U000F050F"
+                              text_color: ${home1_color}
+                              text: ${home1_icon}
                         on_long_press:
                           then:
-                            lvgl.page.show: climate_page
+                            lvgl.page.show: ${home1_page}
                     - button:
                         id: but_home_2
                         styles: button_style
+                        hidden: ${home2_hidden}
                         pressed:
                           styles: button_pressed_style
                         checked:
@@ -4475,14 +4518,15 @@ lvgl:
                               id: ico_home_2
                               align: CENTER
                               text_font: icon_font_55
-                              text_color: yellow
-                              text: "\U000F06E8"
+                              text_color: ${home2_color}
+                              text: ${home2_icon}
                         on_long_press:
                           then:
-                            lvgl.page.show: lights_page
+                            lvgl.page.show: ${home2_page}
                     - button:
                         id: but_home_3
                         styles: button_style
+                        hidden: ${home3_hidden}
                         pressed:
                           styles: button_pressed_style
                         checked:
@@ -4496,14 +4540,15 @@ lvgl:
                               id: ico_home_3
                               align: CENTER
                               text_font: icon_font_55
-                              text_color: fuchsia
-                              text: '${controls_page_icon}'
+                              text_color: ${home3_color}
+                              text: ${home3_icon}
                         on_long_press:
                           then:
-                            lvgl.page.show: controls_page
+                            lvgl.page.show: ${home3_page}
                     - button:
                         id: but_home_4
                         styles: button_style
+                        hidden: ${home4_hidden}
                         pressed:
                           styles: button_pressed_style
                         checked:
@@ -4517,14 +4562,15 @@ lvgl:
                               id: ico_home_4
                               align: CENTER
                               text_font: icon_font_55
-                              text_color: red
-                              text: "\U000F075A"
+                              text_color: ${home4_color}
+                              text: ${home4_icon}
                         on_long_press:
                           then:
-                            - lvgl.page.show: media_page
+                            - lvgl.page.show: ${home4_page}
                     - button:
                         id: but_home_5
                         styles: button_style
+                        hidden: ${home5_hidden}
                         pressed:
                           styles: button_pressed_style
                         checked:
@@ -4538,14 +4584,15 @@ lvgl:
                               id: ico_home_5
                               align: CENTER
                               text_font: icon_font_55
-                              text_color: aqua
-                              text: '${scenes_page_icon}'
+                              text_color: ${home5_color}
+                              text: ${home5_icon}
                         on_long_press:
                           then:
-                            lvgl.page.show: scenes_page
+                            lvgl.page.show: ${home5_page}
                     - button:
                         id: but_home_6
                         styles: button_style
+                        hidden: ${home6_hidden}
                         pressed:
                           styles: button_pressed_style
                         checked:
@@ -4559,12 +4606,13 @@ lvgl:
                               id: ico_home_6
                               align: CENTER
                               text_font: icon_font_55
-                              text_color: lime
-                              text: "\U000F033E"
+                              text_color: ${home6_color}
+                              text: ${home6_icon}
                         on_long_press:
                           then:
-                            lvgl.page.show: security_page
+                            lvgl.page.show: ${home6_page}
     - id: climate_page
+      skip: ${climate_page_hide_from_navigation}
       on_swipe_left:
         - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
         - lvgl.page.next:
@@ -5070,6 +5118,7 @@ lvgl:
                               styles: spinbox_button_label_style
 
     - id: lights_page
+      skip: ${lights_page_hide_from_navigation}
       on_swipe_left:
         - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
         - lvgl.page.next:
@@ -5322,6 +5371,7 @@ lvgl:
                                   entity_id: ${lights6_entity}
 
     - id: controls_page
+      skip: ${controls_page_hide_from_navigation}
       on_swipe_left:
         - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
         - lvgl.page.next:
@@ -5574,6 +5624,7 @@ lvgl:
                                   entity_id: ${controls6_entity}
 
     - id: media_page
+      skip: ${media_page_hide_from_navigation}
       on_swipe_left:
         - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
         - lvgl.page.next:
@@ -5830,6 +5881,7 @@ lvgl:
                   y: -45
  
     - id: scenes_page
+      skip: ${scenes_page_hide_from_navigation}
       on_swipe_left:
         - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
         - lvgl.page.next:
@@ -6184,6 +6236,7 @@ lvgl:
                                         entity_id: ${scenes6_entity}
 
     - id: security_page
+      skip: ${security_page_hide_from_navigation}
       on_swipe_left:
         - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
         - lvgl.page.next:
@@ -8590,7 +8643,7 @@ lvgl:
                 text: "\uF015"
                 on_long_press:
                   then:
-                    lvgl.page.show: idle_page
+                    lvgl.page.show: ${default_page}
               - id: page_settings
                 text: "\uF013"
                 on_long_press:
