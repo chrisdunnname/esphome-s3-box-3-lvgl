@@ -86,6 +86,39 @@ This guide details the available Home Assistant entities implemented with this d
 | WiFi db | The signal strength of the current connected wifi access point in decibel-milliwatts | 
 | WiFi Signal | The signal strength of the current connected wifi access point as a percentage  | 
 
-## Automated Actions
+## Automations
+
+The above entities unlock additional capabilities within Home Assistant. The following are example use cases:
+
+### Quieter and Easier Notifications
+
+When on a call or with guests TTS announcements can be disruptive. Using the notification text (optionally with a brief notification sound) I can see when someone rings the doorbell or leaves the garage door open using automations to pass a message to the notification text field on all my devices.
+An input text helper on my Home Assistant dashboard is also used to trigger an automation that copies the same message as a notification to all my devices - instant family text broadcasts.
+
+### Controlled Reboots
+
+Rebooting devices ensures there are no concerns by freeing up memory and resolving any temporary issues. If you need multiple reboot schedules and want to tailor these to appropriate times of low activity use an automation to press the reboot button.
+
+### Camera Images
+
+When a camera detects motion and captures an image or video you can now display that on your device. An automation can detect motion or a recording and then take a snapshot of the appropriate camera. That snapshot can then be converted to PNG using [JPG to PNG Converter](https://github.com/youkorr/hacs-jpg-to-png-converter) and stored in a folder on HA which is the passed as a URL to the Image URL field of all devices. This means shortly after motion is detected a snapshot of that camera can appear on my device.
+
+### TTS Announcements
+
+As this is a media player and voice assistant you can use any TTS provider to convert calendar entries or notifications to devices as a voice announcement.
+
+### Time of Day Behaviours
+
+The built in screensaer and screen off options provide the ability for the device to wake and sleep as required. These options can also be controlled remotely using an automation to allow devices to turn off the screen when not in use during the day but at night we can turn off the screen off feature to leave the screen on and go to screensaver instead at a dimmer brightness so users have a visible clock. 
+
+### Multiple Assist Pipelines
+
+Using two on device wake words and multiple assist pipelines provides an ability for your device to respond to one command for local control and a second command for using an online agent like Gemini or ChatGPT. 
+
+### Automating UI Modes
+
+An automation can change the UI mode to provide Light and Dark Modes to align with sunset and sunrise. 
+
+## Automated Recovery
 
 The device will automatically reboot if the voice assistant does not successfully complete a response in the expected time or if the touchscreen fails to initialize. These are expected behaviours to mitigate issues that can cause the device to become unresponsive. 
