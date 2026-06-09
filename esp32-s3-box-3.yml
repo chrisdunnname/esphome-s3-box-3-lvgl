@@ -3100,6 +3100,9 @@ select:
     restore_value: true
     name: UI Mode
     widget: dropdown_uimode
+    on_value:
+      - delay: 1s
+      - script.execute: set_uimode
 
   - platform: lvgl
     id: vamode
@@ -3107,6 +3110,9 @@ select:
     restore_value: true
     name: VA Mode
     widget: dropdown_vamode
+    on_value:
+      - delay: 1s
+      - script.execute: set_vamode
 
   - platform: template
     id: temp_unit
