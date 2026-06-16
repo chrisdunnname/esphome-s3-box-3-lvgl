@@ -261,6 +261,8 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
+  project_version: "2026.06.15"
+
 ###### Hardware Specific Configuration ######
 
   font_bpp: 1 #1,2,4,8 - Higher bit depth increases flash usage
@@ -297,6 +299,13 @@ esp32:
       CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB: "y" 
       CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y" 
       CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"
+      CONFIG_SPIRAM_USE_CAPS_ALLOC: "n"
+      CONFIG_SPIRAM_USE_MALLOC: "y"
+      CONFIG_SPIRAM_MALLOC_RESERVE_INTERNAL: "65536"
+      CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL: "4096"
+      CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP: "y"
+      CONFIG_MDNS_TASK_CREATE_FROM_SPIRAM: "y"
+      CONFIG_MDNS_MEMORY_ALLOC_SPIRAM: "y"
     advanced:
       execute_from_psram: true
 
@@ -389,6 +398,11 @@ microphone:
     adc_type: external
     channel: stereo
 
+audio:
+  codecs:
+    flac:
+      buffer_memory: psram
+
 spi:
   - id: spi_bus
     clk_pin: 7
@@ -480,7 +494,7 @@ esphome:
 
   project:
     name: "Christian.s3box3"
-    version: "2026.06.09"
+    version: ${project_version}
 
 api:
   encryption:
@@ -1158,6 +1172,7 @@ micro_wake_word:
   vad:
     probability_cutoff: 0.20
     sliding_window_size: 1
+  microphone: box_mic
   stop_after_detection: false
   models:
     - model: okay_nabu
@@ -1183,6 +1198,12 @@ micro_wake_word:
       probability_cutoff: 0.40  # default 0.5; sliding avg ~0.58 fires reliably
       sliding_window_size: 3    # default 5; faster trigger
   on_wake_word_detected:
+    - logger.log:
+        tag: mww
+        level: INFO
+        format: "MWW fired: %s"
+        args:
+          - 'wake_word.c_str()'
     - if:
         condition:
           switch.is_on: timer_ringing
@@ -1254,6 +1275,7 @@ voice_assistant:
       channels: 1
   media_player: speaker_media_player
   micro_wake_word: mww
+  use_wake_word: false
   noise_suppression_level: 2
   auto_gain: 31dBFS
   volume_multiplier: 4.0
@@ -1472,8 +1494,10 @@ voice_assistant:
         id(time_remaining_0).publish_state(str_sprintf("%d:%02d:%02d", hours, minutes, seconds));
     - lambda: id(draw_timer_timeline).execute();
   on_timer_finished:
-    - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
     - switch.turn_on: timer_ringing
+    - wait_until:
+        media_player.is_announcing:
+    - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
     - script.execute: draw_display
 
 script:
@@ -3652,6 +3676,12 @@ font:
     glyphs: *icon_glyphs
 
 text_sensor:
+  - platform: template
+    name: "Config Version"
+    icon: mdi:home-assistant
+    entity_category: "diagnostic"
+    lambda: return {"${project_version}"};
+    
   - id: text_request
     platform: template
     filters:
@@ -4443,10 +4473,10 @@ lvgl:
     bg_color: 0x000000
   buffer_size: 100%
   byte_order: ${lvgl_byte_order}
-  on_idle:
-    - timeout: 1s
-      then:
-        - script.execute: saver_enabled
+  # on_idle:
+    # - timeout: 1s
+      # then:
+        # - script.execute: saver_enabled
 
   pages:
     - id: home_page
