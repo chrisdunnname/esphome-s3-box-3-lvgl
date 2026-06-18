@@ -261,7 +261,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.06.15"
+  project_version: "2026.06.18"
 
 ###### Hardware Specific Configuration ######
 
@@ -448,7 +448,7 @@ captive_portal:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2026.5.0
+  min_version: 2026.6.0
   name_add_mac_suffix: false
   on_boot:
     priority: 600
@@ -1173,6 +1173,7 @@ micro_wake_word:
     probability_cutoff: 0.20
     sliding_window_size: 1
   microphone: box_mic
+  task_stack_in_psram: true
   stop_after_detection: false
   models:
     - model: okay_nabu
@@ -4468,7 +4469,7 @@ lvgl:
   id: lvgl_display
   touchscreens:
     - touchscreen_id: gt911_touchscreen
-      long_press_time: 60ms
+      long_press_time: 75ms
   bottom_layer:
     bg_color: 0x000000
   buffer_size: 100%

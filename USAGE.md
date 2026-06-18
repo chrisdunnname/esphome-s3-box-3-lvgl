@@ -40,7 +40,7 @@ This guide details the available Home Assistant entities implemented with this d
 | Default Brightness | The default screen brightness | 
 | Display Conversation | Whether conversation text should be displayed on screen when using the voice assistant | 
 | Finished Speaking Detection | Controls how the voice assistant decides when you have finished speaking | 
-| Firmware | Indicates if pending updates to the current ESPHome version | 
+| Firmware | Indicates the ESPHome firmware status | 
 | Image URL | This entity allows you to push a fully qualified URL for a PNG image to the device which will display on screen for 30 seconds (with no notification sound). This can be used with a [JPG to PNG Converter](https://github.com/youkorr/hacs-jpg-to-png-converter) in an automation to capture a snapshot from a camera and push it to the device.|
 | LCD Backlight | Allows controlling the backlight for the device | 
 | Mute | Mutes the microphone on the device |
@@ -78,6 +78,7 @@ This guide details the available Home Assistant entities implemented with this d
 | -------- | -------- |
 | Battery Level | The battery level of the battery if the sensor dock is connected | 
 | BSSID | The current wifi base station ID | 
+} Config Version | Indicates the version of the yaml configuration currently deployed |
 | Device Uptime | The current device uptime. This updates every 5 minutes to minimize log data | 
 | IP Address | The current IP address of the device | 
 | Radar Reset | Resets the radar if required to address presence detection issues | 
