@@ -3010,6 +3010,7 @@ select:
     name: Wake word engine location
     id: wake_word_engine_location
     icon: "mdi:account-voice"
+    initial_option: On device
     optimistic: true
     restore_value: true
     options:
