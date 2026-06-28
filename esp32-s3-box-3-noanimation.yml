@@ -261,7 +261,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.06.18"
+  project_version: "2026.06.28"
 
 ###### Hardware Specific Configuration ######
 
@@ -353,7 +353,6 @@ touchscreen:
       ignore_strapping_warning: true
     on_touch:
       - lambda: ESP_LOGD("touchscreen", "on_touch");
-      - script.execute: turn_on_led
     on_release:
       then:
         - if:
@@ -361,6 +360,7 @@ touchscreen:
             then:
               - lvgl.resume:
               - lvgl.widget.redraw:
+        - script.execute: turn_on_led
         - if:
             condition:
               - lvgl.page.is_showing: saver_page
@@ -4470,7 +4470,7 @@ lvgl:
   id: lvgl_display
   touchscreens:
     - touchscreen_id: gt911_touchscreen
-      long_press_time: 75ms
+      long_press_time: 85ms
   bottom_layer:
     bg_color: 0x000000
   buffer_size: 100%
