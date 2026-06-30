@@ -97,6 +97,7 @@ substitutions:
   
   media_page_title: "Media"
   media_page_hide_from_navigation: false
+  media_page_hide_switcher: true
   
   scenes_page_title: "Screens"
   scenes_page_hide_from_navigation: false
@@ -261,7 +262,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.06.28"
+  project_version: "2026.06.30"
 
 ###### Hardware Specific Configuration ######
 
@@ -2679,6 +2680,10 @@ switch:
       - lvgl.widget.hide: bar_volume
       - lvgl.widget.show: obj_ext_media
       - lvgl.widget.show: lbl_ext_media_playing
+      - lambda: id(media_switcher_external) = true;
+      - lvgl.label.update:
+          id: lbl_media_switcher
+          text: "Ext"
       - lvgl.checkbox.update:
           id: chk_output_audio
           state:
@@ -2692,6 +2697,10 @@ switch:
       - lvgl.widget.show: bar_volume
       - lvgl.widget.hide: obj_ext_media
       - lvgl.widget.hide: lbl_ext_media_playing
+      - lambda: id(media_switcher_external) = false;
+      - lvgl.label.update:
+          id: lbl_media_switcher
+          text: "Int"
       - lvgl.checkbox.update:
           id: chk_output_audio
           state:
@@ -3361,6 +3370,10 @@ globals:
     restore_value: false
     initial_value: '5'
   - id: media_state
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: media_switcher_external
     type: bool
     restore_value: false
     initial_value: "false"
@@ -4470,7 +4483,7 @@ lvgl:
   id: lvgl_display
   touchscreens:
     - touchscreen_id: gt911_touchscreen
-      long_press_time: 85ms
+      long_press_time: 80ms
   bottom_layer:
     bg_color: 0x000000
   buffer_size: 100%
@@ -5917,6 +5930,46 @@ lvgl:
                   text: "Nothing Playing"
                   styles: label_text_color_blue
                   y: -45
+              - button:
+                  id: but_media_switcher
+                  styles: button_style
+                  hidden: ${media_page_hide_switcher}
+                  align: TOP_RIGHT
+                  x: -15
+                  y: 40
+                  bg_grad_dir: VER
+                  pressed:
+                    styles: button_pressed_style
+                  widgets:
+                    - label:
+                        id: lbl_media_switcher
+                        align: CENTER
+                        text: "Int"
+                  on_long_press:
+                    then:
+                      - if:
+                          condition:
+                            lambda: return !id(media_switcher_external);
+                          then:
+                            - lvgl.widget.hide: obj_media
+                            - lvgl.widget.hide: lbl_media_playing
+                            - lvgl.widget.hide: bar_volume
+                            - lvgl.widget.show: obj_ext_media
+                            - lvgl.widget.show: lbl_ext_media_playing
+                            - lambda: id(media_switcher_external) = true;
+                            - lvgl.label.update:
+                                id: lbl_media_switcher
+                                text: "Ext"
+                          else:
+                            - lvgl.widget.show: obj_media
+                            - lvgl.widget.show: lbl_media_playing
+                            - lvgl.widget.show: bar_volume
+                            - lvgl.widget.hide: obj_ext_media
+                            - lvgl.widget.hide: lbl_ext_media_playing
+                            - lambda: id(media_switcher_external) = false;
+                            - lvgl.label.update:
+                                id: lbl_media_switcher
+                                text: "Int"
  
     - id: scenes_page
       skip: ${scenes_page_hide_from_navigation}

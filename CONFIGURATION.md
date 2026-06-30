@@ -171,12 +171,12 @@ Hiding the page from navigation removes it from the navigation arrows and swipin
 ```
 
 ### Media Page
-The media page does not require configuration and a different page will show depending on whether you are using on device or external audio. Here you can translate or change the page title.
-Hiding the page from navigation removes it from the navigation arrows and swiping.
+The media page does not require configuration and a different page will show depending on whether you are using on device or external audio. Here you can translate or change the page title.  Hiding the page from navigation removes it from the navigation arrows and swiping.  The media switcher is for users who want to be able to control both internal and external audio from the media page. When visible a button is added to the media_page to allow switching between the internal audio player and the external audio player irrespective of whether external audio output is enabled. 
 
 ```
   media_page_title: "Media"
   media_page_hide_from_navigation: false
+  media_page_hide_switcher: true
 ```
 
 ### Scenes Page
