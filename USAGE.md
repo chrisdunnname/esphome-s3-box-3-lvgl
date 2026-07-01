@@ -10,8 +10,10 @@ This guide details the available Home Assistant entities implemented with this d
 
 | Entity | Use Case |
 | -------- | -------- |
-| Alarm Clock | Disable or Enable the Alarm Clock | 
-| Alarm Clock Time | The set time for the Alarm Clock |
+| Alarm Clock 1 | Disable or Enable the Alarm Clock | 
+| Alarm Clock 1 Time | The set time for the Alarm Clock |
+| Alarm Clock 2 | Disable or Enable the 2nd Alarm Clock | 
+| Alarm Clock 2 Time | The set time for the 2nd Alarm Clock |
 | Media Player | The device media player |
 | Volume | The device volumme |
 | Notification Text | Text entered here triggers a notification to display on the notification page for 10 seconds |

@@ -161,6 +161,8 @@ substitutions:
   screensaver_lower_right_dp: 0 #decimal places for lower right entity
   screensaver_lower_right_units: " IAI"
   
+  alarmclock_hide_switcher: false
+  
   notification_page_title: "Notification"
   
   wifi_qr_code: !secret wifi_qr #QR code for wifi
@@ -262,7 +264,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.06.30"
+  project_version: "2026.07.01"
 
 ###### Hardware Specific Configuration ######
 
@@ -437,11 +439,11 @@ wifi:
     password: ${wifi_fallback_pwd}   
   on_connect:
     - lambda: id(wifi_connection) = true;
-    - script.execute: draw_display
+    - lvgl.widget.show: lbl_wifi
     - switch.turn_on: speaker_enable
   on_disconnect:
     - lambda: id(wifi_connection) = false;
-    - script.execute: draw_display
+    - lvgl.widget.hide: lbl_wifi
 
 captive_portal:
 
@@ -502,11 +504,10 @@ api:
     key: ${api_key}
   on_client_connected:
     - lambda: id(api_connection) = true;
-    - script.execute: turn_on_led
-    - script.execute: draw_display
+    - lvgl.widget.show: lbl_api
   on_client_disconnected:
     - lambda: id(api_connection) = false;
-    - script.execute: draw_display
+    - lvgl.widget.hide: lbl_api
 
 ota:
   - platform: esphome
@@ -2205,11 +2206,17 @@ script:
             - lvgl.widget.hide: digital
       - if:
           condition:
-            and:
-              - switch.is_on: alarmclock
-              - lambda: 'return (id(ha_time).now().hour == id(alarmclock_time).hour);'
-              - lambda: 'return (id(ha_time).now().minute == id(alarmclock_time).minute);'
-              - lambda: 'return (id(ha_time).now().second <= 15);'
+            or:
+              - and:
+                  - switch.is_on: alarmclock
+                  - lambda: 'return (id(ha_time).now().hour == id(alarmclock_time).hour);'
+                  - lambda: 'return (id(ha_time).now().minute == id(alarmclock_time).minute);'
+                  - lambda: 'return (id(ha_time).now().second <= 15);'
+              - and:
+                  - switch.is_on: alarmclock2
+                  - lambda: 'return (id(ha_time).now().hour == id(alarmclock2_time).hour);'
+                  - lambda: 'return (id(ha_time).now().minute == id(alarmclock2_time).minute);'
+                  - lambda: 'return (id(ha_time).now().second <= 15);'
           then:
             - lambda: id(alarmclock_ringing) = true;
             - lvgl.widget.show: but_snooze
@@ -2988,9 +2995,19 @@ switch:
       - lambda: id(radar_state) = false;
     
   - platform: lvgl
-    name: "Alarm Clock"
+    name: "Alarm Clock 1"
     id: alarmclock
     widget: btn_alarmclock
+    icon: 'mdi:alarm'
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_off:
+      - script.execute: stopalarmtimer
+      - script.stop: snoozealarm
+
+  - platform: lvgl
+    name: "Alarm Clock 2"
+    id: alarmclock2
+    widget: btn_alarmclock2
     icon: 'mdi:alarm'
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_off:
@@ -3188,6 +3205,22 @@ select:
     internal: true
     restore_value: true
 
+  - platform: lvgl
+    id: sel_alarmclock2_hour
+    widget: alarmclock2_hour
+    name: "AlarmClock 2 Hour"
+    entity_category: config
+    internal: true
+    restore_value: true
+    
+  - platform: lvgl
+    id: sel_alarmclock2_minutes
+    widget: alarmclock2_minutes
+    name: "AlarmClock 2 Minutes"
+    entity_category: config    
+    internal: true
+    restore_value: true
+
 datetime:
   - id: alarmclock_time
     platform: template
@@ -3198,7 +3231,7 @@ datetime:
       hour: 00
       minute: 00
       second: 00
-    name: "Alarm Clock Time"
+    name: "Alarm Clock 1 Time"
     icon: 'mdi:alarm'
     on_value:
       then:
@@ -3212,6 +3245,30 @@ datetime:
               - select.set_index:
                   id: sel_alarmclock_minutes
                   index: !lambda return (id(alarmclock_time).minute / 5);  
+
+  - id: alarmclock2_time
+    platform: template
+    type: time
+    optimistic: true
+    restore_value: true
+    initial_value:
+      hour: 00
+      minute: 00
+      second: 00
+    name: "Alarm Clock 2 Time"
+    icon: 'mdi:alarm'
+    on_value:
+      then:
+        - if:
+            condition:
+              - lambda: return ((id(alarmclock2_hour).get_selected_index() != (id(alarmclock2_time).hour / 1)) || (id(alarmclock2_minutes).get_selected_index() != (id(alarmclock2_time).minute / 5)));
+            then:
+              - select.set_index:
+                  id: sel_alarmclock2_hour
+                  index: !lambda return (id(alarmclock2_time).hour / 1);
+              - select.set_index:
+                  id: sel_alarmclock2_minutes
+                  index: !lambda return (id(alarmclock2_time).minute / 5);  
 
   - id: reboot_time
     platform: template
@@ -3374,6 +3431,10 @@ globals:
     restore_value: false
     initial_value: "false"
   - id: media_switcher_external
+    type: bool
+    restore_value: false
+    initial_value: "false"
+  - id: alarm_switcher
     type: bool
     restore_value: false
     initial_value: "false"
@@ -8516,7 +8577,35 @@ lvgl:
                                  then:
                                    - if:
                                        condition:
-                                         lambda: return x;
+                                         or:
+                                          - lambda: return x;
+                                          - switch.is_on: alarmclock2
+                                       then:
+                                         - lvgl.widget.show: lbl_alarmclock
+                                       else:
+                                         - lvgl.widget.hide: lbl_alarmclock
+                           - button:
+                               id: btn_alarmclock2
+                               hidden: true
+                               styles: button_style
+                               pressed:
+                                 styles: button_pressed_style
+                               checked:
+                                 styles: button_checked_style
+                               checkable: true
+                               widgets:
+                                 - label:
+                                     id: ico_alarmclock2_1
+                                     align: CENTER
+                                     text_font: icon_font_55
+                                     text: "\U000F0020"
+                               on_value:
+                                 then:
+                                   - if:
+                                       condition:
+                                         or:
+                                          - lambda: return x;
+                                          - switch.is_on: alarmclock
                                        then:
                                          - lvgl.widget.show: lbl_alarmclock
                                        else:
@@ -8528,6 +8617,7 @@ lvgl:
                                text_align: LEFT
                                styles: label_text_color
                     - obj:
+                         id: obj_alarmclocktime
                          align: CENTER
                          grid_cell_column_pos: 1
                          grid_cell_row_pos: 0
@@ -8542,7 +8632,9 @@ lvgl:
                          layout:
                            type: FLEX
                            flex_flow: ROW
+                           flex_align_main: CENTER
                            flex_align_cross: CENTER
+                           flex_align_track: CENTER
                          widgets:
                            - roller:
                                align: CENTER
@@ -8606,7 +8698,112 @@ lvgl:
                                        int myhours = id(alarmclock_hour).get_selected_index();
                                        uint8_t newhours = static_cast<uint8_t>(myhours);
                                        return {.second = 00, .minute = newminutes, .hour = newhours};
-
+                           - roller:
+                               align: CENTER
+                               id: alarmclock2_hour
+                               hidden: true
+                               options:
+                                 - 0
+                                 - 1
+                                 - 2
+                                 - 3
+                                 - 4
+                                 - 5
+                                 - 6
+                                 - 7
+                                 - 8
+                                 - 9
+                                 - 10
+                                 - 11
+                                 - 12
+                                 - 13
+                                 - 14
+                                 - 15
+                                 - 16
+                                 - 17
+                                 - 18
+                                 - 19
+                                 - 20
+                                 - 21
+                                 - 22
+                                 - 23
+                               on_change:
+                                 - datetime.time.set:
+                                     id: alarmclock2_time
+                                     time: !lambda |-
+                                       int myminutes = id(alarmclock2_minutes).get_selected_index() * 5;
+                                       uint8_t newminutes = static_cast<uint8_t>(myminutes);
+                                       int myhours = x;
+                                       uint8_t newhours = static_cast<uint8_t>(myhours);
+                                       return {.second = 00, .minute = newminutes, .hour = newhours};
+                           - roller:
+                               align: CENTER
+                               id: alarmclock2_minutes
+                               hidden: true
+                               options:
+                                 - "00"
+                                 - "05"
+                                 - 10
+                                 - 15
+                                 - 20
+                                 - 25
+                                 - 30
+                                 - 35
+                                 - 40
+                                 - 45
+                                 - 50
+                                 - 55
+                               on_change:
+                                 - datetime.time.set:
+                                     id: alarmclock2_time
+                                     time: !lambda |-
+                                       int myminutes = x * 5;
+                                       uint8_t newminutes = static_cast<uint8_t>(myminutes);
+                                       int myhours = id(alarmclock2_hour).get_selected_index();
+                                       uint8_t newhours = static_cast<uint8_t>(myhours);
+                                       return {.second = 00, .minute = newminutes, .hour = newhours};
+              - button:
+                  id: but_alarm_switcher
+                  hidden: ${alarmclock_hide_switcher}
+                  styles: button_style
+                  align: TOP_LEFT
+                  x: 15
+                  y: 40
+                  bg_grad_dir: VER
+                  pressed:
+                    styles: button_pressed_style
+                  widgets:
+                    - label:
+                        id: lbl_alarm_switcher
+                        align: CENTER
+                        text: "1"
+                  on_long_press:
+                    then:
+                      - if:
+                          condition:
+                            lambda: return !id(alarm_switcher);
+                          then:
+                            - lvgl.widget.hide: btn_alarmclock
+                            - lvgl.widget.hide: alarmclock_hour
+                            - lvgl.widget.hide: alarmclock_minutes
+                            - lvgl.widget.show: btn_alarmclock2
+                            - lvgl.widget.show: alarmclock2_hour
+                            - lvgl.widget.show: alarmclock2_minutes
+                            - lambda: id(alarm_switcher) = true;
+                            - lvgl.label.update:
+                                id: lbl_alarm_switcher
+                                text: "2"
+                          else:
+                            - lvgl.widget.show: btn_alarmclock
+                            - lvgl.widget.show: alarmclock_hour
+                            - lvgl.widget.show: alarmclock_minutes
+                            - lvgl.widget.hide: btn_alarmclock2
+                            - lvgl.widget.hide: alarmclock2_hour
+                            - lvgl.widget.hide: alarmclock2_minutes
+                            - lambda: id(alarm_switcher) = false;
+                            - lvgl.label.update:
+                                id: lbl_alarm_switcher
+                                text: "1"
   top_layer:
     widgets:
       - obj:

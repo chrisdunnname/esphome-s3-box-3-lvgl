@@ -90,6 +90,15 @@ Hiding the page from navigation removes it from the navigation arrows and swipin
   home6_hidden: false
 ```
 
+Other pages that could be used out of the box on the home page are below:
+| Page | Use Case |
+| -------- | -------- |
+| climate_studio_page | Shows climate 1 Air Conditioner |
+| saver_page | Show Screensaver |
+| settings_page | Show Settings |
+| info_page | Show device information |
+| wifi_page | Show wifi information |
+
 ### Climate Page
 This is where you configure the name and the devices that will be displayed on the climate page. The climate1 entity is expected to be a climate device like an airconditioner and includes a detail page to allow setting the target temperature and HVAC Mode. All other entities are expected to be temperature sensors.
 Hiding the page from navigation removes it from the navigation arrows and swiping.
@@ -263,6 +272,13 @@ Additional lower left and lower right labels can be configured to show data from
   screensaver_lower_right_entity: sensor.allergen_index #sensor
   screensaver_lower_right_dp: 0 #decimal places for lower right entity
   screensaver_lower_right_units: " IAI"
+```
+
+### Alarm Clock Page
+The alarm clock  page does not require configuration and can be accessed by tapping the taskbar clock or the icon shown when an alarm is active. The alarm clock supports two alarms. This option allows you to hide the button for switching between alarm 1 and alarm 2 on the device. This allows you to simplify the device to only have one alarm clock option which will hide the second alarm so users cannot modify it. You will still be able to set both alarms from Home Assistant even if only one is visible. 
+
+```
+   alarmclock_hide_switcher: false"
 ```
 
 ### Notification Page
