@@ -264,7 +264,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.07.01"
+  project_version: "2026.07.02"
 
 ###### Hardware Specific Configuration ######
 
@@ -348,6 +348,7 @@ at581x:
 
 touchscreen:
   - platform: gt911
+    setup_priority: -200
     i2c_id: bus_a
     address: 0x5D
     id: gt911_touchscreen
@@ -454,37 +455,41 @@ esphome:
   min_version: 2026.6.0
   name_add_mac_suffix: false
   on_boot:
-    priority: 600
-    then:
-      - delay: 15s
-      - lvgl.widget.hide: boot_screen
-      # - at581x.settings:
-          # id: "Radar"
-          # sensing_distance: 1000
-          # stage_gain: 4
-      - script.execute: turn_on_led
-      - lambda: id(time_remaining_0).publish_state ("0:00:00");
-      - script.execute: draw_display
-      - script.execute: check_touchscreen_failure
-      - if:
-          condition:
-            switch.is_on: output_audio
-          then:
-            media_player.volume_set:
-              id: speaker_media_player
-              volume: 0
-      - if:
-          condition:
-            - lambda: return !id(radar_state);
-          then:
-            - switch.turn_off: radar_enable
-      - delay: 30s
-      - if:
-          condition:
-            lambda: return id(init_in_progress);
-          then:
-            - lambda: id(init_in_progress) = false;
-            - script.execute: draw_display
+    - priority: -150
+      then:
+        - delay: 300ms
+    - priority: -300
+      then:
+        - delay: 5s
+        - lvgl.widget.hide: boot_screen
+        # - at581x.settings:
+            # id: "Radar"
+            # sensing_distance: 1000
+            # stage_gain: 4
+        - script.execute: turn_on_led
+        - lambda: id(time_remaining_0).publish_state ("0:00:00");
+        - script.execute: draw_display
+        - script.execute: check_touchscreen_failure
+        - if:
+            condition:
+              switch.is_on: output_audio
+            then:
+              media_player.volume_set:
+                id: speaker_media_player
+                volume: 0
+        - if:
+            condition:
+              - lambda: return !id(radar_state);
+            then:
+              - switch.turn_off: radar_enable
+        - delay: 30s
+        - if:
+            condition:
+              lambda: return id(init_in_progress);
+            then:
+              - lambda: id(init_in_progress) = false;
+              - script.execute: draw_display
+    
   on_shutdown:
     then:
       - if:
