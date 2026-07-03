@@ -264,7 +264,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.07.02"
+  project_version: "2026.07.03"
 
 ###### Hardware Specific Configuration ######
 
@@ -277,6 +277,8 @@ substitutions:
   wifi_fast_connect: false
   wifi_power_save_mode: LIGHT #NONE, LIGHT(default for esp32), HIGH
   wifi_use_native_roaming: true #if false uses ESPHome post connect roaming
+  
+  voice_assistant_failed_reboot: "true" #restarts device on voice assistant hangs
 
   screen_max_brightness: 1.0
 
@@ -1422,9 +1424,11 @@ voice_assistant:
           return id(voice_assistant_timeout);
     - if:
         condition:
-          any:
-            - media_player.is_announcing:
-            - media_player.is_playing:
+          and:
+            - lambda: return id(voice_assistant_reboot);
+            - any:
+                - media_player.is_announcing:
+                - media_player.is_playing:
         then:
           - lambda: ESP_LOGD("voice_assistant", "Forced Reboot");
           - button.press: reboot
@@ -3415,6 +3419,10 @@ globals:
     type: int
     restore_value: false
     initial_value: ${voice_assist_not_ready_phase_id}
+  - id:  voice_assistant_reboot
+    type: int
+    restore_value: false
+    initial_value: ${ voice_assistant_failed_reboot}
   - id: wifi_connection
     type: bool
     restore_value: false
@@ -3830,7 +3838,7 @@ text_sensor:
                 long_mode: SCROLL_CIRCULAR
             - lambda: |-
                 lv_obj_set_style_anim_time(id(lbl_v_text_response), id(text_response).state.length()*125, LV_PART_MAIN);
-            - lambda: id(voice_assistant_timeout) = 10000 + (id(text_response).state.length()*125);
+            - lambda: id(voice_assistant_timeout) = 30000 + (id(text_response).state.length()*125);
           else:
             - lvgl.label.update:
                 id: lbl_v_text_response
