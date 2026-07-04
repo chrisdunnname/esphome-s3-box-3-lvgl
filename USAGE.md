@@ -80,7 +80,7 @@ This guide details the available Home Assistant entities implemented with this d
 | -------- | -------- |
 | Battery Level | The battery level of the battery if the sensor dock is connected | 
 | BSSID | The current wifi base station ID | 
-} Config Version | Indicates the version of the yaml configuration currently deployed |
+| Config Version | Indicates the version of the yaml configuration currently deployed |
 | Device Uptime | The current device uptime. This updates every 5 minutes to minimize log data | 
 | IP Address | The current IP address of the device | 
 | Radar Reset | Resets the radar if required to address presence detection issues | 
