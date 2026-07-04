@@ -256,7 +256,8 @@ Hiding the page from navigation removes it from the navigation arrows and swipin
 
 ### Screensaver Page
 When the screensaver is enabled the screensaver page can show the weather (top right), temperature (top left) and humidity (top left). If using the sensor dock the temperature and humidity from the device will be shown but other users can specify the custom temperature and humidify sensors. This allows showing both in and out temperatures on the screensaver page. 
-Additional lower left and lower right labels can be configured to show data from any other sensor. All entities support decimal places substitutions to allow configuration of the granularity of the number to be shown. 
+Additional lower left and lower right labels can be configured to show data from any other sensor. All entities support decimal places substitutions to allow configuration of the granularity of the number to be shown.
+The screensaver will show the next alarm clock time if one is enabled. This feature can be optionally disabled.
 
 ```
   screensaver_page_title: " "
@@ -272,6 +273,7 @@ Additional lower left and lower right labels can be configured to show data from
   screensaver_lower_right_entity: sensor.allergen_index #sensor
   screensaver_lower_right_dp: 0 #decimal places for lower right entity
   screensaver_lower_right_units: " IAI"
+  screensaver_next_alarmclock: "true"
 ```
 
 ### Alarm Clock Page

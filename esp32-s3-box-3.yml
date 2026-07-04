@@ -160,6 +160,7 @@ substitutions:
   screensaver_lower_right_entity: sensor.allergen_index #sensor
   screensaver_lower_right_dp: 0 #decimal places for lower right entity
   screensaver_lower_right_units: " IAI"
+  screensaver_next_alarmclock: "true"
   
   alarmclock_hide_switcher: false
   
@@ -264,7 +265,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.07.03"
+  project_version: "2026.07.05"
 
 ###### Hardware Specific Configuration ######
 
@@ -2215,6 +2216,53 @@ script:
             - lvgl.widget.hide: digital
       - if:
           condition:
+            - lambda: 'return std::string("${screensaver_next_alarmclock}") == "true" && (id(alarmclock).state || id(alarmclock2).state);'
+          then:
+            - lvgl.widget.show: next_alarmclock_obj
+            - lvgl.label.update:
+                id: next_alarmclock_label
+                text: !lambda |-
+                  auto now = id(ha_time).now();
+                  const int current_minutes = now.hour * 60 + now.minute;
+                  int next_alarm_minutes = 1440 * 2;
+
+                  if (id(alarmclock).state) {
+                    int alarm_minutes = id(alarmclock_time).hour * 60 + id(alarmclock_time).minute;
+                    if (alarm_minutes <= current_minutes) {
+                      alarm_minutes += 1440;
+                    }
+                    next_alarm_minutes = alarm_minutes;
+                  }
+
+                  if (id(alarmclock2).state) {
+                    int alarm_minutes = id(alarmclock2_time).hour * 60 + id(alarmclock2_time).minute;
+                    if (alarm_minutes <= current_minutes) {
+                      alarm_minutes += 1440;
+                    }
+                    if (alarm_minutes < next_alarm_minutes) {
+                      next_alarm_minutes = alarm_minutes;
+                    }
+                  }
+
+                  const int display_minutes = next_alarm_minutes % 1440;
+                  const int display_hour = display_minutes / 60;
+                  const int display_minute = display_minutes % 60;
+                  char buffer[12];
+
+                  if (id(time_format).current_option() == "24 Hr") {
+                    sprintf(buffer, "%02d:%02d", display_hour, display_minute);
+                  } else {
+                    int hour_12 = display_hour % 12;
+                    if (hour_12 == 0) {
+                      hour_12 = 12;
+                    }
+                    sprintf(buffer, "%d:%02d %s", hour_12, display_minute, display_hour >= 12 ? "PM" : "AM");
+                  }
+                  return std::string(buffer);
+          else:
+            - lvgl.widget.hide: next_alarmclock_obj
+      - if:
+          condition:
             or:
               - and:
                   - switch.is_on: alarmclock
@@ -2747,7 +2795,6 @@ switch:
       - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
       - lvgl.label.update:
           id: lbl_mic
-          text_color: 0xFF0000
           text: !lambda |-
               static char buf[10];
               std::string icon;
@@ -3746,6 +3793,12 @@ font:
       - "\U000F1A6B"# roller-shade open
       - "\U000F1A6C"# roller-shade closed
       
+  - file: ${icon_font_file}
+    id: icon_font
+    size: 14
+    bpp: ${font_icon_bpp}
+    glyphs: *icon_glyphs
+
   - file: ${icon_font_file}
     id: iconfont_small
     size: 20
@@ -6991,6 +7044,35 @@ lvgl:
             text_font: labelfont_large
             x: -15
             y: -15
+        - obj:
+            id: next_alarmclock_obj
+            hidden: true
+            align: TOP_MID
+            styles: ssaver_style
+            bg_opa: TRANSP
+            border_opa: TRANSP
+            pad_all: 0
+            height: SIZE_CONTENT
+            width: SIZE_CONTENT
+            layout:
+              type: FLEX
+              flex_flow: ROW
+              flex_align_main: CENTER
+              flex_align_cross: CENTER
+            y: 40
+            widgets:
+              - label:
+                  id: next_alarmclock_icon
+                  text: "\U000F0020"
+                  text_align: CENTER
+                  styles: ssaver_style
+                  text_font: icon_font
+              - label:
+                  id: next_alarmclock_label
+                  text: " "
+                  text_align: CENTER
+                  styles: ssaver_style
+                  text_font: my_font
 
     - id: listening_page
       skip: true

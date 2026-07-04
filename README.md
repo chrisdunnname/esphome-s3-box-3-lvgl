@@ -63,7 +63,7 @@ Last tested on Home Assistant 2026.6 and ESPHome Version 2026.6.
 
 **Home Page Functions**
 
-- The page title is configurable.
+- The page title, menu icons and page navigation are configurable.
 - Tapping on the time will show the alarm clock page.
 - An alarm clock indicator will appear when the alarm clock is enabled and will launch the alarm settings page. 
 - A timer status indicator will appear while a timer is running and will launch the time remaining page
@@ -102,6 +102,7 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 # Alarm Clock
 ![alarmclock](https://github.com/user-attachments/assets/13ae3d0a-0148-443d-95fc-102776ebabb8)
 - Access this page by clicking on the toolbar clock. Allows enabling alarm and setting a time.
+- Up to 2 alarms can be set and a button will show which alarm is being viewed and allow switching between the two.
 - Presence snooze will trigger the ringing alarm clock to snooze only once when motion is detected. 
 - Alarm Clock can be turned off from same page or is available as a switch so it can be turned off from voice assistant.
 - Snooze duration can be set in Home Assistant (default 5 minutes).
@@ -135,11 +136,13 @@ Tap the change temperature buttons to move slightly or long press to change fast
 ![media_green](https://github.com/user-attachments/assets/0634c06b-d91e-40cc-b3f6-841f1e569ac5)
 ![media_red](https://github.com/user-attachments/assets/d887ca67-d660-4fc7-b403-6f7a36013427)
 - The page title is configurable.
+- This is the default media view if external output is disabled but an optional toggle can be displayed to allow accessing the external audio view.
 - The volume controls on the media page control the volume of the S3 box including the Voice Assistant.
 
 **External Audio**
 
 ![media_exterrnal](https://github.com/user-attachments/assets/cc9af414-de2a-4832-8bc7-78d8c03b7771)
+- This is the default media view if external output is enabled but an optional toggle can be displayed to allow accessing the internal audio view.
 
 # Screens
 ![screens](https://github.com/user-attachments/assets/304c2778-a0d5-4183-9f65-31bf96287a61)
@@ -161,6 +164,7 @@ Tap the change temperature buttons to move slightly or long press to change fast
 ![s3_digital_screensaver](https://github.com/user-attachments/assets/d70aab79-27c3-42ab-b382-856521651d64)
 
 - The page title is configurable.
+- The top centre will show the upcoming alarm clock time if active but can be disabled.
 - The top left corner of the screen shows device Temperature and Humidity if a Sensor Dock is connected. Alternatively room temperature and humidity sensors can be defined in substitutions. These additional substitutions will show temperature or temperature and humidity based on the available entities.
 - The top right side of the screen shows your specified weather entity temperature and condition and will not be shown if a valid entity is not specified.  Forecast outside temperature and condition can be provided by Open Weather Map or another weather forecast entity in HA.
 - The lower left and right corners include can be configured via substitutions to show any sensor value and any unit of measure. For example these could be air quality indicators. These only show if available. 
