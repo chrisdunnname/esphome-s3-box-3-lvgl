@@ -467,8 +467,14 @@ esphome:
         - lvgl.widget.hide: boot_screen
         # - at581x.settings:
             # id: "Radar"
+            # frequency: 5800MHz
             # sensing_distance: 1000
-            # stage_gain: 4
+            # stage_gain: 0
+            # power_consumption: 70µA
+            # trigger_base: 500ms
+            # trigger_keep: 10s
+            # protect_time: 1000ms
+            # poweron_selfcheck_time: 2000ms
         - script.execute: turn_on_led
         - lambda: id(time_remaining_0).publish_state ("0:00:00");
         - script.execute: draw_display
