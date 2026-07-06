@@ -395,5 +395,21 @@ These substitutions specify the sounds to be used for on device or external audi
   notify_external: /local/sounds/notify.mp3
 ```
 
+### Fonts & Icons
+This configuration should not need to change although you can add missing characters to font_glyphs to have them render correctly if they do not display. Changing font or icon font usually requires further changes.
+
+### Hardware Specific Configuration
+Most hardware specific configuration is best not changed but these options can be useful for different environments. 
+The wifi_fast_connect forces the device to immediately connect to the first available access point on boot. The wifi_power_save_mode controls how heavily the device manages power usage - this is important on battery powered devices. The wifi_native roaming determines whether ESPHome manages roaming (false) or your network uses 802.11v BSS Transition Management and 802.11k Radio Resource Management to determine the best access point (true).
+The voice_assistant_failed_reboot feature is a safety mechanism that reboots the device if the voice assistant hangs during responses. This is on by default but can be disabled if required.
+
+```
+  wifi_fast_connect: false
+  wifi_power_save_mode: LIGHT #NONE, LIGHT(default for esp32), HIGH
+  wifi_use_native_roaming: true #if false uses ESPHome post connect roaming
+  
+  voice_assistant_failed_reboot: "true" #restarts device on voice assistant hangs
+```
+
 ### Other Configuration
-Other font information and hardware specific configuration is included in substitutions. You should not need to change these unless you are experiencing an issue or are looking to try this configuration on different hardware. 
+Other configuration is included in substitutions. You should not need to change these unless you are looking to experiment on different hardware.
