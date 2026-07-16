@@ -265,7 +265,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.07.05"
+  project_version: "2026.07.16"
 
 ###### Hardware Specific Configuration ######
 
@@ -279,7 +279,7 @@ substitutions:
   wifi_power_save_mode: LIGHT #NONE, LIGHT(default for esp32), HIGH
   wifi_use_native_roaming: true #if false uses ESPHome post connect roaming
   
-  voice_assistant_failed_reboot: "true" #restarts device on voice assistant hangs
+  voice_assistant_failed_reboot: "false" #restarts device on voice assistant hangs
 
   screen_max_brightness: 1.0
 
@@ -455,7 +455,7 @@ captive_portal:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2026.6.0
+  min_version: 2026.7.0
   name_add_mac_suffix: false
   on_boot:
     - priority: -150
@@ -3555,8 +3555,9 @@ http_request:
   timeout: 30s
   watchdog_timeout: 60s
 
-online_image:
-  - url: ${loading_illustration_file}
+image:
+  - platform: online_image
+    url: ${loading_illustration_file}
     format: png
     resize: ${image_resize}
     type: RGB565
@@ -3569,61 +3570,163 @@ online_image:
       - text.set:
           id: onlineimagefile
           value: ""
-
-image:
-## Default Images
-  defaults:
+  ## Default Images
+  - platform: file
     type: RGB565
     resize: ${image_resize}
     transparency: alpha_channel
     byte_order: ${image_byte_order}
-  images:
-    - file: ${error_illustration_file}
-      id: error_img
-  #  - file: ${idle_illustration_file}
-  #    id: idle_img
-    - file: ${listening_illustration_file}
-      id: listening_img
-    - file: ${thinking_illustration_file}
-      id: thinking_img
-    - file: ${replying_illustration_file}
-      id: replying_img
-    - file: ${loading_illustration_file}
-      id: loading_img
-  #  - file: ${timer_finished_illustration_file}
-  #    id: timer_finished_img
-  #  - file: ${logo_illustration_file}
-  #    id: logo_img
+    file: ${error_illustration_file}
+    id: error_img
+  # - platform: file
+    # type: RGB565
+    # resize: ${image_resize}
+    # transparency: alpha_channel
+    # byte_order: ${image_byte_order}
+    # file: {idle_illustration_file}
+    # id: idle_img
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${listening_illustration_file}
+    id: listening_img
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${thinking_illustration_file}
+    id: thinking_img
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${replying_illustration_file}
+    id: replying_img
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${loading_illustration_file}
+    id: loading_img
+  # - platform: file
+    # type: RGB565
+    # resize: ${image_resize}
+    # transparency: alpha_channel
+    # byte_order: ${image_byte_order}
+    # file: ${timer_finished_illustration_file}
+    # id: timer_finished_img
+  # - platform: file
+    # type: RGB565
+    # resize: ${image_resize}
+    # transparency: alpha_channel
+    # byte_order: ${image_byte_order}
+    # file: ${logo_illustration_file}
+    # id: logo_img
   ## HAL Animated Voice Assistant images
-    - file: ${anim_listening1}
-      id: anim_listening1
-    - file: ${anim_listening2}
-      id: anim_listening2
-    - file: ${anim_thinking1}
-      id: anim_thinking1
-    - file: ${anim_thinking2}
-      id: anim_thinking2
-    - file: ${anim_replying1}
-      id: anim_replying1
-    - file: ${anim_replying2}
-      id: anim_replying2
-    - file: ${anim_error1}
-      id: anim_error1
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim_listening1}
+    id: anim_listening1
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim_listening2}
+    id: anim_listening2
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim_thinking1}
+    id: anim_thinking1
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim_thinking2}
+    id: anim_thinking2
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim_replying1}
+    id: anim_replying1
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim_replying2}
+    id: anim_replying2
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim_error1}
+    id: anim_error1
   ## HOME Animated Voice Assistant images
-    - file: ${anim2_listening}
-      id: anim2_listening
-    - file: ${anim2_thinking}
-      id: anim2_thinking
-    - file: ${anim2_replying1}
-      id: anim2_replying1
-    - file: ${anim2_replying2}
-      id: anim2_replying2
-    - file: ${anim2_replying3}
-      id: anim2_replying3
-    - file: ${anim2_replying4}
-      id: anim2_replying4
-    - file: ${anim2_error}
-      id: anim2_error
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim2_listening}
+    id: anim2_listening
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim2_thinking}
+    id: anim2_thinking
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim2_replying1}
+    id: anim2_replying1
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim2_replying2}
+    id: anim2_replying2
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim2_replying3}
+    id: anim2_replying3
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim2_replying4}
+    id: anim2_replying4
+  - platform: file
+    type: RGB565
+    resize: ${image_resize}
+    transparency: alpha_channel
+    byte_order: ${image_byte_order}
+    file: ${anim2_error}
+    id: anim2_error
 
 font:
   - file: ${font_file}
@@ -3897,7 +4000,7 @@ text_sensor:
                 long_mode: SCROLL_CIRCULAR
             - lambda: |-
                 lv_obj_set_style_anim_time(id(lbl_v_text_response), id(text_response).state.length()*125, LV_PART_MAIN);
-            - lambda: id(voice_assistant_timeout) = 30000 + (id(text_response).state.length()*125);
+            - lambda: id(voice_assistant_timeout) = 120000 + (id(text_response).state.length()*200);
           else:
             - lvgl.label.update:
                 id: lbl_v_text_response

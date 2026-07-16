@@ -401,14 +401,14 @@ This configuration should not need to change although you can add missing charac
 ### Hardware Specific Configuration
 Most hardware specific configuration is best not changed but these options can be useful for different environments. 
 The wifi_fast_connect forces the device to immediately connect to the first available access point on boot. The wifi_power_save_mode controls how heavily the device manages power usage - this is important on battery powered devices. The wifi_native roaming determines whether ESPHome manages roaming (false) or your network uses 802.11v BSS Transition Management and 802.11k Radio Resource Management to determine the best access point (true).
-The voice_assistant_failed_reboot feature is a safety mechanism that reboots the device if the voice assistant hangs during responses. This is on by default but can be disabled if required.
+The voice_assistant_failed_reboot feature is a safety mechanism that reboots the device if the voice assistant hangs during responses. This is off by default but can be disabled if required.
 
 ```
   wifi_fast_connect: false
   wifi_power_save_mode: LIGHT #NONE, LIGHT(default for esp32), HIGH
   wifi_use_native_roaming: true #if false uses ESPHome post connect roaming
   
-  voice_assistant_failed_reboot: "true" #restarts device on voice assistant hangs
+  voice_assistant_failed_reboot: "false" #restarts device on voice assistant hangs
 ```
 
 ### Other Configuration
