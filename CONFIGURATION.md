@@ -91,13 +91,14 @@ Hiding the page from navigation removes it from the navigation arrows and swipin
 ```
 
 Other pages that could be used out of the box on the home page are below:
-| Page | Use Case |
-| -------- | -------- |
-| climate_studio_page | Shows climate 1 Air Conditioner |
-| saver_page | Show Screensaver |
-| settings_page | Show Settings |
-| info_page | Show device information |
-| wifi_page | Show wifi information |
+| Page | Use Case | Suggested Icon
+| -------- | -------- | -------- |
+| climate_ac_page | Shows climate 1 Air Conditioner | "\U000F0210"
+| saver_page | Show Screensaver | "\U000F0150"
+| settings_page | Show Settings | "\U000F0493"
+| info_page | Show device information | "\U000F1C6F"
+| wifi_page | Show wifi information | "\U000F16BD"
+| cover_page | Shows and controls Covers | "\U000F00AC"
 
 ### Climate Page
 This is where you configure the name and the devices that will be displayed on the climate page. The climate1 entity is expected to be a climate device like an airconditioner and includes a detail page to allow setting the target temperature and HVAC Mode. All other entities are expected to be temperature sensors.
@@ -177,6 +178,22 @@ Hiding the page from navigation removes it from the navigation arrows and swipin
   controls6_state: input_boolean.vacuum #status - switch,light,fan,cover,sensor,binary_sensor
   controls6_icon_off: "\U000F1C01" #icon from icon_glyphs
   controls6_icon_on: "\U000F070D" #icon from icon_glyphs
+```
+### Cover Page
+This is where you configure the name and the devices that will be displayed on the covers page.
+These can only be covers. 
+This page is not shown in the home menu by default but can be optionally visible.
+Hiding the page from navigation removes it from the navigation arrows and swiping.
+
+```
+  cover_page_title: "Covers"
+  cover_page_hide_from_navigation: true
+  cover1_name: "Cover 1"
+  cover1_entity: cover.cover1
+  cover2_name: "Cover 2"
+  cover2_entity: cover.cover2
+  cover3_name: "Cover 3"
+  cover3_entity: cover.cover3
 ```
 
 ### Media Page

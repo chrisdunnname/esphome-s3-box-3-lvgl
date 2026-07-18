@@ -94,6 +94,15 @@ substitutions:
   controls6_state: input_boolean.vacuum #status - switch,light,fan,cover,sensor,binary_sensor
   controls6_icon_off: "\U000F1C01" #icon from icon_glyphs
   controls6_icon_on: "\U000F070D" #icon from icon_glyphs
+
+  cover_page_title: "Covers"
+  cover_page_hide_from_navigation: true
+  cover1_name: "Cover 1"
+  cover1_entity: cover.cover1
+  cover2_name: "Cover 2"
+  cover2_entity: cover.cover2
+  cover3_name: "Cover 3"
+  cover3_entity: cover.cover3
   
   media_page_title: "Media"
   media_page_hide_from_navigation: false
@@ -265,7 +274,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.07.16"
+  project_version: "2026.07.19"
 
 ###### Hardware Specific Configuration ######
 
@@ -643,6 +652,120 @@ light:
                 show_snow: false
 
 sensor:
+  - platform: homeassistant
+    id: cover1_position
+    entity_id: ${cover1_entity}
+    attribute: current_position
+    internal: true
+    on_value:
+      - if:
+          condition:
+            lambda: return x == 100;
+          then:
+            - lvgl.widget.update:
+                id: cover1_up_icon
+                text_opa: 60%
+          else:
+            - lvgl.widget.update:
+                id: cover1_up_icon
+                text_opa: 100%
+      - if:
+          condition:
+            lambda: return x == 0;
+          then:
+            - lvgl.widget.update:
+                id: cover1_down_icon
+                text_opa: 60%
+          else:
+            - lvgl.widget.update:
+                id: cover1_down_icon
+                text_opa: 100%
+      - if:
+          condition:
+            lambda: return id(cover1_state).state != "opening" && id(cover1_state).state != "closing";
+          then:
+            - lvgl.label.update:
+                id: cover1_status
+                text:
+                  format: "%.0f%%"
+                  args: [x]
+
+  - platform: homeassistant
+    id: cover2_position
+    entity_id: ${cover2_entity}
+    attribute: current_position
+    internal: true
+    on_value:
+      - if:
+          condition:
+            lambda: return x == 100;
+          then:
+            - lvgl.widget.update:
+                id: cover2_up_icon
+                text_opa: 60%
+          else:
+            - lvgl.widget.update:
+                id: cover2_up_icon
+                text_opa: 100%
+      - if:
+          condition:
+            lambda: return x == 0;
+          then:
+            - lvgl.widget.update:
+                id: cover2_down_icon
+                text_opa: 60%
+          else:
+            - lvgl.widget.update:
+                id: cover2_down_icon
+                text_opa: 100%
+      - if:
+          condition:
+            lambda: return id(cover2_state).state != "opening" && id(cover2_state).state != "closing";
+          then:
+            - lvgl.label.update:
+                id: cover2_status
+                text:
+                  format: "%.0f%%"
+                  args: [x]
+
+  - platform: homeassistant
+    id: cover3_position
+    entity_id: ${cover3_entity}
+    attribute: current_position
+    internal: true
+    on_value:
+      - if:
+          condition:
+            lambda: return x == 100;
+          then:
+            - lvgl.widget.update:
+                id: cover3_up_icon
+                text_opa: 60%
+          else:
+            - lvgl.widget.update:
+                id: cover3_up_icon
+                text_opa: 100%
+      - if:
+          condition:
+            lambda: return x == 0;
+          then:
+            - lvgl.widget.update:
+                id: cover3_down_icon
+                text_opa: 60%
+          else:
+            - lvgl.widget.update:
+                id: cover3_down_icon
+                text_opa: 100%
+      - if:
+          condition:
+            lambda: return id(cover3_state).state != "opening" && id(cover3_state).state != "closing";
+          then:
+            - lvgl.label.update:
+                id: cover3_status
+                text:
+                  format: "%.0f%%"
+                  args: [x]
+
   - platform: aht10
     i2c_id: bus_b
     variant: AHT20
@@ -3901,6 +4024,8 @@ font:
       - "\U000F00AC"# blinds closed
       - "\U000F1A6B"# roller-shade open
       - "\U000F1A6C"# roller-shade closed
+      - "\U000F0CE1"# arrow-up-bold-circle
+      - "\U000F0047"# arrow-down-bold-circle
       
   - file: ${icon_font_file}
     id: icon_font
@@ -3927,6 +4052,147 @@ font:
     glyphs: *icon_glyphs
 
 text_sensor:
+  - platform: homeassistant
+    id: cover1_state
+    entity_id: ${cover1_entity}
+    internal: true
+    on_value:
+      - if:
+          condition:
+            lambda: return x != "unknown" && x != "unavailable";
+          then:
+            - lvgl.widget.show: cover1_name_label
+            - lvgl.widget.show: cover1_up_button
+            - lvgl.widget.show: cover1_status_button
+            - lvgl.widget.show: cover1_down_button
+      - lvgl.label.update:
+          id: cover1_status
+          text: !lambda |-
+            if (x == "opening" || x == "closing") return std::string("STOP");
+            char buffer[8];
+            snprintf(buffer, sizeof(buffer), "%.0f%%", id(cover1_position).state);
+            return std::string(buffer);
+      - if:
+          condition:
+            lambda: return x == "opening";
+          then:
+            - lvgl.widget.update:
+                id: cover1_up_button
+                state:
+                  checked: true
+          else:
+            - lvgl.widget.update:
+                id: cover1_up_button
+                state:
+                  checked: false
+      - if:
+          condition:
+            lambda: return x == "closing";
+          then:
+            - lvgl.widget.update:
+                id: cover1_down_button
+                state:
+                  checked: true
+          else:
+            - lvgl.widget.update:
+                id: cover1_down_button
+                state:
+                  checked: false
+
+  - platform: homeassistant
+    id: cover2_state
+    entity_id: ${cover2_entity}
+    internal: true
+    on_value:
+      - if:
+          condition:
+            lambda: return x != "unknown" && x != "unavailable";
+          then:
+            - lvgl.widget.show: cover2_name_label
+            - lvgl.widget.show: cover2_up_button
+            - lvgl.widget.show: cover2_status_button
+            - lvgl.widget.show: cover2_down_button
+      - lvgl.label.update:
+          id: cover2_status
+          text: !lambda |-
+            if (x == "opening" || x == "closing") return std::string("STOP");
+            char buffer[8];
+            snprintf(buffer, sizeof(buffer), "%.0f%%", id(cover2_position).state);
+            return std::string(buffer);
+      - if:
+          condition:
+            lambda: return x == "opening";
+          then:
+            - lvgl.widget.update:
+                id: cover2_up_button
+                state:
+                  checked: true
+          else:
+            - lvgl.widget.update:
+                id: cover2_up_button
+                state:
+                  checked: false
+      - if:
+          condition:
+            lambda: return x == "closing";
+          then:
+            - lvgl.widget.update:
+                id: cover2_down_button
+                state:
+                  checked: true
+          else:
+            - lvgl.widget.update:
+                id: cover2_down_button
+                state:
+                  checked: false
+
+  - platform: homeassistant
+    id: cover3_state
+    entity_id: ${cover3_entity}
+    internal: true
+    on_value:
+      - if:
+          condition:
+            lambda: return x != "unknown" && x != "unavailable";
+          then:
+            - lvgl.widget.show: cover3_name_label
+            - lvgl.widget.show: cover3_up_button
+            - lvgl.widget.show: cover3_status_button
+            - lvgl.widget.show: cover3_down_button
+      - lvgl.label.update:
+          id: cover3_status
+          text: !lambda |-
+            if (x == "opening" || x == "closing") return std::string("STOP");
+            char buffer[8];
+            snprintf(buffer, sizeof(buffer), "%.0f%%", id(cover3_position).state);
+            return std::string(buffer);
+      - if:
+          condition:
+            lambda: return x == "opening";
+          then:
+            - lvgl.widget.update:
+                id: cover3_up_button
+                state:
+                  checked: true
+          else:
+            - lvgl.widget.update:
+                id: cover3_up_button
+                state:
+                  checked: false
+      - if:
+          condition:
+            lambda: return x == "closing";
+          then:
+            - lvgl.widget.update:
+                id: cover3_down_button
+                state:
+                  checked: true
+          else:
+            - lvgl.widget.update:
+                id: cover3_down_button
+                state:
+                  checked: false
+
   - platform: template
     name: "Config Version"
     icon: mdi:home-assistant
@@ -4977,7 +5243,7 @@ lvgl:
                               text: "\U000F0210"
                         on_long_press:
                           then:
-                            - lvgl.page.show: climate_studio_page
+                            - lvgl.page.show: climate_ac_page
                             - delay: 1s
                             - if:
                                 condition:
@@ -5159,7 +5425,7 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
 
-    - id: climate_studio_page
+    - id: climate_ac_page
       skip: true
       widgets:
         - obj:
@@ -5910,6 +6176,288 @@ lvgl:
                                 data:
                                   entity_id: ${controls6_entity}
 
+    - id: cover_page
+      skip: ${cover_page_hide_from_navigation}
+      on_swipe_left:
+        - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
+        - lvgl.page.next:
+      on_swipe_right:
+        - lambda: 'lv_indev_wait_release(lv_indev_get_act());'
+        - lvgl.page.previous:
+      widgets:
+        - obj:
+            styles: page_content
+            widgets:
+              - obj:
+                  align: TOP_MID
+                  styles: header_footer
+                  widgets:
+                    - label:
+                        text: '${cover_page_title}'
+                        y: 3
+                        align: CENTER
+                        text_align: CENTER
+                        styles: label_text_color
+              - obj:
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 6
+                  bg_opa: TRANSP
+                  border_opa: TRANSP
+                  layout:
+                    pad_row: 6
+                    pad_column: 8
+                    type: GRID
+                    grid_columns: [FR(1), FR(1), FR(1)]
+                    grid_rows: [FR(10), FR(35), FR(20), FR(35)]
+                  widgets:
+                    - label:
+                        id: cover1_name_label
+                        hidden: true
+                        text: '${cover1_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        styles: label_text_color
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - label:
+                        id: cover2_name_label
+                        hidden: true
+                        text: '${cover2_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        styles: label_text_color
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - label:
+                        id: cover3_name_label
+                        hidden: true
+                        text: '${cover3_name}'
+                        align: CENTER
+                        text_align: CENTER
+                        styles: label_text_color
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                    - button:
+                        id: cover1_up_button
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        checkable: true
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: cover1_up_icon
+                              align: CENTER
+                              text_font: icon_font_30
+                              text: "\U000F0CE1"
+                        on_press:
+                          then:
+                            - homeassistant.action:
+                                action: cover.open
+                                data:
+                                  entity_id: ${cover1_entity}
+                    - button:
+                        id: cover2_up_button
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        checkable: true
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: cover2_up_icon
+                              align: CENTER
+                              text_font: icon_font_30
+                              text: "\U000F0CE1"
+                        on_press:
+                          then:
+                            - homeassistant.action:
+                                action: cover.open
+                                data:
+                                  entity_id: ${cover2_entity}
+                    - button:
+                        id: cover3_up_button
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        checkable: true
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: cover3_up_icon
+                              align: CENTER
+                              text_font: icon_font_30
+                              text: "\U000F0CE1"
+                        on_press:
+                          then:
+                            - homeassistant.action:
+                                action: cover.open
+                                data:
+                                  entity_id: ${cover3_entity}
+                    - button:
+                        id: cover1_status_button
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: cover1_status
+                              align: CENTER
+                              text: "--%"
+                        on_press:
+                          then:
+                            - homeassistant.action:
+                                action: cover.stop
+                                data:
+                                  entity_id: ${cover1_entity}
+                    - button:
+                        id: cover2_status_button
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: cover2_status
+                              align: CENTER
+                              text: "--%"
+                        on_press:
+                          then:
+                            - homeassistant.action:
+                                action: cover.stop
+                                data:
+                                  entity_id: ${cover2_entity}
+                    - button:
+                        id: cover3_status_button
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: cover3_status
+                              align: CENTER
+                              text: "--%"
+                        on_press:
+                          then:
+                            - homeassistant.action:
+                                action: cover.stop
+                                data:
+                                  entity_id: ${cover3_entity}
+                    - button:
+                        id: cover1_down_button
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        checkable: true
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: cover1_down_icon
+                              align: CENTER
+                              text_font: icon_font_30
+                              text: "\U000F0047"
+                        on_press:
+                          then:
+                            - homeassistant.action:
+                                action: cover.close
+                                data:
+                                  entity_id: ${cover1_entity}
+                    - button:
+                        id: cover2_down_button
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        checkable: true
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: cover2_down_icon
+                              align: CENTER
+                              text_font: icon_font_30
+                              text: "\U000F0047"
+                        on_press:
+                          then:
+                            - homeassistant.action:
+                                action: cover.close
+                                data:
+                                  entity_id: ${cover2_entity}
+                    - button:
+                        id: cover3_down_button
+                        hidden: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        checkable: true
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 3
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              id: cover3_down_icon
+                              align: CENTER
+                              text_font: icon_font_30
+                              text: "\U000F0047"
+                        on_press:
+                          then:
+                            - homeassistant.action:
+                                action: cover.close
+                                data:
+                                  entity_id: ${cover3_entity}
     - id: media_page
       skip: ${media_page_hide_from_navigation}
       on_swipe_left:

@@ -130,6 +130,10 @@ Tap the change temperature buttons to move slightly or long press to change fast
 - The controls page provides buttons to toggle configurable controls which can be any entity that supports a toggle function including switch, light, media_player, climate, fan, humidifier, cover, script or siren. Icons can be configured for on and off states and must exist in the icon glyphs (default is switch icon).
 - The second row of controls buttons include an additional substitution to allow more complex implementations where the sensor for the state is a different entity to the one for the switch. If both the action and state entity are the same for a button these operate the same as the other controls. These three controls are configured with icons to show a garage door, dishwasher and a vacuum cleaner.
 
+# Covers
+- This page is not shown by default but can be configured to show in the home page to replace another icon. 
+- This page provides controls for up to 3 covers showing the current position and any movement.
+
 # Media
 **Internal Audio**
 
