@@ -111,6 +111,7 @@ https://github.com/user-attachments/assets/6a4cc3aa-5d56-4a20-91e0-ba3e1859db3c
 
 ![climate](https://github.com/user-attachments/assets/688cad8e-7944-4033-bfe1-401e1b1d1427)
 - The page title is configurable.
+- The first item on this page can be configured to show either a temperature sensor or provide the temperature and a button to access the air conditioner.
 
 **Air Conditioner**
 

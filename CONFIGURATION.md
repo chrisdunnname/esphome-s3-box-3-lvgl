@@ -101,14 +101,17 @@ Other pages that could be used out of the box on the home page are below:
 | cover_page | Shows and controls Covers | "\U000F00AC"
 
 ### Climate Page
-This is where you configure the name and the devices that will be displayed on the climate page. The climate1 entity is expected to be a climate device like an airconditioner and includes a detail page to allow setting the target temperature and HVAC Mode. All other entities are expected to be temperature sensors.
+This is where you configure the name and the devices that will be displayed on the climate page. 
+The first item on this page can be a temperature entity or an air conditioner control. If climate1_entity returns a valid state the temperature will display like all other climate items on this page. If climate1_entity_ac returns a valid state then it will override this and show it's temperature instead and a button to access the air conditioner page. 
+All other entities are expected to be temperature sensors.
 Hiding the page from navigation removes it from the navigation arrows and swiping.
 
 ```
   climate_page_title: "Climate"
   climate_page_hide_from_navigation: false
-  climate1_name: "Room 1 AC"
-  climate1_entity: climate.air_conditioner #climate
+  climate1_name: "Room 1"
+  climate1_entity: sensor.temperature1 #sensor
+  climate1_entity_ac: climate.air_conditioner #climate
   climate2_name: "Room 2"
   climate2_entity: sensor.temperature2 #sensor
   climate3_name: "Room 3"

@@ -37,8 +37,9 @@ substitutions:
 
   climate_page_title: "Climate"
   climate_page_hide_from_navigation: false
-  climate1_name: "Room 1 AC"
-  climate1_entity: climate.air_conditioner #climate
+  climate1_name: "Room 1"
+  climate1_entity: sensor.temperature1 #sensor
+  climate1_entity_ac: climate.air_conditioner #climate
   climate2_name: "Room 2"
   climate2_entity: sensor.temperature2 #sensor
   climate3_name: "Room 3"
@@ -274,7 +275,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.07.19"
+  project_version: "2026.07.19.1"
 
 ###### Hardware Specific Configuration ######
 
@@ -907,44 +908,44 @@ sensor:
 
 ### CLIMATE PAGE SENSORS ###
   - platform: homeassistant
-    id: climate1_temp
-    entity_id: ${climate1_entity}
+    id: climate1_temp_ac
+    entity_id: ${climate1_entity_ac}
     attribute: current_temperature
     internal: true
     on_value:
       then:
-        - lvgl.widget.show: lbl_climate_1
-        - lvgl.widget.show: temp_climate_1
-        - lvgl.widget.show: but_climate_1
+        - script.execute: refresh_climate_1
         - lvgl.label.update:
-            id: temp_climate_1   
-            text: !lambda |-
-              char buf[10];
-              sprintf(buf, "%.1f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
-              return buf;
-        - lvgl.label.update:
-            id: studioac_currenttemp   
+            id: climateac_currenttemp
             text: !lambda |-
               char buf[10];
               sprintf(buf, "%.1f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
               return buf; 
 
   - platform: homeassistant
-    id: climate1_temp2
-    entity_id: ${climate1_entity}
+    id: climate1_temp2_ac
+    entity_id: ${climate1_entity_ac}
     attribute: temperature
     internal: true
     on_value:
       then:
         - lvgl.label.update:
-            id: studioac_targettemp   
+            id: climateac_targettemp
             text: !lambda |-
               char buf[10];
               sprintf(buf, "%.1f%s", x, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
               return buf; 
         - lvgl.spinbox.update:
-            id: spinbox_studioac
+            id: spinbox_climateac
             value: !lambda return x;
+
+  - platform: homeassistant
+    id: climate1_temp
+    entity_id: ${climate1_entity}
+    internal: true
+    on_value:
+      then:
+        - script.execute: refresh_climate_1
 
   - platform: homeassistant
     id: climate2_temp
@@ -1643,6 +1644,55 @@ voice_assistant:
     - script.execute: draw_display
 
 script:
+  - id: refresh_climate_1
+    mode: restart
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(climate1_item_ac).has_state() &&
+                     id(climate1_item_ac).state != "unknown" &&
+                     id(climate1_item_ac).state != "unavailable";
+          then:
+            - lvgl.widget.show: lbl_climate_1
+            - lvgl.widget.show: temp_climate_1
+            - lvgl.widget.show: but_climate_1
+            - lvgl.widget.hide: icon_climate_1
+            - lvgl.label.update:
+                id: temp_climate_1
+                text: !lambda |-
+                  if (!id(climate1_temp_ac).has_state() || isnan(id(climate1_temp_ac).state)) {
+                    return std::string(" ");
+                  }
+                  char buf[10];
+                  sprintf(buf, "%.1f%s", id(climate1_temp_ac).state, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+                  return std::string(buf);
+          else:
+            - if:
+                condition:
+                  lambda: |-
+                    return id(climate1_item_sensor).has_state() &&
+                           id(climate1_item_sensor).state != "unknown" &&
+                           id(climate1_item_sensor).state != "unavailable" &&
+                           id(climate1_temp).has_state() &&
+                           !isnan(id(climate1_temp).state);
+                then:
+                  - lvgl.widget.show: lbl_climate_1
+                  - lvgl.widget.show: temp_climate_1
+                  - lvgl.widget.show: icon_climate_1
+                  - lvgl.widget.hide: but_climate_1
+                  - lvgl.label.update:
+                      id: temp_climate_1
+                      text: !lambda |-
+                        char buf[10];
+                        sprintf(buf, "%.1f%s", id(climate1_temp).state, id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+                        return std::string(buf);
+                else:
+                  - lvgl.widget.hide: lbl_climate_1
+                  - lvgl.widget.hide: temp_climate_1
+                  - lvgl.widget.hide: icon_climate_1
+                  - lvgl.widget.hide: but_climate_1
+
   - id: draw_display
     then:
       - if:
@@ -4357,67 +4407,76 @@ text_sensor:
 
 ### CLIMATE PAGE TEXT SENSORS ###
   - platform: homeassistant
-    id: climate1_item
+    id: climate1_item_sensor
     entity_id: ${climate1_entity}
     internal: true
     on_value:
       then:
+        - script.execute: refresh_climate_1
+
+  - platform: homeassistant
+    id: climate1_item_ac
+    entity_id: ${climate1_entity_ac}
+    internal: true
+    on_value:
+      then:
+        - script.execute: refresh_climate_1
         - if:
             condition: 
-                lambda: return (id(climate1_item).state == "off");
+                lambda: return (id(climate1_item_ac).state == "off");
             then:
               - lvgl.dropdown.update:
-                  id: dropdown_studioacmode
+                  id: dropdown_climateacmode
                   selected_index: 0
               - lvgl.widget.update:
                   id: but_climate_1
                   state:
                     checked: false
               - lvgl.widget.update:
-                  id: but_studioac_1
+                  id: but_climateac_1
                   state:
                     checked: false
         - if:
             condition: 
                 and:
-                  - lambda: return (id(climate1_item).state != "off");
-                  - lambda: return (id(climate1_item).state != "unavailable");
+                  - lambda: return (id(climate1_item_ac).state != "off");
+                  - lambda: return (id(climate1_item_ac).state != "unavailable");
             then:
               - lvgl.widget.update:
                   id: but_climate_1
                   state:
                     checked: true
               - lvgl.widget.update:
-                  id: but_studioac_1
+                  id: but_climateac_1
                   state:
                     checked: true
               - if:
                   condition:
-                    lambda: return (id(climate1_item).state == "heat_cool");
+                    lambda: return (id(climate1_item_ac).state == "heat_cool");
                   then:
                     - lvgl.dropdown.update:
-                        id: dropdown_studioacmode
+                        id: dropdown_climateacmode
                         selected_index: 1
               - if:
                   condition:
-                    lambda: return (id(climate1_item).state == "heat");
+                    lambda: return (id(climate1_item_ac).state == "heat");
                   then:
                     - lvgl.dropdown.update:
-                        id: dropdown_studioacmode
+                        id: dropdown_climateacmode
                         selected_index: 2
               - if:
                   condition:
-                    lambda: return (id(climate1_item).state == "cool");
+                    lambda: return (id(climate1_item_ac).state == "cool");
                   then:
                     - lvgl.dropdown.update:
-                        id: dropdown_studioacmode
+                        id: dropdown_climateacmode
                         selected_index: 3
               - if:
                   condition:
-                    lambda: return (id(climate1_item).state == "dry");
+                    lambda: return (id(climate1_item_ac).state == "dry");
                   then:
                     - lvgl.dropdown.update:
-                        id: dropdown_studioacmode
+                        id: dropdown_climateacmode
                         selected_index: 4
 
 ### SCREENSAVER FORECAST CONDITION ###
@@ -5222,38 +5281,56 @@ lvgl:
                         grid_cell_row_pos: 1
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
-                    - button:
-                        id: but_climate_1
-                        hidden: true
-                        styles: button_style
-                        pressed:
-                          styles: button_pressed_style
-                        checked:
-                          styles: button_checked_style
+                    - obj:
                         grid_cell_column_pos: 0
                         grid_cell_row_pos: 2
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
-                        checkable: true
+                        pad_all: 0
+                        bg_opa: TRANSP
+                        border_opa: TRANSP
                         widgets:
-                          - label:
-                              id: ico_climate_1
+                          - button:
+                              id: but_climate_1
+                              hidden: true
+                              width: 100%
+                              height: 100%
                               align: CENTER
-                              text_font: icon_font_30
-                              text: "\U000F0210"
-                        on_long_press:
-                          then:
-                            - lvgl.page.show: climate_ac_page
-                            - delay: 1s
-                            - if:
-                                condition:
-                                  not:
-                                    lambda: return (id(climate1_item).state == "off");
+                              styles: button_style
+                              pressed:
+                                styles: button_pressed_style
+                              checked:
+                                styles: button_checked_style
+                              checkable: true
+                              widgets:
+                                - label:
+                                    id: ico_climate_1
+                                    align: CENTER
+                                    text_font: icon_font_30
+                                    text: "\U000F0210"
+                              on_long_press:
                                 then:
-                                  - lvgl.widget.update:
-                                      id: but_climate_1
-                                      state:
-                                        checked: true
+                                  - lvgl.page.show: climate_ac_page
+                                  - delay: 1s
+                                  - if:
+                                      condition:
+                                        not:
+                                          lambda: return (id(climate1_item_ac).state == "off");
+                                      then:
+                                        - lvgl.widget.update:
+                                            id: but_climate_1
+                                            state:
+                                              checked: true
+                          - label:
+                              id: icon_climate_1
+                              hidden: true
+                              width: 100%
+                              height: 100%
+                              align: CENTER
+                              text_align: CENTER
+                              text_font: icon_font_30
+                              text: "\U000F050F"
+                              styles: label_text_color_blue
                     - label:
                         id: lbl_climate_2
                         hidden: true
@@ -5465,7 +5542,7 @@ lvgl:
                         grid_cell_x_align: STRETCH
                         grid_cell_y_align: STRETCH
                     - button:
-                        id: but_studioac_1
+                        id: but_climateac_1
                         styles: button_style
                         pressed:
                           styles: button_pressed_style
@@ -5478,7 +5555,7 @@ lvgl:
                         checkable: true
                         widgets:
                           - label:
-                              id: ico_studioac_1
+                              id: ico_climateac_1
                               align: CENTER
                               text_font: icon_font_55
                               text: "\U000F0210"
@@ -5487,7 +5564,7 @@ lvgl:
                             - homeassistant.action:
                                 action: climate.toggle
                                 data:
-                                  entity_id: ${climate1_entity}
+                                  entity_id: ${climate1_entity_ac}
                     - label:
                         text: "Current Temp"
                         align: CENTER
@@ -5499,7 +5576,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - label:
                         text: " "
-                        id: studioac_currenttemp
+                        id: climateac_currenttemp
                         align: CENTER
                         text_align: CENTER
                         styles: label_text_color_blue
@@ -5519,7 +5596,7 @@ lvgl:
                         grid_cell_y_align: STRETCH
                     - label:
                         text: " "
-                        id: studioac_targettemp
+                        id: climateac_targettemp
                         align: CENTER
                         text_align: CENTER
                         styles: label_text_color_blue
@@ -5543,7 +5620,7 @@ lvgl:
                     flex_align_cross: CENTER
                   widgets:
                     - dropdown:
-                        id: dropdown_studioacmode
+                        id: dropdown_climateacmode
                         styles: dropdown_style
                         width: 130
                         text_align: CENTER
@@ -5565,7 +5642,7 @@ lvgl:
                                 - homeassistant.action:
                                     action: climate.set_hvac_mode
                                     data:
-                                      entity_id: ${climate1_entity}
+                                      entity_id: ${climate1_entity_ac}
                                       hvac_mode: "off"
                           - if:
                               condition:
@@ -5574,7 +5651,7 @@ lvgl:
                                 - homeassistant.action:
                                     action: climate.set_hvac_mode
                                     data:
-                                      entity_id: ${climate1_entity}
+                                      entity_id: ${climate1_entity_ac}
                                       hvac_mode: heat_cool
                           - if:
                               condition:
@@ -5583,7 +5660,7 @@ lvgl:
                                 - homeassistant.action:
                                     action: climate.set_hvac_mode
                                     data:
-                                      entity_id: ${climate1_entity}
+                                      entity_id: ${climate1_entity_ac}
                                       hvac_mode: heat
                           - if:
                               condition:
@@ -5592,7 +5669,7 @@ lvgl:
                                 - homeassistant.action:
                                     action: climate.set_hvac_mode
                                     data:
-                                      entity_id: ${climate1_entity}
+                                      entity_id: ${climate1_entity_ac}
                                       hvac_mode: Cool
                           - if:
                               condition:
@@ -5601,10 +5678,10 @@ lvgl:
                                 - homeassistant.action:
                                     action: climate.set_hvac_mode
                                     data:
-                                      entity_id: ${climate1_entity}
+                                      entity_id: ${climate1_entity_ac}
                                       hvac_mode: dry
                     - button:
-                        id: studioac_spin_down
+                        id: climateac_spin_down
                         styles: button_style
                         width: 30
                         pressed:
@@ -5612,9 +5689,9 @@ lvgl:
                         checked:
                           styles: button_checked_style
                         on_short_click:
-                          - lvgl.spinbox.decrement: spinbox_studioac
+                          - lvgl.spinbox.decrement: spinbox_climateac
                         on_long_press_repeat:
-                          - lvgl.spinbox.decrement: spinbox_studioac
+                          - lvgl.spinbox.decrement: spinbox_climateac
                           - delay: 1s
                         on_long_press:
                           then:
@@ -5622,9 +5699,9 @@ lvgl:
                             - homeassistant.action:
                                 action: climate.set_temperature
                                 data:
-                                  entity_id: ${climate1_entity}
+                                  entity_id: ${climate1_entity_ac}
                                   temperature: !lambda |-
-                                    int scaled_value = lv_spinbox_get_value(id(spinbox_studioac));
+                                    int scaled_value = lv_spinbox_get_value(id(spinbox_climateac));
                                     float actual_value = scaled_value / 10.0f;
                                     return actual_value;
                         widgets:
@@ -5632,7 +5709,7 @@ lvgl:
                                text: "\U000F0B26"
                                styles: spinbox_button_label_style
                     - spinbox:
-                        id: spinbox_studioac
+                        id: spinbox_climateac
                         styles: spinbox_style
                         width: 50
                         range_from: 16
@@ -5642,7 +5719,7 @@ lvgl:
                         digits: 3
                         decimal_places: 1
                     - button:
-                        id: studioac_spin_up
+                        id: climateac_spin_up
                         styles: button_style
                         width: 30
                         pressed:
@@ -5650,9 +5727,9 @@ lvgl:
                         checked:
                           styles: button_checked_style
                         on_short_click:
-                          - lvgl.spinbox.increment: spinbox_studioac
+                          - lvgl.spinbox.increment: spinbox_climateac
                         on_long_press_repeat:
-                          - lvgl.spinbox.increment: spinbox_studioac
+                          - lvgl.spinbox.increment: spinbox_climateac
                           - delay: 1s
                         on_long_press:
                           then:
@@ -5660,9 +5737,9 @@ lvgl:
                             - homeassistant.action:
                                 action: climate.set_temperature
                                 data:
-                                  entity_id: ${climate1_entity}
+                                  entity_id: ${climate1_entity_ac}
                                   temperature: !lambda |-
-                                    int scaled_value = lv_spinbox_get_value(id(spinbox_studioac));
+                                    int scaled_value = lv_spinbox_get_value(id(spinbox_climateac));
                                     float actual_value = scaled_value / 10.0f;
                                     return actual_value;
                         widgets:
