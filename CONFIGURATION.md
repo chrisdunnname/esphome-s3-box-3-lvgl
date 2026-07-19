@@ -415,6 +415,44 @@ These substitutions specify the sounds to be used for on device or external audi
   notify_external: /local/sounds/notify.mp3
 ```
 
+### Voice Assistant Wake Word Sensitivity
+These values control the thresholds used by the wake word sensitivity setting. They are preset with recommended defaults.
+The values are used for the probability cutoff threshold and require a quantized integer value (0 to 255) rather than a decimal percentage. Where specified the comments for thresholds indicate the associated percentage value. 
+The high sensitivity threshold is used for the "Very sensitive" option.
+The medium sensitivity threshold is used for the "Moderately sensitive" option.
+The low sensitivity threshold is used for the "Slightly sensitive" option.
+
+```
+###### Voice Assistant Model Sensitivity Thresholds ######
+  va_model_sensitivity_okay_nabu_high: 143 # 0.56
+  va_model_sensitivity_okay_nabu_medium: 176 # 0.69
+  va_model_sensitivity_okay_nabu_low: 247 # 0.97
+  va_model_sensitivity_hey_jarvis_high: 212 # 0.83
+  va_model_sensitivity_hey_jarvis_medium: 235 # 0.92
+  va_model_sensitivity_hey_jarvis_low: 247 # 0.97 (Manifest's default)
+  va_model_sensitivity_hey_mycroft_high: 237 # 0.93
+  va_model_sensitivity_hey_mycroft_medium: 242 # 0.95 (Manifest's default)
+  va_model_sensitivity_hey_mycroft_low: 253 # 0.99
+  va_model_sensitivity_alexa_high: 217 # 0.85
+  va_model_sensitivity_alexa_medium: 235 # 0.92
+  va_model_sensitivity_alexa_low: 250 # 0.98
+  va_model_sensitivity_okay_computer_high: 212
+  va_model_sensitivity_okay_computer_medium: 235
+  va_model_sensitivity_okay_computer_low: 247
+  va_model_sensitivity_hey_home_assistant_high: 212
+  va_model_sensitivity_hey_home_assistant_medium: 235
+  va_model_sensitivity_hey_home_assistant_low: 247
+  va_model_sensitivity_okay_hal_high: 212
+  va_model_sensitivity_okay_hal_medium: 235
+  va_model_sensitivity_okay_hal_low: 247
+  va_model_sensitivity_hey_luna_high: 212
+  va_model_sensitivity_hey_luna_medium: 235
+  va_model_sensitivity_hey_luna_low: 247
+```
+
+### Voice Assistant Phase IDs
+These are the voice assistant phase IDs used by Home Assistant/ESPHome and should not need changing.
+
 ### Fonts & Icons
 This configuration should not need to change although you can add missing characters to font_glyphs to have them render correctly if they do not display. Changing font or icon font usually requires further changes.
 

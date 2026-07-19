@@ -256,6 +256,32 @@ substitutions:
   wakesound_external: /local/sounds/awake.mp3
   notify_external: /local/sounds/notify.mp3
 
+###### Voice Assistant Model Sensitivity Thresholds ######
+  va_model_sensitivity_okay_nabu_high: 143 # 0.56
+  va_model_sensitivity_okay_nabu_medium: 176 # 0.69
+  va_model_sensitivity_okay_nabu_low: 247 # 0.97
+  va_model_sensitivity_hey_jarvis_high: 212 # 0.83
+  va_model_sensitivity_hey_jarvis_medium: 235 # 0.92
+  va_model_sensitivity_hey_jarvis_low: 247 # 0.97 (Manifest's default)
+  va_model_sensitivity_hey_mycroft_high: 237 # 0.93
+  va_model_sensitivity_hey_mycroft_medium: 242 # 0.95 (Manifest's default)
+  va_model_sensitivity_hey_mycroft_low: 253 # 0.99
+  va_model_sensitivity_alexa_high: 217 # 0.85
+  va_model_sensitivity_alexa_medium: 235 # 0.92
+  va_model_sensitivity_alexa_low: 250 # 0.98
+  va_model_sensitivity_okay_computer_high: 212
+  va_model_sensitivity_okay_computer_medium: 235
+  va_model_sensitivity_okay_computer_low: 247
+  va_model_sensitivity_hey_home_assistant_high: 212
+  va_model_sensitivity_hey_home_assistant_medium: 235
+  va_model_sensitivity_hey_home_assistant_low: 247
+  va_model_sensitivity_okay_hal_high: 212
+  va_model_sensitivity_okay_hal_medium: 235
+  va_model_sensitivity_okay_hal_low: 247
+  va_model_sensitivity_hey_luna_high: 212
+  va_model_sensitivity_hey_luna_medium: 235
+  va_model_sensitivity_hey_luna_low: 247
+
 ######  Voice Assistant Phase IDs ######
   voice_assist_idle_phase_id: "1"
   voice_assist_listening_phase_id: "2"
@@ -275,7 +301,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.07.19.1"
+  project_version: "2026.07.19.2"
 
 ###### Hardware Specific Configuration ######
 
@@ -3339,32 +3365,32 @@ select:
     on_value:
       lambda: |-
         if (x == "Slightly sensitive") {
-          id(okay_nabu).set_probability_cutoff(247);    // 0.97
-          id(hey_jarvis).set_probability_cutoff(247);   // 0.97 -> 0.563 FAPH on DipCo (Manifest's default)
-          id(hey_mycroft).set_probability_cutoff(253);  // 0.99 -> 0.567 FAPH on DipCo
-          id(alexa).set_probability_cutoff(250);  // 0.98
-          //id(okay_computer).set_probability_cutoff(247);
-          //id(hey_home_assistant).set_probability_cutoff(247);
-          id(okay_hal).set_probability_cutoff(247);
-          id(hey_luna).set_probability_cutoff(247);
+          id(okay_nabu).set_probability_cutoff(${va_model_sensitivity_okay_nabu_low});
+          id(hey_jarvis).set_probability_cutoff(${va_model_sensitivity_hey_jarvis_low});
+          id(hey_mycroft).set_probability_cutoff(${va_model_sensitivity_hey_mycroft_low});
+          id(alexa).set_probability_cutoff(${va_model_sensitivity_alexa_low});
+          // id(okay_computer).set_probability_cutoff(${va_model_sensitivity_okay_computer_low});
+          // id(hey_home_assistant).set_probability_cutoff(${va_model_sensitivity_hey_home_assistant_low});
+          id(okay_hal).set_probability_cutoff(${va_model_sensitivity_okay_hal_low});
+          id(hey_luna).set_probability_cutoff(${va_model_sensitivity_hey_luna_low});
         } else if (x == "Moderately sensitive") {
-          id(okay_nabu).set_probability_cutoff(176);    // 0.69 -> 0.376 FAPH on DipCo
-          id(hey_jarvis).set_probability_cutoff(235);   // 0.92 -> 0.939 FAPH on DipCo
-          id(hey_mycroft).set_probability_cutoff(242);  // 0.95 -> 1.502 FAPH on DipCo (Manifest's default)
-          id(alexa).set_probability_cutoff(235); // 0.92
-          //id(okay_computer).set_probability_cutoff(235);
-          //id(hey_home_assistant).set_probability_cutoff(235);
-          id(okay_hal).set_probability_cutoff(235);
-          id(hey_luna).set_probability_cutoff(235);
+          id(okay_nabu).set_probability_cutoff(${va_model_sensitivity_okay_nabu_medium});
+          id(hey_jarvis).set_probability_cutoff(${va_model_sensitivity_hey_jarvis_medium});
+          id(hey_mycroft).set_probability_cutoff(${va_model_sensitivity_hey_mycroft_medium});
+          id(alexa).set_probability_cutoff(${va_model_sensitivity_alexa_medium});
+          // id(okay_computer).set_probability_cutoff(${va_model_sensitivity_okay_computer_medium});
+          // id(hey_home_assistant).set_probability_cutoff(${va_model_sensitivity_hey_home_assistant_medium});
+          id(okay_hal).set_probability_cutoff(${va_model_sensitivity_okay_hal_medium});
+          id(hey_luna).set_probability_cutoff(${va_model_sensitivity_hey_luna_medium});
         } else if (x == "Very sensitive") {
-          id(okay_nabu).set_probability_cutoff(143);    // 0.56 -> 0.751 FAPH on DipCo
-          id(hey_jarvis).set_probability_cutoff(212);   // 0.83 -> 1.502 FAPH on DipCo
-          id(hey_mycroft).set_probability_cutoff(237);  // 0.93 -> 1.878 FAPH on DipCo
-          id(alexa).set_probability_cutoff(217); // 0.85
-          //id(okay_computer).set_probability_cutoff(212);
-          //id(hey_home_assistant).set_probability_cutoff(212);
-          id(okay_hal).set_probability_cutoff(212);
-          id(hey_luna).set_probability_cutoff(212);
+          id(okay_nabu).set_probability_cutoff(${va_model_sensitivity_okay_nabu_high});
+          id(hey_jarvis).set_probability_cutoff(${va_model_sensitivity_hey_jarvis_high});
+          id(hey_mycroft).set_probability_cutoff(${va_model_sensitivity_hey_mycroft_high});
+          id(alexa).set_probability_cutoff(${va_model_sensitivity_alexa_high});
+          // id(okay_computer).set_probability_cutoff(${va_model_sensitivity_okay_computer_high});
+          // id(hey_home_assistant).set_probability_cutoff(${va_model_sensitivity_hey_home_assistant_high});
+          id(okay_hal).set_probability_cutoff(${va_model_sensitivity_okay_hal_high});
+          id(hey_luna).set_probability_cutoff(${va_model_sensitivity_hey_luna_high});
         }
 
   - platform: lvgl
