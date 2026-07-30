@@ -474,6 +474,7 @@ wifi:
   power_save_mode: ${wifi_power_save_mode}
   enable_btm: ${wifi_use_native_roaming}  # 802.11v BSS Transition Management
   enable_rrm: ${wifi_use_native_roaming}  # 802.11k Radio Resource Management
+  reboot_timeout: 10min
   ap:
     ssid: ${name}
     password: ${wifi_fallback_pwd}   
@@ -2492,9 +2493,9 @@ script:
               - switch.is_on: reboot_schedule
               - lambda: 'return (id(ha_time).now().hour == id(reboot_time).hour);'
               - lambda: 'return (id(ha_time).now().minute == id(reboot_time).minute);'
-              - lambda: 'return (id(ha_time).now().second <= 15);'
+              - lambda: 'return (id(ha_time).now().second <= 10);'
           then:
-            - delay: 10s
+            - delay: 11s
             - button.press: reboot
     mode: single
     
