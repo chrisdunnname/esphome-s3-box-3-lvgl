@@ -2474,19 +2474,19 @@ script:
                   - switch.is_on: alarmclock
                   - lambda: 'return (id(ha_time).now().hour == id(alarmclock_time).hour);'
                   - lambda: 'return (id(ha_time).now().minute == id(alarmclock_time).minute);'
-                  - lambda: 'return (id(ha_time).now().second <= 15);'
+                  - lambda: 'return (id(ha_time).now().second <= 5);'
               - and:
                   - switch.is_on: alarmclock2
                   - lambda: 'return (id(ha_time).now().hour == id(alarmclock2_time).hour);'
                   - lambda: 'return (id(ha_time).now().minute == id(alarmclock2_time).minute);'
-                  - lambda: 'return (id(ha_time).now().second <= 15);'
+                  - lambda: 'return (id(ha_time).now().second <= 5);'
           then:
             - lambda: id(alarmclock_ringing) = true;
             - lvgl.widget.show: but_snooze
             - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
             - script.execute: draw_display
             - switch.turn_on: timer_ringing
-            - delay: 15s
+            - delay: 6s
       - if:
           condition:
             and:
