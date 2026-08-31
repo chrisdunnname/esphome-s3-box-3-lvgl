@@ -40,6 +40,18 @@ substitutions:
   climate1_name: "Room 1"
   climate1_entity: sensor.temperature1 #sensor
   climate1_entity_ac: climate.air_conditioner #climate
+  climate1_entity_ac_p1_name: "" #None
+  climate1_entity_ac_p1_code: "" #none
+  climate1_entity_ac_p2_name: "" #Eco
+  climate1_entity_ac_p2_code: "" #eco
+  climate1_entity_ac_p3_name: "" #Comfort
+  climate1_entity_ac_p3_code: "" #comfort
+  climate1_entity_ac_p4_name: "" #Away
+  climate1_entity_ac_p4_code: "" #away
+  climate1_entity_ac_p5_name: "" #Home
+  climate1_entity_ac_p5_code: "" #home
+  climate1_entity_ac_p6_name: "" #Sleep
+  climate1_entity_ac_p6_code: "" #sleep
   climate2_name: "Room 2"
   climate2_entity: sensor.temperature2 #sensor
   climate3_name: "Room 3"
@@ -301,7 +313,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.07.19.2"
+  project_version: "2026.08.31"
 
 ###### Hardware Specific Configuration ######
 
@@ -502,6 +514,7 @@ esphome:
       then:
         - delay: 5s
         - lvgl.widget.hide: boot_screen
+        - script.execute: configure_climate_ac_presets
         # - at581x.settings:
             # id: "Radar"
             # frequency: 5800MHz
@@ -1671,6 +1684,79 @@ voice_assistant:
     - script.execute: draw_display
 
 script:
+  - id: configure_climate_ac_presets
+    then:
+      - if:
+          condition:
+            lambda: return strlen("${climate1_entity_ac_p1_name}") > 0 && strlen("${climate1_entity_ac_p1_code}") > 0;
+          then:
+            - lvgl.widget.show: climateac_preset_1
+      - if:
+          condition:
+            lambda: return strlen("${climate1_entity_ac_p2_name}") > 0 && strlen("${climate1_entity_ac_p2_code}") > 0;
+          then:
+            - lvgl.widget.show: climateac_preset_2
+      - if:
+          condition:
+            lambda: return strlen("${climate1_entity_ac_p3_name}") > 0 && strlen("${climate1_entity_ac_p3_code}") > 0;
+          then:
+            - lvgl.widget.show: climateac_preset_3
+      - if:
+          condition:
+            lambda: return strlen("${climate1_entity_ac_p4_name}") > 0 && strlen("${climate1_entity_ac_p4_code}") > 0;
+          then:
+            - lvgl.widget.show: climateac_preset_4
+      - if:
+          condition:
+            lambda: return strlen("${climate1_entity_ac_p5_name}") > 0 && strlen("${climate1_entity_ac_p5_code}") > 0;
+          then:
+            - lvgl.widget.show: climateac_preset_5
+      - if:
+          condition:
+            lambda: return strlen("${climate1_entity_ac_p6_name}") > 0 && strlen("${climate1_entity_ac_p6_code}") > 0;
+          then:
+            - lvgl.widget.show: climateac_preset_6
+      - if:
+          condition:
+            lambda: |-
+              return (strlen("${climate1_entity_ac_p1_name}") > 0 && strlen("${climate1_entity_ac_p1_code}") > 0) ||
+                     (strlen("${climate1_entity_ac_p2_name}") > 0 && strlen("${climate1_entity_ac_p2_code}") > 0) ||
+                     (strlen("${climate1_entity_ac_p3_name}") > 0 && strlen("${climate1_entity_ac_p3_code}") > 0) ||
+                     (strlen("${climate1_entity_ac_p4_name}") > 0 && strlen("${climate1_entity_ac_p4_code}") > 0) ||
+                     (strlen("${climate1_entity_ac_p5_name}") > 0 && strlen("${climate1_entity_ac_p5_code}") > 0) ||
+                     (strlen("${climate1_entity_ac_p6_name}") > 0 && strlen("${climate1_entity_ac_p6_code}") > 0);
+          then:
+            - lvgl.widget.show: climateac_preset_open
+
+  - id: set_climate_ac_preset_selection
+    parameters:
+      selected: int
+    then:
+      - lvgl.widget.update:
+          id: climateac_preset_1
+          state:
+            checked: !lambda return selected == 1;
+      - lvgl.widget.update:
+          id: climateac_preset_2
+          state:
+            checked: !lambda return selected == 2;
+      - lvgl.widget.update:
+          id: climateac_preset_3
+          state:
+            checked: !lambda return selected == 3;
+      - lvgl.widget.update:
+          id: climateac_preset_4
+          state:
+            checked: !lambda return selected == 4;
+      - lvgl.widget.update:
+          id: climateac_preset_5
+          state:
+            checked: !lambda return selected == 5;
+      - lvgl.widget.update:
+          id: climateac_preset_6
+          state:
+            checked: !lambda return selected == 6;
+
   - id: refresh_climate_1
     mode: restart
     then:
@@ -3998,6 +4084,7 @@ font:
       - "\U000F0020"#alarmclock
       - "\U000F009E"#bell
       - "\U000F0150"#clock
+      - "\U000F015A"#close-circle-outline
       - "\U000F01AE"#gbp pound symbol
       - "\U000F0210"#fan
       - "\U000F0238"#heating
@@ -4433,6 +4520,24 @@ text_sensor:
         - script.execute: set_alarm_status
 
 ### CLIMATE PAGE TEXT SENSORS ###
+  - platform: homeassistant
+    id: climate1_preset_mode_ac
+    entity_id: ${climate1_entity_ac}
+    attribute: preset_mode
+    internal: true
+    on_value:
+      then:
+        - script.execute:
+            id: set_climate_ac_preset_selection
+            selected: !lambda |-
+              if (strlen("${climate1_entity_ac_p1_code}") > 0 && x == "${climate1_entity_ac_p1_code}") return 1;
+              if (strlen("${climate1_entity_ac_p2_code}") > 0 && x == "${climate1_entity_ac_p2_code}") return 2;
+              if (strlen("${climate1_entity_ac_p3_code}") > 0 && x == "${climate1_entity_ac_p3_code}") return 3;
+              if (strlen("${climate1_entity_ac_p4_code}") > 0 && x == "${climate1_entity_ac_p4_code}") return 4;
+              if (strlen("${climate1_entity_ac_p5_code}") > 0 && x == "${climate1_entity_ac_p5_code}") return 5;
+              if (strlen("${climate1_entity_ac_p6_code}") > 0 && x == "${climate1_entity_ac_p6_code}") return 6;
+              return 0;
+
   - platform: homeassistant
     id: climate1_item_sensor
     entity_id: ${climate1_entity}
@@ -5632,6 +5737,26 @@ lvgl:
                         grid_cell_row_pos: 1
                         grid_cell_x_align: CENTER
                         grid_cell_y_align: CENTER
+              - button:
+                  id: climateac_preset_open
+                  hidden: true
+                  align: CENTER
+                  y: 1
+                  width: SIZE_CONTENT
+                  height: SIZE_CONTENT
+                  pad_top: 2
+                  pad_bottom: 2
+                  pad_left: 10
+                  pad_right: 10
+                  styles: button_style
+                  pressed:
+                    styles: button_pressed_style
+                  widgets:
+                    - label:
+                        align: CENTER
+                        text: "Presets"
+                  on_long_press:
+                    - lvgl.widget.show: climateac_preset_overlay
               - obj:
                   align: CENTER
                   styles: bg_color
@@ -5773,6 +5898,208 @@ lvgl:
                           - label:
                               text: "\U000F0B2C"
                               styles: spinbox_button_label_style
+              - obj:
+                  id: climateac_preset_overlay
+                  hidden: true
+                  align: CENTER
+                  width: 95%
+                  height: ${page_content_height}
+                  bg_color: 0x000000
+                  bg_opa: 80%
+                  border_width: 0
+                  pad_all: 6
+                  layout:
+                    type: GRID
+                    pad_row: 6
+                    pad_column: 8
+                    grid_columns: [FR(1), FR(1), FR(1)]
+                    grid_rows: [28, FR(1), FR(1)]
+                  widgets:
+                    - button:
+                        id: climateac_preset_close
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 0
+                        grid_cell_x_align: END
+                        grid_cell_y_align: STRETCH
+                        width: 32
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_font: iconfont_small
+                              text: "\U000F015A"
+                        on_long_press:
+                          - lvgl.widget.hide: climateac_preset_overlay
+                    - button:
+                        id: climateac_preset_1
+                        hidden: true
+                        checkable: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_align: CENTER
+                              text: '${climate1_entity_ac_p1_name}'
+                        on_long_press:
+                          - script.execute:
+                              id: set_climate_ac_preset_selection
+                              selected: 1
+                          - homeassistant.action:
+                              action: climate.set_preset_mode
+                              data:
+                                entity_id: ${climate1_entity_ac}
+                                preset_mode: '${climate1_entity_ac_p1_code}'
+                          - lvgl.widget.hide: climateac_preset_overlay
+                    - button:
+                        id: climateac_preset_2
+                        hidden: true
+                        checkable: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_align: CENTER
+                              text: '${climate1_entity_ac_p2_name}'
+                        on_long_press:
+                          - script.execute:
+                              id: set_climate_ac_preset_selection
+                              selected: 2
+                          - homeassistant.action:
+                              action: climate.set_preset_mode
+                              data:
+                                entity_id: ${climate1_entity_ac}
+                                preset_mode: '${climate1_entity_ac_p2_code}'
+                          - lvgl.widget.hide: climateac_preset_overlay
+                    - button:
+                        id: climateac_preset_3
+                        hidden: true
+                        checkable: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 1
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_align: CENTER
+                              text: '${climate1_entity_ac_p3_name}'
+                        on_long_press:
+                          - script.execute:
+                              id: set_climate_ac_preset_selection
+                              selected: 3
+                          - homeassistant.action:
+                              action: climate.set_preset_mode
+                              data:
+                                entity_id: ${climate1_entity_ac}
+                                preset_mode: '${climate1_entity_ac_p3_code}'
+                          - lvgl.widget.hide: climateac_preset_overlay
+                    - button:
+                        id: climateac_preset_4
+                        hidden: true
+                        checkable: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 0
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_align: CENTER
+                              text: '${climate1_entity_ac_p4_name}'
+                        on_long_press:
+                          - script.execute:
+                              id: set_climate_ac_preset_selection
+                              selected: 4
+                          - homeassistant.action:
+                              action: climate.set_preset_mode
+                              data:
+                                entity_id: ${climate1_entity_ac}
+                                preset_mode: '${climate1_entity_ac_p4_code}'
+                          - lvgl.widget.hide: climateac_preset_overlay
+                    - button:
+                        id: climateac_preset_5
+                        hidden: true
+                        checkable: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 1
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_align: CENTER
+                              text: '${climate1_entity_ac_p5_name}'
+                        on_long_press:
+                          - script.execute:
+                              id: set_climate_ac_preset_selection
+                              selected: 5
+                          - homeassistant.action:
+                              action: climate.set_preset_mode
+                              data:
+                                entity_id: ${climate1_entity_ac}
+                                preset_mode: '${climate1_entity_ac_p5_code}'
+                          - lvgl.widget.hide: climateac_preset_overlay
+                    - button:
+                        id: climateac_preset_6
+                        hidden: true
+                        checkable: true
+                        styles: button_style
+                        pressed:
+                          styles: button_pressed_style
+                        checked:
+                          styles: button_checked_style
+                        grid_cell_column_pos: 2
+                        grid_cell_row_pos: 2
+                        grid_cell_x_align: STRETCH
+                        grid_cell_y_align: STRETCH
+                        widgets:
+                          - label:
+                              align: CENTER
+                              text_align: CENTER
+                              text: '${climate1_entity_ac_p6_name}'
+                        on_long_press:
+                          - script.execute:
+                              id: set_climate_ac_preset_selection
+                              selected: 6
+                          - homeassistant.action:
+                              action: climate.set_preset_mode
+                              data:
+                                entity_id: ${climate1_entity_ac}
+                                preset_mode: '${climate1_entity_ac_p6_code}'
+                          - lvgl.widget.hide: climateac_preset_overlay
 
     - id: lights_page
       skip: ${lights_page_hide_from_navigation}
@@ -8877,7 +9204,7 @@ lvgl:
                         width: 100%
                         text_align: CENTER
                         text: !lambda |-
-                          char buf[30];
+                          char buf[35];
                           sprintf(buf, "%s", "${name}.local");
                           return buf;
                         styles: label_text_color_blue

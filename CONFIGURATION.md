@@ -102,7 +102,8 @@ Other pages that could be used out of the box on the home page are below:
 
 ### Climate Page
 This is where you configure the name and the devices that will be displayed on the climate page. 
-The first item on this page can be a temperature entity or an air conditioner control. If climate1_entity returns a valid state the temperature will display like all other climate items on this page. If climate1_entity_ac returns a valid state then it will override this and show it's temperature instead and a button to access the air conditioner page. 
+The first item on this page can be a temperature entity or an air conditioner control. If climate1_entity returns a valid state the temperature will display like all other climate items on this page. If climate1_entity_ac returns a valid state then it will override this and show it's temperature instead and a button to access the air conditioner page.
+For the climate entity you can define 6 preset modes. Common options are provided in comments but can vary per device. You can find the preset modes for your device using Tools > States in Home Assistant. For each preset mode you can set a name and the state code. If these are not defined then the presets options will not be shown.
 All other entities are expected to be temperature sensors.
 Hiding the page from navigation removes it from the navigation arrows and swiping.
 
@@ -112,6 +113,18 @@ Hiding the page from navigation removes it from the navigation arrows and swipin
   climate1_name: "Room 1"
   climate1_entity: sensor.temperature1 #sensor
   climate1_entity_ac: climate.air_conditioner #climate
+  climate1_entity_ac_p1_name: "" #None
+  climate1_entity_ac_p1_code: "" #none
+  climate1_entity_ac_p2_name: "" #Eco
+  climate1_entity_ac_p2_code: "" #eco
+  climate1_entity_ac_p3_name: "" #Comfort
+  climate1_entity_ac_p3_code: "" #comfort
+  climate1_entity_ac_p4_name: "" #Away
+  climate1_entity_ac_p4_code: "" #away
+  climate1_entity_ac_p5_name: "" #Home
+  climate1_entity_ac_p5_code: "" #home
+  climate1_entity_ac_p6_name: "" #Sleep
+  climate1_entity_ac_p6_code: "" #sleep
   climate2_name: "Room 2"
   climate2_entity: sensor.temperature2 #sensor
   climate3_name: "Room 3"
@@ -300,7 +313,7 @@ The screensaver will show the next alarm clock time if one is enabled. This feat
 The alarm clock  page does not require configuration and can be accessed by tapping the taskbar clock or the icon shown when an alarm is active. The alarm clock supports two alarms. This option allows you to hide the button for switching between alarm 1 and alarm 2 on the device. This allows you to simplify the device to only have one alarm clock option which will hide the second alarm so users cannot modify it. You will still be able to set both alarms from Home Assistant even if only one is visible. 
 
 ```
-   alarmclock_hide_switcher: false"
+   alarmclock_hide_switcher: false
 ```
 
 ### Notification Page
