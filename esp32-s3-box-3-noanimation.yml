@@ -313,7 +313,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.08.31"
+  project_version: "2026.09.01"
 
 ###### Hardware Specific Configuration ######
 
@@ -547,7 +547,15 @@ esphome:
               lambda: return id(init_in_progress);
             then:
               - lambda: id(init_in_progress) = false;
-              - script.execute: draw_display
+        - lvgl.dropdown.update:
+            id: dropdown_wakeword
+            selected_index: !lambda |-
+              return id(wake_word_engine_location).current_option() == "In Home Assistant" ? 0 : 1;
+        - lvgl.dropdown.update:
+            id: dropdown_tempunit
+            selected_index: !lambda |-
+              return id(temp_unit).current_option() == "Celsius" ? 0 : 1;
+        - script.execute: draw_display
     
   on_shutdown:
     then:
@@ -3429,15 +3437,6 @@ select:
                         switch.is_off: mute_switch
                       then:
                         - micro_wake_word.start:
-          else:
-            - if:
-                condition:
-                  lambda: return id(wake_word_engine_location).current_option() == "On device";
-                then:
-                  - lambda: ESP_LOGD("wake_word_engine_location", "Set to On Device");
-                  - lvgl.dropdown.update:
-                      id: dropdown_wakeword
-                      selected_index: 1
 
   - platform: template
     name: "Wake word sensitivity"
@@ -3527,15 +3526,19 @@ select:
     on_value:
       - if:
           condition:
-            lambda: return id(temp_unit).current_option() == "Celsius";
+            lambda: return !id(init_in_progress);
           then:
-            - lvgl.dropdown.update:
-                id: dropdown_tempunit
-                selected_index: 0
-          else:
-            - lvgl.dropdown.update:
-                id: dropdown_tempunit
-                selected_index: 1
+            - if:
+                condition:
+                  lambda: return id(temp_unit).current_option() == "Celsius";
+                then:
+                  - lvgl.dropdown.update:
+                      id: dropdown_tempunit
+                      selected_index: 0
+                else:
+                  - lvgl.dropdown.update:
+                      id: dropdown_tempunit
+                      selected_index: 1
 
   - platform: lvgl
     id: sel_alarmclock_hour
@@ -4555,7 +4558,9 @@ text_sensor:
         - script.execute: refresh_climate_1
         - if:
             condition: 
-                lambda: return (id(climate1_item_ac).state == "off");
+                and:
+                  - lambda: return (id(climate1_item_ac).state == "off");
+                  - lambda: return !id(init_in_progress);
             then:
               - lvgl.dropdown.update:
                   id: dropdown_climateacmode
@@ -4573,6 +4578,7 @@ text_sensor:
                 and:
                   - lambda: return (id(climate1_item_ac).state != "off");
                   - lambda: return (id(climate1_item_ac).state != "unavailable");
+                  - lambda: return !id(init_in_progress);
             then:
               - lvgl.widget.update:
                   id: but_climate_1
@@ -9537,7 +9543,7 @@ lvgl:
                           selected:
                             checked:
                               text_color: 0xFF0000
-                        on_value:
+                        on_change:
                           - if:
                               condition:
                                 lambda: return (x == 0);
