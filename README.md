@@ -1,10 +1,6 @@
 # ESP32-S3-Box-3 LVGL Firmware 
 ESPHome Configuration for the S3-Box-3 with an LVGL UI.
 
-All credit and inspiration for the original UI and device configuration goes to https://github.com/BigBobbas/ESP32-S3-Box3-Custom-ESPHome/.
-
-This configuration has also been ported to the P4-86 https://github.com/chrisdunnname/esphome-p4-86-panel-eth-2ro-lvgl.
-
 This firmware provides the S3 box 3 with a voice assistant, timers, screen saver with analog/digital clock and sleep, 12/24 hour time, media controls, radar/presence sensing, temperature (in Celsius or Fahrenheit) and humidity sensing, battery levels and indicator, alarm integration, alarm clock, internal and external audio, notifications with sound, and multiple pages for lights, thermostats, switches, media, scenes, locks other devices from your Home Assistant.
 A weather service from Home Assistant (e.g. open weather map) can provide temperature and condition for the screen saver.
 
@@ -42,8 +38,8 @@ Requires [S3-Box-3](https://www.espressif.com/en/dev-board/esp32-s3-box-3-en).
 
 Sensor dock & battery are optional to use radar/presence, battery level and temperature/humidity functionality.
 
-The minimum supported ESPHome version is 2026.8.0.
-Last tested on Home Assistant 2026.8 and ESPHome Version 2026.8.
+The minimum supported ESPHome version is 2026.9.0.
+Last tested on Home Assistant 2026.9 and ESPHome Version 2026.9.
 
 # Loading
 ![loading](https://github.com/user-attachments/assets/55e0a1b8-8873-42a3-864f-297fa6826b6e)
@@ -256,6 +252,12 @@ See [CONFIGURATION.md](https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/bl
 **Additional Information**
 
 See [USAGE.md](https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/blob/main/USAGE.md) for further details of the available Home Assistant entities and how they can be used.
+
+**Credits**
+
+All credit and inspiration for the original UI and device configuration goes to https://github.com/BigBobbas/ESP32-S3-Box3-Custom-ESPHome/.
+
+This configuration has also been ported to the P4-86 https://github.com/chrisdunnname/esphome-p4-86-panel-eth-2ro-lvgl.
 
 **Thank You!**
 

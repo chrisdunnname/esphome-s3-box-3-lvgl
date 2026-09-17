@@ -313,7 +313,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.09.01"
+  project_version: "2026.09.17"
 
 ###### Hardware Specific Configuration ######
 
@@ -504,7 +504,7 @@ captive_portal:
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
-  min_version: 2026.7.0
+  min_version: 2026.9.0
   name_add_mac_suffix: false
   on_boot:
     - priority: -150
@@ -584,6 +584,7 @@ api:
 ota:
   - platform: esphome
     id: ota_esphome
+    encryption:
     on_begin:
       - script.execute: turn_on_led
       - lvgl.page.show: ota_page
