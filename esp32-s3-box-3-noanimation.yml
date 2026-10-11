@@ -1359,8 +1359,8 @@ media_player:
 micro_wake_word:
   id: mww
   vad:
-    probability_cutoff: 0.20
-    sliding_window_size: 1
+    probability_cutoff: 0.50
+    sliding_window_size: 5
   microphone: box_mic
   task_stack_in_psram: true
   stop_after_detection: false
