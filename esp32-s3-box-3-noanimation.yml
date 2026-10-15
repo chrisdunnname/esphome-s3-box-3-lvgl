@@ -5183,7 +5183,7 @@ lvgl:
   id: lvgl_display
   touchscreens:
     - touchscreen_id: gt911_touchscreen
-      long_press_time: 80ms
+      long_press_time: 65ms
   bottom_layer:
     bg_color: 0x000000
   buffer_size: 100%
