@@ -22,7 +22,7 @@ This guide details the available Home Assistant entities implemented with this d
 
 | Entity | Use Case |
 | -------- | -------- |
-| Presence Detect | Indicates presence if the sensor dock is connected and radar enabled | 
+| Radar Presence | Indicates presence if the sensor dock is connected and radar enabled | 
 | S3 Humidity | The device humidity if the sensor dock is connected |
 | S3 Temperature | The device temperature if the sensor dock is connected |
 | Timer | The countdown of the currently active voice assistant timer |
@@ -51,19 +51,19 @@ This guide details the available Home Assistant entities implemented with this d
 | Output Audio Externally | Sends all audio to the specified external media player | 
 | Play Wake Sound | Enables a wake sound when activating the voice assistant | 
 | Presence Duration | How long the device should show occupancy when presence is detected | 
-| Radar Enable | Enables the radar if the sensor dock is connected | 
+| Radar | Enables the radar if the sensor dock is connected | 
 | Reboot Schedule | Enables the automated reboot schedule | 
 | Reboot Time | Specifies the time when the device should reboot automatically | 
-| Screen wake on motion | Triggers the device to wake on presence if the radar is enabled  | 
+| Screen Wake On Presence | Triggers the device to wake when presence is detected  | 
 | Screensaver Clock | Display an Analog or Digital clock on the screensaver page | 
 | ScrOff Delay | Sets the time delay in seconds to turn off the display after activity | 
 | ScrOff Enable | Enables the device to turn off the display when no activity | 
 | ScrSave Brightness | Sets the brightness of the display when the screensaver is shown | 
 | ScrSave Delay | Sets the time delay in seconds to show the screensaver after activity | 
 | ScrSave Enable | Enables the device to show the screen saver on the display when no activity | 
-| Snooze on Presence | Enables the alarm clock to snooze automatically when presence is detected by the radar | 
+| Snooze on Presence | Enables the alarm clock to snooze automatically when presence is detected | 
 | Snooze Time | Sets the time delay in seconds for snoozing the alarm clock | 
-| Stop Ring on Presence | Enables alarms and timers to stop ringing when presence is detected by the radar | 
+| Stop Ring on Presence | Enables alarms and timers to stop ringing when presence is detected | 
 | Temp Offset | Allows calibration adjustment of the sensor dock temperature | 
 | Temperature Unit | Controls whether temperature should be shown in Fahrenheit or Celsius | 
 | Time Format | Controls whether the clock should show 12 or 24 hour time |

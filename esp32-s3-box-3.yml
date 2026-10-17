@@ -313,7 +313,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.09.17"
+  project_version: "2026.10.17"
 
 ###### Hardware Specific Configuration ######
 
@@ -3188,7 +3188,7 @@ switch:
 
   - platform: template
     id: s_saver_presc
-    name: Screen wake on motion
+    name: Screen Wake On Presence
     icon: 'mdi:motion-sensor'
     entity_category: config
     optimistic: true
@@ -3345,7 +3345,8 @@ switch:
   - platform: at581x
     at581x_id: "Radar"
     id: radar_enable
-    name: "Radar Enable"
+    name: "Radar"
+    icon: 'mdi:radar'
     entity_category: config
     restore_mode: RESTORE_DEFAULT_ON
     on_turn_off:
@@ -3712,7 +3713,7 @@ number:
           id: slider_brightness
           value: !lambda return x;
 
-  - id: radar_delayed_off
+  - id: presence_delayed_off
     platform: template
     name: "Presence duration"
     icon: mdi:account-clock
@@ -10440,12 +10441,12 @@ binary_sensor:
   - platform: gpio
     pin:
       number: GPIO21
-    name: "Presence detect"
+    name: "Radar Presence"
     disabled_by_default: false
     device_class: "occupancy"
     trigger_on_initial_state: true
     filters:
-      - delayed_off: !lambda return id(radar_delayed_off).state * 1000;
+      - delayed_off: !lambda return id(presence_delayed_off).state * 1000;
     on_state:
       - if:
           condition:
