@@ -5830,7 +5830,7 @@ lvgl:
                                     action: climate.set_hvac_mode
                                     data:
                                       entity_id: ${climate1_entity_ac}
-                                      hvac_mode: Cool
+                                      hvac_mode: cool
                           - if:
                               condition:
                                 lambda: return (x == 4);
