@@ -19,6 +19,24 @@ Binary Sensors or sensors with an on/off status will work as entities for the li
 
 For triggering more complex scenarios, helper Toggles (input_boolean) and automations can be really useful. You can set an input_boolean as the entity for any of the configurable buttons. You can create an automation using the input_boolean turning on as the trigger, have it perform some actions in Home Assistant and then set the input_boolean to off. On the device pushing the button will turn this on, triggering the automation and showing the on status and when the automation completes it will go back to off. 
 
+## Optional Packages
+
+This section specifies the configuration for features that can optionally be removed from the configuration.
+
+### ESPectre Wi-Fi Motiion Detection
+
+ESPectre provides motion detection capability using your wi-fi network allowing devices without the radar to leverage presence detection features. 
+This feature can affect network performance on fast networks and will automatically change power saving to NONE and may affect battery life on battery operated devices.
+If this feature is disabled then the sensors, switches and buttons for this feature will not be available. Presence features will still be available for radar use.
+
+https://esphome.io/components/espectre/ 
+
+```
+  remote_package_files:
+    url: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl
+    files: [components/espectre.yaml]
+```
+
 ## Substitutions
 
 ### Core
@@ -472,13 +490,15 @@ This configuration should not need to change although you can add missing charac
 ### Hardware Specific Configuration
 Most hardware specific configuration is best not changed but these options can be useful for different environments. 
 The wifi_fast_connect forces the device to immediately connect to the first available access point on boot. The wifi_power_save_mode controls how heavily the device manages power usage - this is important on battery powered devices. The wifi_native roaming determines whether ESPHome manages roaming (false) or your network uses 802.11v BSS Transition Management and 802.11k Radio Resource Management to determine the best access point (true).
+Wi-Fi motion detection uses ESPectre to detect activity. The Motion threshold from 1-20 determines the required minimum motion level to trigger presence. 1 is sensitive and 20 is insensitive.
 The voice_assistant_failed_reboot feature is a safety mechanism that reboots the device if the voice assistant hangs during responses. This is off by default but can be disabled if required.
 
 ```
   wifi_fast_connect: false
   wifi_power_save_mode: LIGHT #NONE, LIGHT(default for esp32), HIGH
   wifi_use_native_roaming: true #if false uses ESPHome post connect roaming
-  
+  wifi_motion_threshold: 10 #espectre presence threshhold
+
   voice_assistant_failed_reboot: "false" #restarts device on voice assistant hangs
 ```
 

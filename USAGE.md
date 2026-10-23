@@ -26,6 +26,7 @@ This guide details the available Home Assistant entities implemented with this d
 | S3 Humidity | The device humidity if the sensor dock is connected |
 | S3 Temperature | The device temperature if the sensor dock is connected |
 | Timer | The countdown of the currently active voice assistant timer |
+| Wi-Fi Presence | Indicates presence if Wi-Fi Motion is enabled |
 
 ### Assist
 
@@ -73,6 +74,8 @@ This guide details the available Home Assistant entities implemented with this d
 | Wake Word 2 | Sets the on device wake word for the secondary voice assistant pipeline |
 | Wake Word Engine Location | Specifies whether wake word detection is on device or on home assistant |
 | Wake Word Sensitivity | Adjusts the sensitivity of wake word detection for the selected wake word models |
+| Wi-Fi Motion | Enables ESPectre for presence detection using wifi |
+| Wi-Fi P Traffic Source | Sets the traffic source for identification. Options: ping, dns, dns_tcp, wifi_raw, or external. External does not generate traffic and is set when Wi-Fi Motion is disabled. wifi_raw is recommended |
 
 ### Diagnostic
 
@@ -86,6 +89,8 @@ This guide details the available Home Assistant entities implemented with this d
 | Radar Reset | Resets the radar if required to address presence detection issues | 
 | Reboot | Reboots the device | 
 | SSID | The current connected wifi network | 
+| Wi-Fi P Calibrating| Indicates if calibration is in progress | 
+| Wi-Fi P Recalibrate | Triggers a recalibration | 
 | WiFi db | The signal strength of the current connected wifi access point in decibel-milliwatts | 
 | WiFi Signal | The signal strength of the current connected wifi access point as a percentage  | 
 

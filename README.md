@@ -1,7 +1,7 @@
 # ESP32-S3-Box-3 LVGL Firmware 
 ESPHome Configuration for the S3-Box-3 with an LVGL UI.
 
-This firmware provides the S3 box 3 with a voice assistant, timers, screen saver with analog/digital clock and sleep, 12/24 hour time, media controls, radar presence, temperature (in Celsius or Fahrenheit) and humidity sensing, battery levels and indicator, alarm integration, alarm clock, internal and external audio, notifications with sound, and multiple pages for lights, thermostats, switches, media, scenes, locks other devices from your Home Assistant.
+This firmware provides the S3 box 3 with a voice assistant, timers, screen saver with analog/digital clock and sleep, 12/24 hour time, media controls, radar presence, wi-fi presence, temperature (in Celsius or Fahrenheit) and humidity sensing, battery levels and indicator, alarm integration, alarm clock, internal and external audio, notifications with sound, and multiple pages for lights, thermostats, switches, media, scenes, locks other devices from your Home Assistant.
 A weather service from Home Assistant (e.g. open weather map) can provide temperature and condition for the screen saver.
 
 A large number of entities are exposed to Home Assistant including a notification text entity that provides the ability to push notifications to the device which will display on screen for 10 seconds (with an optional notification sound) and an Image URL entity that provides the ability to push the URL for a PNG image to the device which will display on screen for 30 seconds (with no notification sound). This can be used with a [JPG to PNG Converter](https://github.com/youkorr/hacs-jpg-to-png-converter) in an automation to capture a snapshot from a camera and push it to the device.
@@ -38,8 +38,8 @@ Requires [S3-Box-3](https://www.espressif.com/en/dev-board/esp32-s3-box-3-en).
 
 Sensor dock & battery are optional to use radar, battery level and temperature/humidity functionality.
 
-The minimum supported ESPHome version is 2026.9.0.
-Last tested on Home Assistant 2026.10 and ESPHome Version 2026.9.
+The minimum supported ESPHome version is 2026.10.0.
+Last tested on Home Assistant 2026.10 and ESPHome Version 2026.10.
 
 # Loading
 ![loading](https://github.com/user-attachments/assets/55e0a1b8-8873-42a3-864f-297fa6826b6e)
