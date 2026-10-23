@@ -1,0 +1,139 @@
+espectre:
+  detection_algorithm: lightweight
+  csi_capture_profile: auto
+  traffic_generator_mode: external
+  motion_on_hits: ${wifi_motion_threshold}
+  motion_off_hits: 3
+
+
+button:
+  - platform: espectre
+    name: "Wi-Fi P Recalibrate"
+    entity_category: diagnostic
+
+script:
+  # A sensing interruption shares the normal clear countdown. Further OFF or
+  # unknown events must not change its expiry; confirmed motion stops it.
+  - id: wifi_presence_clear
+    mode: single
+    then:
+      - delay: !lambda return id(presence_delayed_off).state * 1000;
+      - binary_sensor.template.publish:
+          id: wifi_presence
+          state: OFF
+
+switch:
+  - platform: template
+    name: "Wi-Fi Motion"
+    id: espectre_enable
+    icon: "mdi:wifi-marker"
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_OFF
+    entity_category: config
+    on_turn_off:
+      - if:
+          condition:
+            lambda: return !id(init_in_progress);
+          then:
+            - select.set:
+                id: espectre_traffic_source
+                option: external
+
+    on_turn_on:
+      - if:
+          condition:
+            lambda: return !id(init_in_progress);
+          then:
+            - select.set:
+                id: espectre_traffic_source
+                option: wifi_raw
+
+select:
+  - platform: espectre
+    id: espectre_traffic_source
+    name: "Wi-Fi P Traffic Source"
+
+binary_sensor:
+### espectre wi-fi motion sensor ###
+  - platform: espectre
+    motion:
+      id: wifi_motion_raw
+      internal: true
+      on_state_change:
+        - if:
+            condition:
+              lambda: return x.has_value() && x.value();
+            then:
+              - script.stop: wifi_presence_clear
+              - binary_sensor.template.publish:
+                  id: wifi_presence
+                  state: ON
+            else:
+              - if:
+                  condition:
+                    and:
+                      - binary_sensor.is_on: wifi_presence
+                      - not:
+                          script.is_running: wifi_presence_clear
+                  then:
+                    - script.execute: wifi_presence_clear
+    calibrating:
+      name: "Wi-Fi P Calibrating"
+      entity_category: diagnostic
+
+  - platform: template
+    id: wifi_presence
+    name: "Wi-Fi Presence"
+    disabled_by_default: false
+    trigger_on_initial_state: true
+    device_class: "occupancy"
+    lambda: |-
+      if (isnan(id(wifi_presence).state)) {
+        return false;
+      }
+      return id(wifi_presence).state;
+    on_state:
+      - if:
+          condition:
+            and:
+              - switch.is_on: espectre_enable
+              - lambda: "return x;"
+              - switch.is_on: s_saver
+              - switch.is_on: s_saver_presc
+          then:
+            - script.execute: turn_on_led
+            - lvgl.page.show: ${default_page}
+            - script.execute: draw_display
+      - if:
+          condition:
+            and:
+              - switch.is_on: espectre_enable
+              - lambda: "return x;"
+              - switch.is_on: stopringonpresence
+              - switch.is_on: timer_ringing
+              - switch.is_off: snoozeonpresence
+          then:
+            - script.execute: stopalarmtimer
+      - if:
+          condition:
+            and:
+              - switch.is_on: espectre_enable
+              - lambda: "return x;"
+              - switch.is_on: stopringonpresence
+              - switch.is_on: timer_ringing
+              - switch.is_on: snoozeonpresence
+              - switch.is_on: alarmclock
+              - lambda: return !id(alarmclock_ringing);
+          then:
+            - script.execute: stopalarmtimer
+      - if:
+          condition:
+            and:
+              - switch.is_on: espectre_enable
+              - lambda: "return x;"
+              - switch.is_on: timer_ringing
+              - switch.is_on: snoozeonpresence
+              - switch.is_on: alarmclock
+              - lambda: return id(alarmclock_ringing);
+          then:
+            - script.execute: snoozealarm
