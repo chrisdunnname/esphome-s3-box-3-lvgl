@@ -2,6 +2,39 @@ at581x:
   id: "Radar"
   i2c_id: bus_b
 
+globals:
+  - id: radar_state
+    type: bool
+    restore_value: true
+    initial_value: "true"
+  - id: radar_state_restored
+    type: bool
+    restore_value: false
+    initial_value: "false"
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        # - at581x.settings:
+            # id: "Radar"
+            # frequency: 5800MHz
+            # sensing_distance: 1000
+            # stage_gain: 0
+            # power_consumption: 70µA
+            # trigger_base: 500ms
+            # trigger_keep: 10s
+            # protect_time: 1000ms
+            # poweron_selfcheck_time: 2000ms
+        - if:
+            condition:
+              lambda: return id(radar_state);
+            then:
+              - switch.turn_on: radar_enable
+            else:
+              - switch.turn_off: radar_enable
+        - lambda: id(radar_state_restored) = true;
+
 interval:
   - interval: 10s
     then:
@@ -151,6 +184,17 @@ switch:
     icon: 'mdi:radar'
     entity_category: config
     restore_mode: RESTORE_DEFAULT_ON
+    # Ignore initialization callbacks so they cannot overwrite the saved state.
+    on_turn_on:
+      - lambda: |-
+          if (id(radar_state_restored)) {
+            id(radar_state) = true;
+          }
+    on_turn_off:
+      - lambda: |-
+          if (id(radar_state_restored)) {
+            id(radar_state) = false;
+          }
 
 binary_sensor:
 ### radar sensor ###
