@@ -1,0 +1,207 @@
+at581x:
+  id: "Radar"
+  i2c_id: bus_b
+
+interval:
+  - interval: 10s
+    then:
+      - if:
+          condition:
+            lambda: return !id(use_room_temp);
+          then:
+            - lambda: |-
+                float celsius = id(s3temp).state;
+                if (id(temp_unit).current_option() == "Fahrenheit") {
+                  id(display_temp) = celsius * 9.0 / 5.0 + 32.0;
+                } else {
+                  id(display_temp) = celsius;
+                }
+            - lvgl.label.update:
+                id: temp_label
+                text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.${screensaver_temperature_dp}f%s", id(display_temp), id(temp_unit).current_option() == "Fahrenheit" ? "°F" : "°C");
+                  return buf;
+            - lvgl.label.update:
+                id: humidity_label
+                text: !lambda |-
+                  char buf[10];
+                  sprintf(buf, "%.${screensaver_humidity_dp}f%s", id(s3humidity).state, "%");
+                  return buf;
+button:
+  - platform: template
+    id: restart_radar
+    name: "Radar Reset"
+    entity_category: diagnostic
+    on_press:
+      at581x.reset:
+        id: "Radar"
+
+sensor:
+  - platform: aht10
+    i2c_id: bus_b
+    variant: AHT20
+    temperature:
+      name: "S3 Temperature"
+      filters:
+        - lambda: |-
+            return x + id(temp_offset_number).state;
+      id: s3temp
+      on_value:
+        - delay: 15s
+        - if:
+            condition: 
+              lambda: return !id(use_room_temp);
+            then:
+              - lvgl.widget.show: temp_label
+    humidity:
+      name: "S3 Humidity"
+      id: s3humidity
+      on_value:
+        - delay: 15s
+        - if:
+            condition: 
+              lambda: return !id(use_room_temp);
+            then:
+              - lvgl.widget.show: humidity_label
+    update_interval: 30s
+
+  - platform: adc
+    pin: GPIO10
+    id: battery_voltage
+    unit_of_measurement: "V"
+    accuracy_decimals: 1
+    device_class: "voltage"
+    entity_category: "diagnostic"
+    disabled_by_default: true
+    update_interval: 30s
+    attenuation: auto
+    filters:
+      - multiply: 4.11
+
+  - platform: copy
+    id: battery_percent
+    source_id: battery_voltage
+    name: "Battery level"
+    unit_of_measurement: "%"
+    accuracy_decimals: 0
+    device_class: "battery"
+    entity_category: "diagnostic"
+    filters:
+      - lambda: return (x - 2.7) / (4.2 - 2.7) * 100;
+      - clamp:
+          min_value: 0
+          max_value: 100
+    on_value:
+      - lvgl.label.update:
+          id: lbl_battery
+          text: !lambda |-
+            char buf[10];
+            sprintf(buf, "%.f%%", id(battery_percent).state);
+            return buf;
+      - if:
+          condition:
+              lambda: return (x > 0);
+          then:
+            - lvgl.widget.show: lbl_battery_status
+            - lvgl.widget.show: lbl_battery_title
+            - lvgl.widget.show: lbl_battery
+          else:
+            - lvgl.widget.hide: lbl_battery_status
+            - lvgl.widget.hide: lbl_battery_title
+            - lvgl.widget.hide: lbl_battery
+      - lvgl.label.update:
+          id: lbl_battery_status
+          text: !lambda |-
+            static char buf[10];
+            std::string icon;
+            if (x == 100.0) {
+                icon = "\U000F0079"; // mdi-battery (full)
+            } else if (x > 90) {
+                icon = "\U000F0082"; // mdi-battery-90
+            } else if (x > 80) {
+                icon = "\U000F0081"; // mdi-battery-80
+            } else if (x > 70) {
+                icon = "\U000F0080"; // mdi-battery-70
+            } else if (x > 60) {
+                icon = "\U000F007F"; // mdi-battery-60
+            } else if (x > 50) {
+                icon = "\U000F007E"; // mdi-battery-50
+            } else if (x > 40) {
+                icon = "\U000F007D"; // mdi-battery-40
+            } else if (x > 30) {
+                icon = "\U000F007C"; // mdi-battery-30
+            } else if (x > 20) {
+                icon = "\U000F007B"; // mdi-battery-20
+            } else if (x > 10) {
+                icon = "\U000F007A"; // mdi-battery-10
+            } else if (x > 0) {
+                icon = "\U000F008E"; // mdi-battery-outline
+            } else {
+                icon = "\U000F06A5"; // mdi-power-plug
+            }
+            snprintf(buf, sizeof(buf), "%s", icon.c_str());
+            return buf;
+
+switch:
+  - platform: at581x
+    at581x_id: "Radar"
+    id: radar_enable
+    name: "Radar"
+    icon: 'mdi:radar'
+    entity_category: config
+    restore_mode: RESTORE_DEFAULT_ON
+
+binary_sensor:
+### radar sensor ###
+  - platform: gpio
+    pin:
+      number: GPIO21
+    name: "Radar Presence"
+    disabled_by_default: false
+    device_class: "occupancy"
+    trigger_on_initial_state: true
+    filters:
+      - delayed_off: !lambda return id(presence_delayed_off).state * 1000;
+    on_state:
+      - if:
+          condition:
+            and:
+              - lambda: "return x;"
+              - switch.is_on: s_saver
+              - switch.is_on: s_saver_presc
+          then:
+            - script.execute: turn_on_led
+            - lvgl.page.show: ${default_page}
+            - script.execute: draw_display
+      - if:
+          condition:
+            and:
+              - lambda: "return x;"
+              - switch.is_on: stopringonpresence
+              - switch.is_on: timer_ringing
+              - switch.is_off: snoozeonpresence
+          then:
+            - script.execute: stopalarmtimer
+      - if:
+          condition:
+            and:
+              - lambda: "return x;"
+              - switch.is_on: stopringonpresence
+              - switch.is_on: timer_ringing
+              - switch.is_on: snoozeonpresence
+              - switch.is_on: alarmclock
+              - lambda: return !id(alarmclock_ringing);
+          then:
+            - script.execute: stopalarmtimer
+      - if:
+          condition:
+            and:
+              - lambda: "return x;"
+              - switch.is_on: timer_ringing
+              - switch.is_on: snoozeonpresence
+              - switch.is_on: alarmclock
+              - lambda: return id(alarmclock_ringing);
+          then:
+            - script.execute: snoozealarm
+
