@@ -23,7 +23,20 @@ For triggering more complex scenarios, helper Toggles (input_boolean) and automa
 
 This section specifies the configuration for features that can optionally be removed from the configuration.
 
-### ESPectre Wi-Fi Motiion Detection
+```
+packages:
+  remote_package_files:
+    url: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl
+    refresh: always
+    files:
+      - path: components/sensordock.yaml
+      - path: components/espectre.yaml  
+```
+### Sensor Dock
+
+The sensor dock for the S3 provides radar, temperature and humidity. This package implements these features. If you do not have the sensor dock you can remove/comment out this package. It will still work if you leave it but removing it does reduce flash usage and unnecessary entities. To support presence detection you need this package or the following package.
+
+### ESPectre Wi-Fi Motion Detection
 
 ESPectre provides motion detection capability using your wi-fi network allowing devices without the radar to leverage presence detection features. 
 This feature can affect network performance on fast networks and will automatically change power saving to NONE and may affect battery life on battery operated devices.
@@ -31,11 +44,6 @@ If this feature is disabled then the sensors, switches and buttons for this feat
 
 https://esphome.io/components/espectre/ 
 
-```
-  remote_package_files:
-    url: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl
-    files: [components/espectre.yaml]
-```
 
 ## Substitutions
 
@@ -575,30 +583,3 @@ If you disable any of the currently active models you will need to comment out t
           id(hey_luna).set_probability_cutoff(${va_model_sensitivity_hey_luna_high});
         }
 ```
-
-### Radar
-The S3 Box 3 sensor dock contains an at581x radar. This will work out of the box if a sensor dock is connected.
-The out of the box settings usually provide a radar range of 2-3 metres but can vary by box using the firmware configuration.
-The options below from the esphome component can be enabled if you want to control the radar configuration however investigation has shown they do not currently update all registers set by the core firmware and due to this they can reduce the range to 5-30 cm. This may be useful for some use cases but is disabled by default for this reason.
-
-```
-  on_boot:
-    - priority: -150
-      then:
-        - delay: 300ms
-    - priority: -300
-      then:
-        - delay: 5s
-        - lvgl.widget.hide: boot_screen
-        # - at581x.settings:
-            # id: "Radar"
-            # frequency: 5800MHz
-            # sensing_distance: 1000
-            # stage_gain: 0
-            # power_consumption: 70µA
-            # trigger_base: 500ms
-            # trigger_keep: 10s
-            # protect_time: 1000ms
-            # poweron_selfcheck_time: 2000ms
-```
-
