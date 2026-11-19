@@ -50,8 +50,9 @@ switch:
 
 select:
   - platform: espectre
-    id: espectre_traffic_source
-    name: "Wi-Fi P Traffic Source"
+    traffic_generator_mode:
+      id: espectre_traffic_source
+      name: "Wi-Fi P Traffic Source"
 
 binary_sensor:
 ### espectre wi-fi motion sensor ###
