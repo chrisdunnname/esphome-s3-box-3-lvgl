@@ -1426,8 +1426,15 @@ voice_assistant:
     - lambda: id(draw_timer_timeline).execute();
   on_timer_finished:
     - switch.turn_on: timer_ringing
-    - wait_until:
-        media_player.is_announcing:
+    - if:
+        condition:
+          switch.is_off: output_audio
+        then:
+          - wait_until:
+              condition:
+                media_player.is_announcing:
+                  id: speaker_media_player
+              timeout: 3s
     - lambda: id(voice_assistant_phase) = ${voice_assist_timer_finished_phase_id};
     - script.execute: draw_display
 
@@ -1680,10 +1687,12 @@ script:
     then:
       - lambda: |
           const auto &timers = id(va).get_timers();
-          auto output_timer = *timers.begin();
+          voice_assistant::Timer output_timer{};
+          bool found_active_timer = false;
           for (const auto &timer : timers) {
-            if (timer.is_active && timer.seconds_left <= output_timer.seconds_left) {
+            if (timer.is_active && (!found_active_timer || timer.seconds_left <= output_timer.seconds_left)) {
               output_timer = timer;
+              found_active_timer = true;
             }
           }
           id(global_first_active_timer) = output_timer;
