@@ -323,7 +323,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.11.19"
+  project_version: "2026.11.22"
 
 ###### Hardware Specific Configuration ######
 
@@ -431,6 +431,7 @@ touchscreen:
 
 i2s_audio:
   - id: audio_bus
+    full_duplex: true
     i2s_lrclk_pin:
       number: GPIO45
       ignore_strapping_warning: true
@@ -442,7 +443,7 @@ audio_adc:
     id: es7210_adc
     i2c_id: bus_a
     bits_per_sample: 16bit
-    sample_rate: 16000
+    sample_rate: 48000
 
 audio_dac:
   - platform: es8311
@@ -454,11 +455,20 @@ audio_dac:
 microphone:
   - platform: i2s_audio
     id: box_mic
-    sample_rate: 16000
+    i2s_audio_id: audio_bus
+    sample_rate: 48000
     i2s_din_pin: GPIO16
     bits_per_sample: 16bit
     adc_type: external
     channel: stereo
+
+  - platform: resampler
+    id: box_mic_resampled
+    microphone:
+      microphone: box_mic
+      channels: [0, 1]
+      bits_per_sample: 16
+    sample_rate: 16000
 
 audio:
   codecs:
@@ -1056,6 +1066,7 @@ speaker:
   - id: mixing_speaker
     platform: mixer
     output_speaker: i2s_audio_speaker
+    num_channels: 1
     source_speakers:
       - id: announcement_mixing_input
         timeout: never
@@ -1103,6 +1114,7 @@ media_player:
     on_state:
       then:
         - lambda: ESP_LOGD("media_player", "on_state");
+        - script.execute: update_stop_word
         - if:
             condition:
               media_player.is_playing:
@@ -1120,35 +1132,22 @@ media_player:
                   id: lbl_media_playing
                   text: "Nothing Playing"
               - script.execute: set_uimode
-        - if:
-            condition:
-              and:
-                - switch.is_off: timer_ringing
-                - not:
-                    voice_assistant.is_running:
-                - not:
-                    media_player.is_announcing:
-            then:
-              - mixer_speaker.apply_ducking:
-                  id: media_mixing_input
-                  decibel_reduction: 0
-                  duration: 1.0s
+        - script.execute: restore_media_volume
     on_play:
       - lambda: ESP_LOGD("media_player", "on_play");
       - if:
           condition:
-            script.is_running: start_voice_request
+            or:
+              - lambda: return id(global_is_assisting);
+              - switch.is_on: timer_ringing
+              - media_player.is_announcing: speaker_media_player
           then:
-            - script.stop: start_voice_request
-            - lambda: id(global_is_assisting) = false;
-      - script.execute: stop_wake_word
+            - script.execute: duck_media
+      - script.execute: start_wake_word
     on_announcement:
       - lambda: ESP_LOGD("media_player", "on_announcement");
-      - script.execute: stop_wake_word
-      - mixer_speaker.apply_ducking:
-          id: media_mixing_input
-          decibel_reduction: 20
-          duration: 0.0s
+      - script.execute: start_wake_word
+      - script.execute: duck_media
       - if:
           condition:
             not:
@@ -1174,7 +1173,10 @@ micro_wake_word:
   vad:
     probability_cutoff: 0.50
     sliding_window_size: 5
-  microphone: box_mic
+  microphone:
+    microphone: box_mic_resampled
+    channels: 0
+    gain_factor: 4
   task_stack_in_psram: true
   stop_after_detection: false
   models:
@@ -1201,52 +1203,55 @@ micro_wake_word:
       probability_cutoff: 0.40  # default 0.5; sliding avg ~0.58 fires reliably
       sliding_window_size: 3    # default 5; faster trigger
   on_wake_word_detected:
-    - logger.log:
-        tag: mww
-        level: INFO
-        format: "MWW fired: %s"
-        args:
-          - 'wake_word.c_str()'
     - if:
         condition:
-          switch.is_on: timer_ringing
+          and:
+            - switch.is_off: mute_switch
+            - not:
+                microphone.is_muted: box_mic
         then:
-          - script.execute: stopalarmtimer
-        # Stop voice assistant if running
-        else:
           - if:
               condition:
-                voice_assistant.is_running:
+                switch.is_on: timer_ringing
               then:
-                voice_assistant.stop:
-              # Stop any other media player announcement
+                - script.execute: stopalarmtimer
               else:
                 - if:
                     condition:
-                      - switch.is_on: output_audio
+                      or:
+                        - lambda: return id(global_is_assisting);
+                        - media_player.is_announcing: speaker_media_player
                     then:
-                      - homeassistant.action:
-                          action: media_player.media_stop
-                          data:
-                            entity_id: media_player.${external_media_player}
-                - if:
-                    condition:
-                      media_player.is_announcing:
-                    then:
-                      - media_player.stop:
-                          announcement: true
-                    # Start the voice assistant and play the wake sound, if enabled
+                      - script.execute: interrupt_voice_assistant
                     else:
-                      - script.execute:
-                          id: start_voice_request
-                          detected_wake_word: !lambda return wake_word;
+                      # "stop" never starts Assist; HA mode starts requests only in HA.
+                      - if:
+                          condition:
+                            and:
+                              - lambda: return wake_word != id(stop).get_wake_word() && !id(init_in_progress);
+                              - lambda: return id(wake_word_engine_location).current_option() == "On device";
+                              - voice_assistant.connected:
+                              - not:
+                                  voice_assistant.is_running:
+                          then:
+                            - if:
+                                condition:
+                                  switch.is_on: output_audio
+                                then:
+                                  - homeassistant.action:
+                                      action: media_player.media_stop
+                                      data:
+                                        entity_id: media_player.${external_media_player}
+                            - script.execute:
+                                id: start_voice_request
+                                detected_wake_word: !lambda return wake_word;
 
 voice_assistant:
   id: va
   microphone:
-    - microphone: box_mic
+    - microphone: box_mic_resampled
       channels: 0
-    - microphone: box_mic
+    - microphone: box_mic_resampled
       channels: 1
   media_player: speaker_media_player
   micro_wake_word: mww
@@ -1278,37 +1283,25 @@ voice_assistant:
               # Start the voice assistant and play the wake sound, if enabled
               else:
                 - lambda: id(global_is_assisting) = true;
+                - script.execute: duck_media
+                - script.execute: update_stop_word
                 - script.stop: start_wake_word
-                - if:
-                    condition:
-                      and:
-                        - switch.is_off: output_audio
-                        - switch.is_on: wake_sound
-                    then:
-                      - logger.log:
-                          tag: audio_handover
-                          level: WARN
-                          format: "Skipping local wake chime: Home Assistant is already capturing speech"
-                    else:
-                      if:
-                        condition:
-                          and:
-                            - switch.is_on: wake_sound
-                            - switch.is_on: output_audio
-                        then:
-                          - homeassistant.action:
-                              action: media_player.play_media
-                              data:
-                                entity_id: media_player.${external_media_player}
-                                media_content_id: '${home_assistant_host}${wakesound_external}'
-                                media_content_type: music
+                - script.execute: play_wake_sound
   on_start:
-    - script.stop: start_wake_word
-    - script.stop: finish_voice_assistant
-    - script.execute: draw_display
+    - if:
+        condition:
+          lambda: return id(voice_request_cancelled);
+        then:
+          - script.execute: interrupt_voice_assistant
+        else:
+          - script.stop: start_wake_word
+          - script.stop: finish_voice_assistant
+          - script.execute: draw_display
   on_listening:
     # Follow-up turns enter STT without another wake-word event.
     - lambda: id(global_is_assisting) = true;
+    - script.execute: duck_media
+    - script.execute: update_stop_word
     - lambda: id(voice_assistant_phase) = ${voice_assist_listening_phase_id};
     - text_sensor.template.publish:
         id: text_request
@@ -1334,6 +1327,10 @@ voice_assistant:
         then:
           - lambda: id(voice_assistant_phase) = ${voice_assist_replying_phase_id};
   on_tts_start:
+    # Server-initiated announcements can enter TTS without an STT/listening event.
+    - lambda: id(global_is_assisting) = true;
+    - script.execute: duck_media
+    - script.execute: update_stop_word
     - if:
         condition:
           # The intent_progress trigger didn't start the TTS Response
@@ -1348,8 +1345,14 @@ voice_assistant:
     - lambda: ESP_LOGD("voice_assistant", "on_tts_end");
     - if:
         condition:
+          lambda: return id(voice_request_cancelled);
+        then:
+          - script.execute: interrupt_voice_assistant
+    - if:
+        condition:
           and:
             - switch.is_on: mute_response_switch
+            - lambda: return !id(voice_request_cancelled);
             - switch.is_off: media_mute
             - switch.is_off: ext_media_mute
         then:
@@ -1359,6 +1362,7 @@ voice_assistant:
     - if:
         condition:
           - switch.is_on: output_audio
+          - lambda: return !id(voice_request_cancelled);
         then:
           - homeassistant.action:
               action: media_player.play_media
@@ -1378,6 +1382,7 @@ voice_assistant:
     - script.stop: finish_voice_assistant
     - script.stop: start_voice_request
     - lambda: id(global_is_assisting) = false;
+    - script.execute: restore_media_volume
     - script.execute: start_wake_word
     - if:
         condition:
@@ -1403,7 +1408,9 @@ voice_assistant:
     - script.stop: start_voice_request
     - script.stop: finish_voice_assistant
     - lambda: id(global_is_assisting) = false;
+    - script.execute: restore_media_volume
     - script.execute: stop_wake_word
+    - script.execute: start_wake_word
     - lambda: id(voice_assistant_phase) = ${voice_assist_not_ready_phase_id};
     - script.execute: draw_display
   on_timer_started:
@@ -1864,6 +1871,29 @@ script:
                 level: 0%
     mode: restart
 
+  # Duck only the music source; chimes and Assist replies retain their own volume.
+  - id: duck_media
+    then:
+      - mixer_speaker.apply_ducking:
+          id: media_mixing_input
+          decibel_reduction: 20
+          duration: 0.0s
+
+  - id: restore_media_volume
+    then:
+      - if:
+          condition:
+            and:
+              - lambda: return !id(global_is_assisting);
+              - switch.is_off: timer_ringing
+              - not:
+                  media_player.is_announcing: speaker_media_player
+          then:
+            - mixer_speaker.apply_ducking:
+                id: media_mixing_input
+                decibel_reduction: 0
+                duration: 1.0s
+
   # A new pipeline cancels this delayed cleanup before it can reset its state.
   - id: finish_voice_assistant
     mode: restart
@@ -1877,10 +1907,12 @@ script:
       - wait_until:
           condition:
             - and:
+                - or:
+                    - not:
+                        media_player.is_announcing:
+                    - switch.is_on: timer_ringing
                 - not:
-                    media_player.is_announcing:
-                - not:
-                    media_player.is_playing:
+                    voice_assistant.is_running:
           timeout: !lambda |-
             return id(voice_assistant_timeout);
       - if:
@@ -1888,18 +1920,22 @@ script:
             and:
               - lambda: return id(voice_assistant_reboot);
               - any:
-                  - media_player.is_announcing:
-                  - media_player.is_playing:
+                  - and:
+                      - media_player.is_announcing:
+                      - switch.is_off: timer_ringing
+                  - voice_assistant.is_running:
           then:
             - lambda: ESP_LOGD("voice_assistant", "Forced Reboot");
             - button.press: reboot
-      - mixer_speaker.apply_ducking:
-          id: media_mixing_input
-          decibel_reduction: 0
-          duration: 1.0s
+      - if:
+          condition:
+            switch.is_off: timer_ringing
+          then:
+            - script.execute: set_idle_or_mute_phase
       - lambda: id(global_is_assisting) = false;
+      - lambda: id(voice_request_cancelled) = false;
+      - script.execute: restore_media_volume
       - script.execute: start_wake_word
-      - script.execute: set_idle_or_mute_phase
       - script.execute: draw_display
       - if:
           condition:
@@ -1917,101 +1953,119 @@ script:
           id: text_response
           state: ""
 
-  # Only this script resumes normal listening. Playback cancels pending waits.
+  # Full duplex keeps local interruption detection available in both engine modes.
+  - id: update_stop_word
+    then:
+      - if:
+          condition:
+            and:
+              - switch.is_off: mute_switch
+              - not:
+                  microphone.is_muted: box_mic
+              - or:
+                  - switch.is_on: timer_ringing
+                  - lambda: return id(global_is_assisting);
+                  - media_player.is_announcing: speaker_media_player
+          then:
+            - micro_wake_word.enable_model: stop
+          else:
+            - micro_wake_word.disable_model: stop
+
   - id: start_wake_word
     mode: restart
     then:
-      - logger.log:
-          tag: audio_handover
-          format: "Waiting to resume listening"
-      - wait_until:
-          condition: &wake_word_restart_ready
-            and:
-              - voice_assistant.connected:
-              - not:
-                  voice_assistant.is_running:
-              - not:
-                  media_player.is_playing:
-                    id: speaker_media_player
-              - not:
-                  media_player.is_announcing:
-                    id: speaker_media_player
-              - switch.is_off: mute_switch
-              - switch.is_off: timer_ringing
-              - not:
-                  script.is_running: stop_wake_word
-              - not:
-                  microphone.is_muted:
-                    id: box_mic
-              # is_playing/is_running do not include STARTING or STOPPING.
-              - lambda: |-
-                  return !id(init_in_progress) && !id(global_is_assisting)
-                      && id(i2s_audio_speaker).is_stopped();
-              # Streaming detection must not overlap the outgoing local detector.
-              - lambda: |-
-                  return id(wake_word_engine_location).current_option() != "In Home Assistant"
-                      || (!id(wake_word_start_pending) && !id(mww).is_running()
-                          && id(box_mic).is_stopped());
+      - script.wait: stop_wake_word
+      - script.execute: update_stop_word
       - if:
-          condition: *wake_word_restart_ready
+          condition:
+            and:
+              - switch.is_off: mute_switch
+              - not:
+                  microphone.is_muted: box_mic
+              - or:
+                  - switch.is_on: timer_ringing
+                  - media_player.is_announcing: speaker_media_player
+                  - and:
+                      - voice_assistant.connected:
+                      - lambda: return !id(init_in_progress);
           then:
+            # Music can continue under HA wake listening; pause only for alerts/announcements.
             - if:
                 condition:
-                  lambda: return id(wake_word_engine_location).current_option() == "On device";
+                  and:
+                    - lambda: return !id(global_is_assisting);
+                    - lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
+                    - or:
+                        - switch.is_on: timer_ringing
+                        - media_player.is_announcing: speaker_media_player
                 then:
                   - lambda: id(va).set_use_wake_word(false);
-                  - if:
-                      condition:
-                        not:
-                          micro_wake_word.is_running:
-                      then:
-                        - logger.log:
-                            tag: audio_handover
-                            format: "Resuming on-device wake word detection"
-                        # ESPHome start() queues a command while is_running() is still false.
-                        - lambda: id(wake_word_start_pending) = true;
-                        - micro_wake_word.start:
-                        - wait_until:
-                            condition:
-                              micro_wake_word.is_running:
-                            timeout: 3s
-                        - lambda: id(wake_word_start_pending) = false;
-                        - if:
-                            condition:
-                              not:
-                                micro_wake_word.is_running:
-                            then:
-                              - logger.log:
-                                  tag: audio_handover
-                                  level: ERROR
-                                  format: "Wake word detection did not start within 3 seconds"
+                  - voice_assistant.stop:
+            - if:
+                condition:
+                  and:
+                    - not:
+                        micro_wake_word.is_running:
+                    - lambda: return !id(wake_word_start_pending);
+                then:
+                  # start() is queued; stop_wake_word must account for that queued start.
+                  - lambda: id(wake_word_start_pending) = true;
+                  - micro_wake_word.start:
+            - wait_until:
+                condition:
+                  micro_wake_word.is_running:
+                timeout: 3s
+            - lambda: id(wake_word_start_pending) = false;
+            - if:
+                condition:
+                  not:
+                    micro_wake_word.is_running:
+                then:
+                  - logger.log:
+                      level: ERROR
+                      format: "Wake word detection did not start within 3 seconds"
+            - if:
+                condition:
+                  and:
+                    - voice_assistant.connected:
+                    - lambda: return !id(global_is_assisting);
+                    - switch.is_off: timer_ringing
+                    - not:
+                        media_player.is_playing: speaker_media_player
+                    - not:
+                        media_player.is_announcing: speaker_media_player
+                then:
+                  - script.execute: set_idle_or_mute_phase
+                  - script.execute: draw_display
             - if:
                 condition:
                   lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
                 then:
-                  - logger.log:
-                      tag: audio_handover
-                      format: "Resuming Home Assistant wake word detection"
+                  # Announcements and active/follow-up requests must not start another HA pipeline.
+                  - wait_until:
+                      and:
+                        - voice_assistant.connected:
+                        - not:
+                            voice_assistant.is_running:
+                        - lambda: return !id(global_is_assisting) && !id(init_in_progress);
+                        - switch.is_off: mute_switch
+                        - not:
+                            microphone.is_muted: box_mic
+                        - switch.is_off: timer_ringing
+                        - not:
+                            media_player.is_announcing: speaker_media_player
+                  - lambda: id(voice_request_cancelled) = false;
                   - lambda: id(va).set_use_wake_word(true);
-                  # Native follow-up turns continue within this request. Once it ends,
-                  # resume wake-word listening through this guarded script.
                   - voice_assistant.start:
-                      wake_word: "" # Clear the previous on-device phrase.
-            - script.execute: set_idle_or_mute_phase
-            - script.execute: draw_display
+                      wake_word: ""
+                else:
+                  - lambda: id(va).set_use_wake_word(false);
 
   - id: stop_wake_word
     mode: restart
     then:
       - script.stop: start_wake_word
-      - logger.log:
-          tag: audio_handover
-          format: "Stop requested: mic stopped=%d, speaker stopped=%d, wake word active=%d"
-          args:
-            - 'id(box_mic).is_stopped()'
-            - 'id(i2s_audio_speaker).is_stopped()'
-            - 'id(mww).is_running()'
-      # stop() cannot cancel a queued start while microWakeWord is still STOPPED.
+      # ESPHome stop() cannot cancel a start queued while the detector is STOPPED.
       - if:
           condition:
             lambda: return id(wake_word_start_pending);
@@ -2021,18 +2075,61 @@ script:
                   micro_wake_word.is_running:
                 timeout: 3s
             - lambda: id(wake_word_start_pending) = false;
+      - micro_wake_word.stop:
+      - micro_wake_word.disable_model: stop
+      - wait_until:
+          condition:
+            not:
+              micro_wake_word.is_running:
+          timeout: 3s
       - if:
           condition:
-            and:
-              - lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
-              # Do not abort an active request or its streaming TTS response.
-              - lambda: return !id(global_is_assisting);
+            lambda: return !id(global_is_assisting);
           then:
             - lambda: id(va).set_use_wake_word(false);
             - voice_assistant.stop:
-      # The select already contains the new location during an engine switch.
-      # Always release the outgoing local detector, including its queued start.
-      - micro_wake_word.stop:
+
+  - id: interrupt_voice_assistant
+    then:
+      - script.stop: start_voice_request
+      - script.stop: finish_voice_assistant
+      - script.stop: start_wake_word
+      - lambda: id(voice_request_cancelled) = true;
+      - if:
+          condition:
+            switch.is_on: output_audio
+          then:
+            - homeassistant.action:
+                action: media_player.media_stop
+                data:
+                  entity_id: media_player.${external_media_player}
+      - voice_assistant.stop:
+      - media_player.stop:
+          id: speaker_media_player
+          announcement: true
+      - script.execute: finish_voice_assistant
+
+  # The chime is feedback only: it must not delay speech capture or abort a request.
+  - id: play_wake_sound
+    then:
+      - if:
+          condition:
+            switch.is_on: wake_sound
+          then:
+            - if:
+                condition:
+                  switch.is_off: output_audio
+                then:
+                  - media_player.speaker.play_on_device_media_file:
+                      media_file: wake_sound_file
+                      announcement: true
+                else:
+                  - homeassistant.action:
+                      action: media_player.play_media
+                      data:
+                        entity_id: media_player.${external_media_player}
+                        media_content_id: '${home_assistant_host}${wakesound_external}'
+                        media_content_type: music
 
   - id: start_voice_request
     mode: single
@@ -2041,115 +2138,27 @@ script:
     then:
       - script.stop: start_wake_word
       - script.stop: finish_voice_assistant
-      - lambda: id(global_is_assisting) = true;
-      - if:
-          condition:
-            and:
-              - switch.is_off: output_audio
-              - switch.is_on: wake_sound
-          then:
-            - script.execute: stop_wake_word
-            - script.wait: stop_wake_word
-            - wait_until:
-                condition: &wake_chime_microphone_stopped
-                  and:
-                    - not:
-                        micro_wake_word.is_running:
-                    - lambda: return id(box_mic).is_stopped();
-                timeout: 3s
-            - if:
-                condition:
-                  not: *wake_chime_microphone_stopped
-                then:
-                  - logger.log:
-                      tag: audio_handover
-                      level: ERROR
-                      format: "Aborting request: microphone did not stop within 3 seconds before wake chime"
-                  - lambda: id(global_is_assisting) = false;
-                  - script.execute: start_wake_word
-                  - script.stop: start_voice_request
-            - media_player.speaker.play_on_device_media_file:
-                media_file: wake_sound_file
-                announcement: true
-            # Playback is queued; do not mistake its initial IDLE state for completion.
-            - wait_until:
-                condition:
-                  media_player.is_announcing:
-                    id: speaker_media_player
-                timeout: 3s
-            - if:
-                condition:
-                  not:
-                    media_player.is_announcing:
-                      id: speaker_media_player
-                then:
-                  - logger.log:
-                      tag: audio_handover
-                      level: ERROR
-                      format: "Aborting request: wake chime did not start within 3 seconds"
-                  - media_player.stop:
-                      id: speaker_media_player
-                      announcement: true
-                  - lambda: id(global_is_assisting) = false;
-                  - script.execute: start_wake_word
-                  - script.stop: start_voice_request
-            - wait_until:
-                condition: &wake_chime_speaker_stopped
-                  and:
-                    - not:
-                        media_player.is_announcing:
-                          id: speaker_media_player
-                    - lambda: return id(i2s_audio_speaker).is_stopped();
-                timeout: 3s
-            - if:
-                condition:
-                  not: *wake_chime_speaker_stopped
-                then:
-                  - logger.log:
-                      tag: audio_handover
-                      level: ERROR
-                      format: "Aborting request: wake chime did not release the speaker within 3 seconds"
-                  - media_player.stop:
-                      id: speaker_media_player
-                      announcement: true
-                  - lambda: id(global_is_assisting) = false;
-                  - script.execute: start_wake_word
-                  - script.stop: start_voice_request
-          else:
-            - if:
-                condition:
-                  and:
-                    - switch.is_on: output_audio
-                    - switch.is_on: wake_sound
-                then:
-                  - homeassistant.action:
-                      action: media_player.play_media
-                      data:
-                        entity_id: media_player.${external_media_player}
-                        media_content_id: '${home_assistant_host}${wakesound_external}'
-                        media_content_type: music
-                  - delay: 500ms
       - if:
           condition:
             and:
               - voice_assistant.connected:
               - switch.is_off: mute_switch
               - not:
-                  microphone.is_muted:
-                    id: box_mic
+                  microphone.is_muted: box_mic
+              - switch.is_off: timer_ringing
+              - not:
+                  voice_assistant.is_running:
           then:
-            - logger.log:
-                tag: audio_handover
-                format: "Audio handover complete; starting voice request"
+            - lambda: id(voice_request_cancelled) = false;
+            - lambda: id(global_is_assisting) = true;
+            - script.execute: duck_media
+            - script.execute: update_stop_word
+            # Full duplex allows the microphone and chime to run together.
             - voice_assistant.start:
                 wake_word: !lambda return detected_wake_word;
+            - script.execute: play_wake_sound
           else:
-            - logger.log:
-                tag: audio_handover
-                level: WARN
-                format: "Aborting request: assistant disconnected or microphone muted"
-            - lambda: id(global_is_assisting) = false;
-            - script.execute: start_wake_word
+            - script.execute: interrupt_voice_assistant
 
   - id: set_idle_or_mute_phase
     then:
@@ -3075,7 +3084,7 @@ switch:
     restore_mode: RESTORE_DEFAULT_OFF
     entity_category: config
     on_turn_off:
-      - microphone.unmute:
+      - microphone.unmute: box_mic
       - script.execute: start_wake_word
       - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
       - lvgl.label.update:
@@ -3090,7 +3099,8 @@ switch:
       - script.execute: draw_display
     on_turn_on:
       - script.stop: start_wake_word
-      - microphone.mute:
+      - microphone.mute: box_mic
+      - script.execute: stop_wake_word
       - lambda: id(voice_assistant_phase) = ${voice_assist_muted_phase_id};
       - lvgl.label.update:
           id: lbl_mic
@@ -3211,8 +3221,6 @@ switch:
     restore_mode: ALWAYS_OFF
 
     on_turn_off:
-      # Disable stop wake word
-      - micro_wake_word.disable_model: stop
       - lambda: id(voice_assistant_phase) = ${voice_assist_idle_phase_id};
       - lambda: id(time_remaining_0).publish_state ("0:00:00");
       - lambda: id(alarmclock_ringing) = false;
@@ -3229,7 +3237,25 @@ switch:
       - lvgl.widget.hide: bar_timer
       - lvgl.page.show: ${default_page}
       - script.execute: draw_display
+      - if:
+          condition:
+            and:
+              - switch.is_on: output_audio
+              - script.is_running: timer_started_external
+          then:
+            - script.stop: timer_started_external
+            - homeassistant.action:
+                action: media_player.media_stop
+                data:
+                  entity_id: media_player.${external_media_player}
+      - script.execute: start_wake_word
     on_turn_on:
+      - if:
+          condition:
+            script.is_running: start_voice_request
+          then:
+            - script.stop: start_voice_request
+            - lambda: id(global_is_assisting) = false;
       - script.execute: turn_on_led
       - lambda: |-
             id(speaker_media_player)
@@ -3247,9 +3273,7 @@ switch:
             - media_player.speaker.play_on_device_media_file:
                 media_file: timer_finished_sound
                 announcement: true
-      # Enable stop wake word
-      - micro_wake_word.start:
-      - micro_wake_word.enable_model: stop
+      - script.execute: start_wake_word
       - delay: 15min
       - switch.turn_off: timer_ringing
 
@@ -3396,28 +3420,20 @@ select:
             lambda: return !id(init_in_progress);
           then:
             - wait_until:
-                lambda: return id(voice_assistant_phase) == ${voice_assist_muted_phase_id} || id(voice_assistant_phase) == ${voice_assist_idle_phase_id};
-            - if:
+                lambda: return !id(global_is_assisting) && (id(voice_assistant_phase) == ${voice_assist_muted_phase_id} || id(voice_assistant_phase) == ${voice_assist_idle_phase_id});
+            - script.stop: start_wake_word
+            - lambda: id(va).set_use_wake_word(false);
+            - voice_assistant.stop:
+            - wait_until:
                 condition:
-                  lambda: return id(wake_word_engine_location).current_option() == "In Home Assistant";
-                then:
-                  - lambda: ESP_LOGD("wake_word_engine_location", "Set to In Home Assistant");
-                  - lvgl.dropdown.update:
-                      id: dropdown_wakeword
-                      selected_index: 0
-                  - script.execute: stop_wake_word
-                  - script.execute: start_wake_word
-            - if:
-                condition:
-                  lambda: return id(wake_word_engine_location).current_option() == "On device";
-                then:
-                  - lambda: ESP_LOGD("wake_word_engine_location", "Set to On Device");
-                  - lvgl.dropdown.update:
-                      id: dropdown_wakeword
-                      selected_index: 1
-                  - lambda: id(va).set_use_wake_word(false);
-                  - voice_assistant.stop
-                  - script.execute: start_wake_word
+                  not:
+                    voice_assistant.is_running:
+                timeout: 3s
+            - lvgl.dropdown.update:
+                id: dropdown_wakeword
+                selected_index: !lambda |-
+                  return id(wake_word_engine_location).current_option() == "In Home Assistant" ? 0 : 1;
+            - script.execute: start_wake_word
 
   - platform: template
     name: "Wake word sensitivity"
@@ -3730,6 +3746,10 @@ number:
     mode: box
 
 globals:
+  - id: voice_request_cancelled
+    type: bool
+    restore_value: false
+    initial_value: "false"
   - id: wake_word_start_pending
     type: bool
     restore_value: false
