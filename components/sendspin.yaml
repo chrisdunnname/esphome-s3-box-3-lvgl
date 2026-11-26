@@ -1,0 +1,35 @@
+# Optional native Sendspin playback; keep this package identical on S3 and P4.
+# Omit the package include to exclude Sendspin from the firmware entirely.
+# Requires a Sendspin 1.0.0-rc1 compatible server (e.g. Music Assistant
+# 2.11.0b4 or newer), mDNS discovery, and TCP port 8928 between server/device.
+# Any compatible local server may play without pairing. Existing HA playback
+# remains available when the server is absent or this package is omitted.
+# Hardware checks: HTTP music/TTS, wake/notification sounds, timer repeat/stop,
+# volume/mute, wake words and ducking, then Sendspin playback, source switching,
+# synchronization and server disconnect/reconnect. Repeat without this package.
+# Flash growth and runtime RAM can be impacted by this component.
+substitutions:
+  sendspin_buffer_size: "1000000" # Bytes; override in the device substitutions.
+
+sendspin:
+  id: sendspin_hub
+  task_stack_in_psram: true
+  unpaired_access: true
+
+media_source:
+  - platform: sendspin
+    id: sendspin_source
+    sendspin_id: sendspin_hub
+    sample_rate: 48000
+    bits_per_sample: 16
+    codecs: [flac, pcm]
+    buffer_size: ${sendspin_buffer_size}
+    task_stack_in_psram: true
+    decode_memory: psram
+
+# Extend the existing player; retain its normal sources and actions.
+media_player:
+  - id: !extend speaker_media_player
+    media_pipeline:
+      sources:
+        - sendspin_source
