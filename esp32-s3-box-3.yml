@@ -1,11 +1,13 @@
 ###### Optional Components ######
 packages:
+  <<: {} # Required if all optional components are commented out
   remote_package_files:
     url: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl
     refresh: always
     files:
       - path: components/sensordock.yaml
-      - path: components/espectre.yaml  
+      - path: components/espectre.yaml
+      - path: components/sendspin.yaml
 
 ###### Device Identity ######
 substitutions:
@@ -317,13 +319,15 @@ substitutions:
 
 ###### Fonts & Icons ######
   font_glyphs: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¢£€¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀàÁáÂâÃãÄäĀāĂăÅåǺǻẠạĄąÆæǼǽĆćĈĉČčĊċÇçĎďĐđÐðÈèÉéÊêẼẽĚěËëĒēĔĕĖėẸẹĘęĜĝǦǧĞğĠġĢģĤĥĦħıÌìÍíÎîĨĩÏïĪīĬĭİỊịĮįȷĴĵĶķĸĹĺĽľĻļŁłĿŀŃńÑñŇňŅņƝɲŊŋŉÒòÓóÔôÕõÖöŌōŎŏŐőỌọǪǫØøǾǿŒœŔŕŘřŖŗŚśŜŝŠšŞşȘșẞßŤťŢţȚțŦŧÞþÙùÚúÛûŨũÜüŪūŬŭŮůŰűỤụŲųẀẁẂẃŴŵẄẅỲỳÝýŶŷỸỹŸÿȲȳŹźŽžŻżĲĳƏəАБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфхцчщьыъэюяμ–—ſ’…"
+  font_time_glyphs: " 0123456789:APM"
+  font_alarm_icon_glyphs: "\U000F009E"
   font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/Montserrat-Regular.ttf
   icon_font_file: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl/raw/main/fonts/materialdesignicons-webfont.ttf
 #Note: LVGL includes a default pre-rendered fonts and icons.
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.11.22"
+  project_version: "2026.11.27"
 
 ###### Hardware Specific Configuration ######
 
@@ -1085,12 +1089,32 @@ speaker:
     sample_rate: 48000
     bits_per_sample: 16
 
+audio_file:
+  - id: timer_finished_sound
+    file: ${timerfinished_ondevice}
+  - id: wake_sound_file
+    file: ${wakesound_ondevice}
+  - id: notify_sound_file
+    file: ${notify_ondevice}
+
+media_source:
+  - platform: audio_http
+    id: announcement_http_source
+    task_stack_in_psram: true
+  - platform: audio_file
+    id: announcement_file_source
+    task_stack_in_psram: true
+  - platform: audio_http
+    id: media_http_source
+    task_stack_in_psram: true
+  - platform: audio_file
+    id: media_file_source
+    task_stack_in_psram: true
+
 media_player:
-  - platform: speaker
+  - platform: speaker_source
     name: Media Player
     id: speaker_media_player
-    # buffer_size: 2000000
-    task_stack_in_psram: true
     volume_increment: 0.05
     volume_min: 0.5
     volume_max: 0.8
@@ -1099,18 +1123,17 @@ media_player:
       format: FLAC
       sample_rate: 48000
       num_channels: 1
+      sources:
+        - announcement_http_source
+        - announcement_file_source
     media_pipeline:
       speaker: media_resampling_speaker
       format: FLAC
       num_channels: 2
       sample_rate: 48000
-    files:
-      - id: timer_finished_sound
-        file: ${timerfinished_ondevice}
-      - id: wake_sound_file
-        file: ${wakesound_ondevice}
-      - id: notify_sound_file
-        file: ${notify_ondevice}
+      sources:
+        - media_http_source
+        - media_file_source
     on_state:
       then:
         - lambda: ESP_LOGD("media_player", "on_state");
@@ -2120,8 +2143,9 @@ script:
                 condition:
                   switch.is_off: output_audio
                 then:
-                  - media_player.speaker.play_on_device_media_file:
-                      media_file: wake_sound_file
+                  - media_player.play_media:
+                      id: speaker_media_player
+                      media_url: "audio-file://wake_sound_file"
                       announcement: true
                 else:
                   - homeassistant.action:
@@ -2419,8 +2443,9 @@ script:
               - switch.is_off: output_audio
               - switch.is_on: notify_sound
           then:
-            - media_player.speaker.play_on_device_media_file:
-                media_file: notify_sound_file
+            - media_player.play_media:
+                id: speaker_media_player
+                media_url: "audio-file://notify_sound_file"
                 announcement: true
             - wait_until:
                 not:
@@ -3230,7 +3255,10 @@ switch:
                 .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_OFF)
                 .set_announcement(true)
                 .perform();
-              id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 0);
+      - speaker_source.set_playlist_delay:
+          id: speaker_media_player
+          pipeline: announcement
+          delay: 0ms
       - media_player.stop:
           announcement: true
       - lvgl.widget.hide: lbl_timer
@@ -3263,15 +3291,19 @@ switch:
               .set_command(media_player::MediaPlayerCommand::MEDIA_PLAYER_COMMAND_REPEAT_ONE)
               .set_announcement(true)
               .perform();
-            id(speaker_media_player)->set_playlist_delay_ms(speaker::AudioPipelineType::ANNOUNCEMENT, 1000);
+      - speaker_source.set_playlist_delay:
+          id: speaker_media_player
+          pipeline: announcement
+          delay: 1000ms
       - if:
           condition:
             switch.is_on: output_audio
           then:
             - script.execute: timer_started_external
           else:
-            - media_player.speaker.play_on_device_media_file:
-                media_file: timer_finished_sound
+            - media_player.play_media:
+                id: speaker_media_player
+                media_url: "audio-file://timer_finished_sound"
                 announcement: true
       - script.execute: start_wake_word
       - delay: 15min
@@ -4045,7 +4077,7 @@ font:
     size: 16
     bpp: ${font_bpp}
     glyphs:
-      '${font_glyphs}'
+      '${font_time_glyphs}'
 
   - file: ${font_file}
     id: labelfont_large
@@ -4059,7 +4091,7 @@ font:
     size: 60
     bpp: ${font_bpp}
     glyphs:
-      '${font_glyphs}'
+      '${font_time_glyphs}'
 
   - file: ${font_file}
     id: my_font22
@@ -4217,7 +4249,8 @@ font:
     id: icon_font_80
     size: 75
     bpp: ${font_icon_bpp}
-    glyphs: *icon_glyphs
+    glyphs:
+      '${font_alarm_icon_glyphs}'
 
 text_sensor:
   - platform: homeassistant

@@ -25,12 +25,14 @@ This section specifies the configuration for features that can optionally be rem
 
 ```
 packages:
+  <<: {} # Required if all optional components are commented out
   remote_package_files:
     url: https://github.com/chrisdunnname/esphome-s3-box-3-lvgl
     refresh: always
     files:
       - path: components/sensordock.yaml
-      - path: components/espectre.yaml  
+      - path: components/espectre.yaml
+	  - path: components/sendspin.yaml
 ```
 ### Sensor Dock
 
@@ -44,6 +46,11 @@ If this feature is disabled then the sensors, switches and buttons for this feat
 
 https://esphome.io/components/espectre/ 
 
+### Sendspin
+
+Whole home audio using Sendspin. Seamlessly stream to devices or device groups using Music Assistant.
+
+https://www.sendspin-audio.com/
 
 ## Substitutions
 

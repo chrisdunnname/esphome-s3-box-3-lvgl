@@ -3,6 +3,7 @@ ESPHome Configuration for the S3-Box-3 with an LVGL UI.
 
 This firmware provides the S3 box 3 with a voice assistant, timers, screen saver with analog/digital clock and sleep, 12/24 hour time, media controls, radar presence, wi-fi presence, temperature (in Celsius or Fahrenheit) and humidity sensing, battery levels and indicator, alarm integration, alarm clock, internal and external audio, notifications with sound, and multiple pages for lights, thermostats, switches, media, scenes, locks other devices from your Home Assistant.
 A weather service from Home Assistant (e.g. open weather map) can provide temperature and condition for the screen saver.
+Sendspin audio supports synchronised group media streaming from Music Assistant.
 
 A large number of entities are exposed to Home Assistant including a notification text entity that provides the ability to push notifications to the device which will display on screen for 10 seconds (with an optional notification sound) and an Image URL entity that provides the ability to push the URL for a PNG image to the device which will display on screen for 30 seconds (with no notification sound). This can be used with a [JPG to PNG Converter](https://github.com/youkorr/hacs-jpg-to-png-converter) in an automation to capture a snapshot from a camera and push it to the device.
 
@@ -20,7 +21,7 @@ The wakeword is not tied to the VA Mode providing flexibility for your preferred
 The On Device Wake Word includes the standard ESPHome wakeword models (4) but also some experimental models including okay hal and hey luna.
 Additional experimental wake words for okay computer and hey home assistant and included in the config but disabled by default. 
 
-The UI and Voice Assistant experience is implemented out of the box.
+The UI and a native duplex Voice Assistant experience is implemented out of the box.
 Only basic configuration is required to integrate the standard features with your Home Assistant.
 
 Key Components:
@@ -32,6 +33,7 @@ Key Components:
 - Wake Word VA: https://github.com/esphome/wake-word-voice-assistants/
 - Micro Wake Word Models: https://github.com/esphome/micro-wake-word-models/
 - LVGL: https://esphome.io/components/lvgl/
+- Sendspin: https://www.sendspin-audio.com/
 
 # Requirements
 Requires [S3-Box-3](https://www.espressif.com/en/dev-board/esp32-s3-box-3-en).
