@@ -327,7 +327,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.11.27"
+  project_version: "2026.11.28"
 
 ###### Hardware Specific Configuration ######
 
@@ -583,6 +583,7 @@ ota:
     on_begin:
       - script.execute: turn_on_led
       - lvgl.page.show: ota_page
+      - script.stop: saver_enabled
       - lvgl.widget.hide: top_layer
       - lambda: "id(lvgl_display).loop();"
     on_progress:
@@ -647,20 +648,35 @@ light:
     entity_category: config
     output: backlight_output
     restore_mode: ALWAYS_ON
-    # internal: true
-    default_transition_length: 50ms
-    on_turn_on:
-      - lvgl.resume:
-      - lvgl.widget.redraw:
-    on_turn_off:
-      - lvgl.pause:
-          show_snow: true
-      - delay: 60s
+    gamma_correct: 1.0 # Match the linear brightness previously applied to the output.
+    default_transition_length: 0s
+    on_state:
       - if:
-          condition: lvgl.is_paused
+          condition:
+            lambda: return !id(backlight_update) && !id(init_in_progress);
           then:
-            - lvgl.pause:
-                show_snow: false
+            - if:
+                condition:
+                  lambda: return id(led).remote_values.is_on();
+                then:
+                  # Preserve HA's requested brightness while using the normal wake path.
+                  - globals.set:
+                      id: backlight_update
+                      value: 'true'
+                  - if:
+                      condition:
+                        lvgl.page.is_showing: saver_page
+                      then:
+                        - script.execute: draw_display
+                      else:
+                        - script.execute: turn_on_led
+                  - globals.set:
+                      id: backlight_update
+                      value: 'false'
+                else:
+                  - script.stop: saver_enabled
+                  - script.stop: saver_enabled_manual
+                  - script.execute: pause_display
 
 sensor:
   - platform: homeassistant
@@ -1597,7 +1613,6 @@ script:
           condition:
             lambda: return !id(init_in_progress);
           then:
-            - script.execute: saver_enabled
             - if:
                 condition:
                   or:
@@ -1710,6 +1725,7 @@ script:
                 then:
                    - lvgl.widget.show: top_layer
                    - lvgl.widget.show: lbl_time
+            - script.execute: turn_on_led
           else:
             - lvgl.widget.show: boot_screen
 
@@ -1832,8 +1848,34 @@ script:
           id: bar_volume
           value: !lambda return id(speaker_volume) * 10 ;
 
+  # Scheduling never wakes the backlight; automatic and manual entry share one sequence.
   - id: saver_enabled
+    mode: restart
     then:
+      - if:
+          condition:
+            and:
+              - light.is_on: led
+              - switch.is_on: s_saver
+          then:
+            - if:
+                condition:
+                  not:
+                    lvgl.page.is_showing: saver_page
+                then:
+                  - delay: !lambda return id(s_saver_delay).state * 1000;
+            - if:
+                condition:
+                  and:
+                    - light.is_on: led
+                    - switch.is_on: s_saver
+                then:
+                  - script.execute: saver_enabled_manual
+
+  - id: saver_enabled_manual
+    mode: restart
+    then:
+      - script.stop: saver_enabled
       - if:
           condition:
             and:
@@ -1841,58 +1883,39 @@ script:
               - not:
                   lvgl.page.is_showing: saver_page
           then:
-            - script.execute: turn_on_led
-            - delay: !lambda return id(s_saver_delay).state * 1000;
             - lvgl.widget.hide: top_layer
             - lvgl.widget.hide: lbl_time
             - lvgl.page.show: saver_page
-            - lambda: id(led).turn_on().set_brightness(id(s_saver_brightness).state /100).perform();
-            - output.set_level:
-                id: backlight_output
-                level: !lambda |-
+            - script.stop: pause_display
+            - lvgl.resume:
+            - globals.set:
+                id: backlight_update
+                value: 'true'
+            - light.turn_on:
+                id: led
+                brightness: !lambda |-
                   float brightness = id(s_saver_brightness).state / 100.0f;
                   if (isnan(brightness)) return 1.0f;
                   return std::min(std::max(brightness, 0.0f), 1.0f);
-      - if:
-          condition:
-            and:
-              - switch.is_on: s_saver_mode
-              - lvgl.page.is_showing: saver_page
-          then:
-            - delay: !lambda return id(s_saver_blank_delay).state * 1000;
-            - light.turn_off: led
-            - output.set_level:
-                id: backlight_output
-                level: 0%
-    mode: restart
-
-  - id: saver_enabled_manual
-    then:
-      - if:
-          condition:
-            - switch.is_on: s_saver
-          then:
-            - lvgl.widget.hide: top_layer
-            - lvgl.widget.hide: lbl_time
-            - lvgl.page.show: saver_page
-            - lambda: id(led).turn_on().set_brightness(id(s_saver_brightness).state /100).perform();
-            - output.set_level:
-                id: backlight_output
-                level: !lambda |-
-                  float brightness = id(s_saver_brightness).state / 100.0f;
-                  if (isnan(brightness)) return 1.0f;
-                  return std::min(std::max(brightness, 0.0f), 1.0f);
+            - globals.set:
+                id: backlight_update
+                value: 'false'
 
       - if:
           condition:
             - switch.is_on: s_saver_mode
           then:
             - delay: !lambda return id(s_saver_blank_delay).state * 1000;
-            - light.turn_off: led
-            - output.set_level:
-                id: backlight_output
-                level: 0%
-    mode: restart
+            - if:
+                condition:
+                  and:
+                    - switch.is_on: s_saver_mode
+                    - or:
+                        - lvgl.page.is_showing: saver_page
+                        # Preserve manual screen-off when the screensaver is disabled.
+                        - switch.is_off: s_saver
+                then:
+                  - light.turn_off: led
 
   # Duck only the music source; chimes and Assist replies retain their own volume.
   - id: duck_media
@@ -3023,14 +3046,46 @@ script:
   - id: turn_on_led
     mode: restart
     then:
+      - script.stop: saver_enabled_manual
+      - script.stop: pause_display
       - lvgl.resume:
-      - output.set_level:
-          id: backlight_output
-          level: !lambda |-
-            float brightness = id(s_default_brightness).state / 100.0f;
-            if (isnan(brightness)) return 1.0f;
-            return std::min(std::max(brightness, 0.0f), 1.0f);
+      - if:
+          condition:
+            lambda: return !id(backlight_update);
+          then:
+            - globals.set:
+                id: backlight_update
+                value: 'true'
+            - light.turn_on:
+                id: led
+                brightness: !lambda |-
+                  float brightness = id(s_default_brightness).state / 100.0f;
+                  if (isnan(brightness)) return 1.0f;
+                  return std::min(std::max(brightness, 0.0f), 1.0f);
+            - globals.set:
+                id: backlight_update
+                value: 'false'
       - lvgl.widget.redraw:
+      - if:
+          condition:
+            not:
+              or:
+                - lvgl.page.is_showing: saver_page
+                - lvgl.page.is_showing: ota_page
+          then:
+            - script.execute: saver_enabled
+
+  - id: pause_display
+    mode: restart
+    then:
+      - lvgl.pause:
+          show_snow: true
+      - delay: 60s
+      - if:
+          condition: lvgl.is_paused
+          then:
+            - lvgl.pause:
+                show_snow: false
     
 switch:
   - platform: gpio
@@ -3735,7 +3790,13 @@ number:
     max_value: 100
     on_value:
       - component.update: s_default_brightness
-      - script.execute: saver_enabled
+      - if:
+          condition:
+            lvgl.page.is_showing: saver_page
+          then:
+            - script.execute: saver_enabled
+          else:
+            - script.execute: turn_on_led
       - lvgl.slider.update:
           id: slider_brightness
           value: !lambda return x;
@@ -3778,6 +3839,11 @@ number:
     mode: box
 
 globals:
+  # Suppress HA-command handling for local backlight updates.
+  - id: backlight_update
+    type: bool
+    restore_value: false
+    initial_value: "false"
   - id: voice_request_cancelled
     type: bool
     restore_value: false
