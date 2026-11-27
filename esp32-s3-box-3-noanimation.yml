@@ -1239,8 +1239,8 @@ micro_wake_word:
     - model: https://github.com/kahrendt/microWakeWord/releases/download/stop/stop.json
       id: stop
       internal: true
-      probability_cutoff: 0.40  # default 0.5; sliding avg ~0.58 fires reliably
-      sliding_window_size: 3    # default 5; faster trigger
+      probability_cutoff: 0.50  # Higher threshold reduces false stop detections
+      sliding_window_size: 5    # Longer averaging window reduces false triggers
   on_wake_word_detected:
     - if:
         condition:
