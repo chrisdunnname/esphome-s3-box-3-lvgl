@@ -327,7 +327,7 @@ substitutions:
 
 ################################### DO NOT CHANGE BELOW HERE UNLESS YOU ARE FAMILIAR WITH ESPHOME ###################################
 
-  project_version: "2026.11.28"
+  project_version: "2026.11.29"
 
 ###### Hardware Specific Configuration ######
 
@@ -350,10 +350,71 @@ substitutions:
   speaker_enable_pin: GPIO46
 
   side_button_pin: GPIO0
-  
+
   page_content_height: 180
   taskbar_height: 30
   button_radius: 15
+
+  # Native artwork reserves two RGB565 frame buffers at this size.
+  sendspin_artwork_resize: 320x180
+  sendspin_text_inset: 8
+  sendspin_text_width: 226
+  sendspin_title_height: 22
+  sendspin_artist_height: 18
+
+  # These definitions are instantiated only by the optional Sendspin package.
+  sendspin_now_playing_images:
+    - platform: sendspin
+      id: sendspin_album_slot
+      sendspin_id: sendspin_hub
+      source: album
+      format: JPEG
+      type: RGB565
+      byte_order: ${image_byte_order}
+      resize: ${sendspin_artwork_resize}
+      current_image:
+        id: sendspin_album_art
+      on_image_display:
+        - lvgl.widget.update:
+            id: obj_sendspin_artwork
+            bg_image_src: sendspin_album_art
+        - globals.set:
+            id: sendspin_artwork_ready
+            value: 'true'
+        - script.execute: refresh_sendspin_now_playing
+      on_image_clear:
+        - globals.set:
+            id: sendspin_artwork_ready
+            value: 'false'
+        - script.execute: refresh_sendspin_now_playing
+      on_image_error:
+        - globals.set:
+            id: sendspin_artwork_ready
+            value: 'false'
+        - script.execute: refresh_sendspin_now_playing
+  sendspin_now_playing_text_sensors:
+    - platform: sendspin
+      id: sendspin_track_title
+      sendspin_id: sendspin_hub
+      type: title
+      internal: true
+    - platform: sendspin
+      id: sendspin_track_artist
+      sendspin_id: sendspin_hub
+      type: artist
+      internal: true
+  sendspin_now_playing_on_state: &sendspin_now_playing_update
+    - script.execute:
+        id: update_sendspin_now_playing
+        active: !lambda |-
+          return id(sendspin_source).get_state() == media_source::MediaSourceState::PLAYING;
+        title: !lambda return id(sendspin_track_title).state;
+        artist: !lambda return id(sendspin_track_artist).state;
+  sendspin_now_playing_intervals:
+    # Source state can change without changing the combined player state (TTS,
+    # source takeover). Metadata can also arrive after playback has started.
+    - interval: 100ms
+      then: *sendspin_now_playing_update
 
 esp32:
   board: esp32s3box
@@ -1172,6 +1233,7 @@ media_player:
                   text: "Nothing Playing"
               - script.execute: set_uimode
         - script.execute: restore_media_volume
+        - script.execute: refresh_sendspin_now_playing
     on_play:
       - lambda: ESP_LOGD("media_player", "on_play");
       - if:
@@ -1485,6 +1547,116 @@ voice_assistant:
     - script.execute: draw_display
 
 script:
+
+  # UI-only hooks: safe when the Sendspin package is omitted.
+  - id: update_sendspin_now_playing
+    parameters:
+      active: bool
+      title: string
+      artist: string
+    then:
+      # Only the optional Sendspin hooks call this script. Queue navigation on
+      # the source's stopped -> playing edge, never on a metadata-only update.
+      - if:
+          condition:
+            lambda: return active != id(sendspin_playing);
+          then:
+            - globals.set:
+                id: sendspin_open_media_pending
+                value: !lambda return active;
+      - if:
+          condition:
+            lambda: |-
+              return id(sendspin_playing) != active ||
+                     id(sendspin_title) != title || id(sendspin_artist) != artist;
+          then:
+            - lambda: |-
+                id(sendspin_playing) = active;
+                id(sendspin_title) = title;
+                id(sendspin_artist) = artist;
+            - lvgl.label.update:
+                id: lbl_sendspin_title
+                text: !lambda return title;
+            - lvgl.label.update:
+                id: lbl_sendspin_artist
+                text: !lambda return artist;
+            - script.execute: refresh_sendspin_now_playing
+
+      # Wait for higher-priority screens to finish without repeatedly taking
+      # the user back to Media after they navigate elsewhere during playback.
+      - if:
+          condition:
+            and:
+              - lambda: |-
+                  return id(sendspin_open_media_pending) &&
+                         !id(init_in_progress) && !id(global_is_assisting);
+              - switch.is_off: timer_ringing
+              - not:
+                  or:
+                    - lvgl.page.is_showing: ota_page
+                    - lvgl.page.is_showing: listening_page
+                    - lvgl.page.is_showing: thinking_page
+                    - lvgl.page.is_showing: replying_page
+                    - lvgl.page.is_showing: error_page
+                    - lvgl.page.is_showing: notification_page
+                    - lvgl.page.is_showing: image_page
+                    - lvgl.page.is_showing: alarm_keypad_page
+                    - lvgl.page.is_showing: time_remaining_page
+                    - lvgl.page.is_showing: timer_finished_page
+          then:
+            - globals.set:
+                id: sendspin_open_media_pending
+                value: 'false'
+            # Select only the UI; do not change output_audio or audio routing.
+            - lvgl.widget.show: obj_media
+            - lvgl.widget.show: lbl_media_playing
+            - lvgl.widget.show: bar_volume
+            - lvgl.widget.hide: obj_ext_media
+            - lvgl.widget.hide: lbl_ext_media_playing
+            - globals.set:
+                id: media_switcher_external
+                value: 'false'
+            - lvgl.label.update:
+                id: lbl_media_switcher
+                text: "Int"
+            - script.execute: refresh_sendspin_now_playing
+            - lvgl.page.show: media_page
+            - script.execute: turn_on_led
+
+  - id: refresh_sendspin_now_playing
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(sendspin_playing) && !id(media_switcher_external) &&
+                     (id(sendspin_artwork_ready) || !id(sendspin_title).empty() ||
+                      !id(sendspin_artist).empty());
+          then:
+            - lvgl.widget.show: obj_sendspin_now_playing
+            - if:
+                condition:
+                  lambda: return id(sendspin_artwork_ready);
+                then:
+                  - lvgl.widget.show: obj_sendspin_artwork
+                else:
+                  - lvgl.widget.hide: obj_sendspin_artwork
+            - if:
+                condition:
+                  lambda: return !id(sendspin_title).empty() || !id(sendspin_artist).empty();
+                then:
+                  - lvgl.widget.hide: lbl_media_playing
+                else:
+                  - lvgl.widget.show: lbl_media_playing
+          else:
+            - lvgl.widget.hide: obj_sendspin_now_playing
+            - if:
+                condition:
+                  lambda: return !id(media_switcher_external);
+                then:
+                  - lvgl.widget.show: lbl_media_playing
+                else:
+                  - lvgl.widget.hide: lbl_media_playing
+
   - id: configure_climate_ac_presets
     then:
       - if:
@@ -3132,6 +3304,7 @@ switch:
       - lvgl.widget.show: obj_ext_media
       - lvgl.widget.show: lbl_ext_media_playing
       - lambda: id(media_switcher_external) = true;
+      - script.execute: refresh_sendspin_now_playing
       - lvgl.label.update:
           id: lbl_media_switcher
           text: "Ext"
@@ -3148,6 +3321,7 @@ switch:
       - lvgl.widget.hide: obj_ext_media
       - lvgl.widget.hide: lbl_ext_media_playing
       - lambda: id(media_switcher_external) = false;
+      - script.execute: refresh_sendspin_now_playing
       - lvgl.label.update:
           id: lbl_media_switcher
           text: "Int"
@@ -3839,6 +4013,28 @@ number:
     mode: box
 
 globals:
+
+  # Presentation state only; no Sendspin component IDs are required here.
+  - id: sendspin_playing
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: sendspin_open_media_pending
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: sendspin_artwork_ready
+    type: bool
+    restore_value: false
+    initial_value: 'false'
+  - id: sendspin_title
+    type: std::string
+    restore_value: false
+    initial_value: '""'
+  - id: sendspin_artist
+    type: std::string
+    restore_value: false
+    initial_value: '""'
   # Suppress HA-command handling for local backlight updates.
   - id: backlight_update
     type: bool
@@ -7018,6 +7214,60 @@ lvgl:
                         align: CENTER
                         text_align: CENTER
                         styles: label_text_color
+
+              # Declared before controls so artwork/text stay behind them.
+              - obj:
+                  id: obj_sendspin_now_playing
+                  hidden: true
+                  clickable: false
+                  scrollable: false
+                  align: CENTER
+                  width: 100%
+                  height: ${page_content_height}
+                  pad_all: 0
+                  border_width: 0
+                  radius: 0
+                  bg_opa: TRANSP
+                  widgets:
+                    - obj:
+                        id: obj_sendspin_artwork
+                        hidden: true
+                        clickable: false
+                        scrollable: false
+                        width: 100%
+                        height: 100%
+                        pad_all: 0
+                        border_width: 0
+                        radius: 0
+                        bg_opa: TRANSP
+                        bg_image_opa: 45%
+                    - label:
+                        id: lbl_sendspin_title
+                        clickable: false
+                        align: TOP_LEFT
+                        x: ${sendspin_text_inset}
+                        y: ${sendspin_text_inset}
+                        width: ${sendspin_text_width}
+                        height: ${sendspin_title_height}
+                        text: ""
+                        text_align: LEFT
+                        text_font: labelfont_large
+                        text_color: 0xFFFFFF
+                        long_mode: DOT
+                    - label:
+                        id: lbl_sendspin_artist
+                        clickable: false
+                        align: TOP_LEFT
+                        x: ${sendspin_text_inset}
+                        y: ${sendspin_text_inset + sendspin_title_height}
+                        width: ${sendspin_text_width}
+                        height: ${sendspin_artist_height}
+                        text: ""
+                        text_align: LEFT
+                        text_font: my_font16
+                        text_color: 0xDDDDDD
+                        long_mode: DOT
+
               - obj:
                   id: obj_media
                   align: CENTER
@@ -7279,6 +7529,7 @@ lvgl:
                             - lvgl.widget.show: obj_ext_media
                             - lvgl.widget.show: lbl_ext_media_playing
                             - lambda: id(media_switcher_external) = true;
+                            - script.execute: refresh_sendspin_now_playing
                             - lvgl.label.update:
                                 id: lbl_media_switcher
                                 text: "Ext"
@@ -7289,6 +7540,7 @@ lvgl:
                             - lvgl.widget.hide: obj_ext_media
                             - lvgl.widget.hide: lbl_ext_media_playing
                             - lambda: id(media_switcher_external) = false;
+                            - script.execute: refresh_sendspin_now_playing
                             - lvgl.label.update:
                                 id: lbl_media_switcher
                                 text: "Int"
