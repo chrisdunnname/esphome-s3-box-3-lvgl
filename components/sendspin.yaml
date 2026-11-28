@@ -10,6 +10,12 @@
 # Flash growth and runtime RAM can be impacted by this component.
 substitutions:
   sendspin_buffer_size: "1000000" # Bytes; override in the device substitutions.
+  # Optional native now-playing hooks. Empty defaults preserve existing users
+  # and avoid allocating artwork buffers unless the device opts in.
+  sendspin_now_playing_images: []
+  sendspin_now_playing_text_sensors: []
+  sendspin_now_playing_intervals: []
+  sendspin_now_playing_on_state: []
 
 sendspin:
   id: sendspin_hub
@@ -30,6 +36,13 @@ media_source:
 # Extend the existing player; retain its normal sources and actions.
 media_player:
   - id: !extend speaker_media_player
+    on_state:
+      then: ${sendspin_now_playing_on_state}
     media_pipeline:
       sources:
         - sendspin_source
+
+# Structured substitutions are expanded only while this package is included.
+image: ${sendspin_now_playing_images}
+text_sensor: ${sendspin_now_playing_text_sensors}
+interval: ${sendspin_now_playing_intervals}
