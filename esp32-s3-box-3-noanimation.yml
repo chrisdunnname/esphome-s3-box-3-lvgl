@@ -439,6 +439,12 @@ esp32:
       execute_from_psram: true
       flash_chip: gd # Detected in the device boot log; omit unused flash vendor drivers.
 
+power_management:
+  - platform: esp32_power_management
+    min_frequency: 160MHz
+    max_frequency: 240MHz
+    enable_light_sleep: false
+
 psram:
   mode: octal
   speed: 80MHz
